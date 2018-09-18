@@ -35,9 +35,4 @@ public class AppConfig {
         
         return dataSource;
     }
-    
-    @Bean
-    public TokenStore tokenStore() {
-        return new JdbcTokenStore(dataSource());
-    }
 }

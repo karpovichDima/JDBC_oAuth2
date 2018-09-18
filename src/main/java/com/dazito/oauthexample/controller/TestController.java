@@ -27,8 +27,9 @@ public class TestController {
              * Oauth client will know how to read
              *
              * The @EnableResourceServer on the application entry point is what makes all this magic happen.
-             * If ☺there is an incoming request token it will check the token validity and handle it accordingly
+             * If there is an incoming request token it will check the token validity and handle it accordingly
              */
+        System.out.println(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
     return principal;
     }
 
