@@ -1,6 +1,6 @@
 package com.dazito.oauthexample.config.oauth;
 
-import com.dazito.oauthexample.service.AccountUserDetailsService;
+import com.dazito.oauthexample.service.impl.AccountUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Bean;

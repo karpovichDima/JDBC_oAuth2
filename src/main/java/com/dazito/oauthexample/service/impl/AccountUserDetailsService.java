@@ -1,4 +1,4 @@
-package com.dazito.oauthexample.service;
+package com.dazito.oauthexample.service.impl;
 
 import com.dazito.oauthexample.dao.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
