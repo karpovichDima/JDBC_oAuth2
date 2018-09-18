@@ -3,7 +3,6 @@ package com.dazito.oauthexample.controller;
 import com.dazito.oauthexample.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,8 +30,8 @@ public class UserController {
 
     // edit name of the current user
     @PatchMapping("/name")
-    public String editNames() {
-        return String.valueOf(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+    public void editNames(String newName) {
+        userService.editName(findOutNameUser(), "newName");
     }
 
 

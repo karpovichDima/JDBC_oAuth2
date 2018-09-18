@@ -10,16 +10,27 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserServicesImpl implements UserService {
 
-    @Autowired
-    AccountRepository accountRepository;
+    private final AccountRepository accountRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
+    public UserServicesImpl(AccountRepository accountRepository, BCryptPasswordEncoder passwordEncoder) {
+        this.accountRepository = accountRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
 
     @Override
     public void editPassword(String name, String newPassword) {
         Account account = accountRepository.findByUsername(name).get();
         account.setPassword(passwordEncoder.encode(newPassword));
+        accountRepository.saveAndFlush(account);
+    }
+
+    @Override
+    public void editName(String name, String newName) {
+        Account account = accountRepository.findByUsername(name).get();
+        account.setUsername(newName);
         accountRepository.saveAndFlush(account);
     }
 }
