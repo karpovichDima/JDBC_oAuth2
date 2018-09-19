@@ -1,12 +1,16 @@
 package com.dazito.oauthexample.controller;
 
+import com.dazito.oauthexample.model.Account;
+import com.dazito.oauthexample.service.dto.request.AccountDto;
+import com.dazito.oauthexample.service.dto.request.EditNameDto;
+import com.dazito.oauthexample.service.dto.request.EditPasswordDto;
+import com.dazito.oauthexample.service.dto.response.NameDto;
+import com.dazito.oauthexample.service.dto.response.PasswordDto;
 import com.dazito.oauthexample.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -18,22 +22,23 @@ public class UserController {
 
     // get current user
     @GetMapping("/current")
-    public String getInfoAboutUser() {
-        return String.valueOf(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+    public AccountDto getAccountCurrentUser() {
+        return userService.getCurrentUser(findOutNameUser());
     }
 
     // edit password of the current user
     @PatchMapping("/password")
-    public void editPassword() {
-        userService.editPassword(findOutNameUser(), "qwerty");
+    public ResponseEntity<PasswordDto> editPassword(@RequestBody EditPasswordDto editPassword) {
+        PasswordDto passwordDto = userService.editPassword(findOutNameUser(),editPassword.getNewPassword(),editPassword.getRawOldPassword());
+        return ResponseEntity.ok(passwordDto);
     }
 
     // edit name of the current user
     @PatchMapping("/name")
-    public void editNames(String newName) {
-        userService.editName(findOutNameUser(), "newName");
+    public ResponseEntity<NameDto> editNames(@RequestBody EditNameDto editNameDto) {
+        NameDto nameDto = userService.editName(findOutNameUser(), editNameDto.getNewName());
+        return ResponseEntity.ok(nameDto);
     }
-
 
     // get name of the current user
     private String findOutNameUser(){

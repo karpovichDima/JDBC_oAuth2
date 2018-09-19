@@ -38,16 +38,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return super.authenticationManagerBean();
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
-                .csrf().disable()
-                .anonymous().disable()
-                // Allows restricting access based upon the HttpServletRequest
-                .authorizeRequests()
-                .antMatchers("/users/api-docs").permitAll();
-                // why don't work? //.antMatchers("/users/current").access("hasRole('ADMIN')");
+    public void configure(HttpSecurity http) {
+        try {
+            http
+                    .csrf().disable()
+                    .anonymous().disable()
+                    // Allows restricting access based upon the HttpServletRequest
+                    .authorizeRequests()
+                    .antMatchers("/oauth/token").permitAll();
+        } catch (Exception e) {}
     }
+
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
