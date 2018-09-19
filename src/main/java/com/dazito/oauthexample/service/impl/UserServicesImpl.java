@@ -4,17 +4,17 @@ import com.dazito.oauthexample.dao.UserRepositoryDAO;
 import com.dazito.oauthexample.entities.Account;
 import com.dazito.oauthexample.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserServicesImpl implements UserService {
 
     private final UserRepositoryDAO userRepositoryDAO;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServicesImpl(UserRepositoryDAO userRepositoryDAO, BCryptPasswordEncoder passwordEncoder) {
+    public UserServicesImpl(UserRepositoryDAO userRepositoryDAO, PasswordEncoder passwordEncoder) {
         this.userRepositoryDAO = userRepositoryDAO;
         this.passwordEncoder = passwordEncoder;
     }

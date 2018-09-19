@@ -8,18 +8,17 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AccountUserDetailsService implements UserDetailsService {
 
     private UserRepositoryDAO userRepositoryDAO;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Autowired
-    public AccountUserDetailsService(UserRepositoryDAO userRepositoryDAO, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public AccountUserDetailsService(UserRepositoryDAO userRepositoryDAO) {
         this.userRepositoryDAO = userRepositoryDAO;
-        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     @Override
