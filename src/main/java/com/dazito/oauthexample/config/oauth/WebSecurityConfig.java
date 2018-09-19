@@ -42,8 +42,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable()
                 .anonymous().disable()
+                // Allows restricting access based upon the HttpServletRequest
                 .authorizeRequests()
                 .antMatchers("/users/api-docs").permitAll();
+                // why don't work? //.antMatchers("/users/current").access("hasRole('ADMIN')");
     }
 
     @Override

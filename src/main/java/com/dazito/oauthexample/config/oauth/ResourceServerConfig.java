@@ -28,9 +28,12 @@ class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     @Override
     public void configure(HttpSecurity http) {
         try {
+            // Prescribe the roles that our paths are available
             http
                     .authorizeRequests()
+                    //.antMatchers("/users/current").access("hasRole('ADMIN')")
                     .anyRequest().hasRole("USER");
+
         } catch (Exception e) {
             logger.error("HttpSecurity configuration failed", e);
         }

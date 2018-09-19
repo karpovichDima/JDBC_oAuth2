@@ -14,13 +14,12 @@ import org.springframework.stereotype.Service;
 public class AccountUserDetailsService implements UserDetailsService {
 
     private AccountRepository accountRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
-
-    @Autowired
-    public AccountUserDetailsService(AccountRepository accountRepository) {
+    public AccountUserDetailsService(AccountRepository accountRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.accountRepository = accountRepository;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     @Override
