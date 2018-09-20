@@ -1,4 +1,4 @@
-package com.dazito.oauthexample.utils.converter;
+package com.dazito.oauthexample.utils.converter.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +25,8 @@ public class ConversionServiceBean {
     private static final String STRING_ARRAY_SEPARATOR = ",";
     private final Logger logger = LoggerFactory.getLogger(ConversionServiceBean.class);
 
-    /*@Bean
-    public ConversionServiceFactoryBean conversionService(@Value("${yessspad.converter-locations}") String locations) {
+    @Bean
+    public ConversionServiceFactoryBean conversionService(@Value("${dazito.converter-locations}") String locations) {
 
         ConversionServiceFactoryBean bean = new ConversionServiceFactoryBean();
         Set<Converter> converters = findAndInstantiateConverters(locations);
@@ -45,9 +45,9 @@ public class ConversionServiceBean {
             try {
                 return (Converter) clazz.newInstance();
             } catch (InstantiationException e) {
-                logger.error("Could not instantiate converter " + clazz.getName(), e);
+                logger.error("Could not instantiate config " + clazz.getName(), e);
             } catch (IllegalAccessException e) {
-                logger.error("Could not get access to converter " + clazz.getName(), e);
+                logger.error("Could not get access to config " + clazz.getName(), e);
             }
             return null;
         })
@@ -55,6 +55,7 @@ public class ConversionServiceBean {
                 .collect(Collectors.toSet());
     }
 
+    // find converters
     private Collection<Class> findConverterClasses(String locations) {
         String[] converterLocations = parseConverterLocations(locations);
         List<Class> result = new ArrayList<>();
@@ -64,11 +65,12 @@ public class ConversionServiceBean {
                 .forEach(result::addAll);
         result = result.stream().filter(clazz -> !Modifier.isAbstract(clazz.getModifiers())).collect(Collectors.toList());
         return result;
-    }*/
+    }
 
+    // split address locations
     private String[] parseConverterLocations(String converterLocations) {
         if (Objects.isNull(converterLocations)) {
-            logger.error("Could not find property tms.converter-locations. Please, check the configuration");
+            logger.error("Could not find property tms.config-locations. Please, check the configuration");
             return new String[]{};
         }
         return converterLocations.split(STRING_ARRAY_SEPARATOR);

@@ -1,6 +1,6 @@
-package com.dazito.oauthexample.utils.converter;
+package com.dazito.oauthexample.utils.converter.config;
 
-//import org.reflections.Reflections;
+import org.reflections.Reflections;
 
 import java.util.Collection;
 
@@ -15,8 +15,8 @@ public class FindClassUtil {
      * @return list of classes which implements interface
      * @implNote Reflections library is used for find the classes
      */
-    /*public static Collection<Class> findAllClassesImplementsInterface(String packageName, Class requiredInterface) {
+    public static Collection<Class> findAllClassesImplementsInterface(String packageName, Class requiredInterface) {
         Reflections reflections = new Reflections(packageName);
         return reflections.getSubTypesOf(requiredInterface);
-    }*/
+    }
 }

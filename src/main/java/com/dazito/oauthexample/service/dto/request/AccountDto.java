@@ -12,7 +12,8 @@ import javax.validation.constraints.NotNull;
 @Getter
 public class AccountDto {
 
-    private Integer id;
+    @NotNull
     private String username;
+    @NotNull
     private String password;
 }

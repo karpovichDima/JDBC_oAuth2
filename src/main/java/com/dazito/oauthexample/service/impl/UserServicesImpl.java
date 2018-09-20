@@ -6,10 +6,12 @@ import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.response.NameDto;
 import com.dazito.oauthexample.service.dto.response.PasswordDto;
-import com.dazito.oauthexample.utils.ConverterAccount;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 
 @Service
 public class UserServicesImpl implements UserService {
@@ -17,16 +19,18 @@ public class UserServicesImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Resource(name = "conversionService")
+    ConversionService conversionService;
+
     @Autowired
     public UserServicesImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
-
     @Override
     public AccountDto getCurrentUser(String name) {
-        return ConverterAccount.mapAccountEntityToDto(findUserByName(name));
+        return conversionService.convert(findUserByName(name), AccountDto.class);
     }
 
     @Override

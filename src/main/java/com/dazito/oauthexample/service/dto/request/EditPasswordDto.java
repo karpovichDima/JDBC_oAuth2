@@ -12,7 +12,5 @@ public class EditPasswordDto implements Serializable  {
     @NotNull
     private String newPassword;
     @NotNull
-    private String oldPassword;
-    @NotNull
     private String rawOldPassword;
 }

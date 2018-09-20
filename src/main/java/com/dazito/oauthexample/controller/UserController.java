@@ -1,12 +1,11 @@
 package com.dazito.oauthexample.controller;
 
-import com.dazito.oauthexample.model.Account;
+import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.request.EditNameDto;
 import com.dazito.oauthexample.service.dto.request.EditPasswordDto;
 import com.dazito.oauthexample.service.dto.response.NameDto;
 import com.dazito.oauthexample.service.dto.response.PasswordDto;
-import com.dazito.oauthexample.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
