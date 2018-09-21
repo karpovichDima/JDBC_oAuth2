@@ -21,4 +21,19 @@
             <column name="additional_information" value="{}"/>
         </insert>
     </changeSet>
+    <changeSet id="02" author="karpovich">
+
+        <addColumn schemaName="liqui"
+                   tableName="organizations">
+            <column name="org_name" type="varchar(255)"/>
+        </addColumn>
+
+    </changeSet>
+    <changeSet id="03" author="karpovich">
+        <addColumn schemaName="liqui"
+                   tableName="organizations">
+            <column name="salary" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

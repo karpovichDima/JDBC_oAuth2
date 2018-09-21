@@ -22,6 +22,12 @@ public class Organization {
     @GeneratedValue
     private Integer id;
 
+    @Column(name = "org_name")
+    private String organizationName;
+
+    @Column
+    private String salary;
+
     @OneToMany(mappedBy = "organization")
-    private List<UserEntity> users = new ArrayList<>();
+    private List<UserEntity> users;
 }
