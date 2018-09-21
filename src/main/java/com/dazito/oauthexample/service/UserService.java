@@ -1,6 +1,6 @@
 package com.dazito.oauthexample.service;
 
-import com.dazito.oauthexample.service.dto.request.UserDto;
+import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.response.NameDto;
 import com.dazito.oauthexample.service.dto.response.PasswordDto;
 import org.springframework.stereotype.Service;
@@ -12,7 +12,7 @@ public interface UserService {
      * get current user
      * @param name is name current user
      */
-    UserDto getCurrentUser(String name);
+    AccountDto getCurrentUser(String name);
 
     /**
      * edit password of the current user

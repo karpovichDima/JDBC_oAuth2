@@ -11,11 +11,10 @@
         <createTable tableName="organizations">
             <column name="id" type="int"><constraints primaryKey="true"/></column>
         </createTable>
-
-        <createTable tableName="user_entity">
+        <createTable tableName="account_entity">
             <column name="id" type="int"><constraints primaryKey="true"/></column>
             <column name="password" type="varchar(128)"/>
-            <column name="username" type="varchar(128)"/>
+            <column name="name" type="varchar(128)"/>
             <column name="organization_id" type="int">
             <constraints foreignKeyName="fk_organization" referencedTableName="organizations"
                          referencedColumnNames="id" nullable="true"/>

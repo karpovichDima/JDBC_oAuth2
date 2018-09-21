@@ -7,10 +7,10 @@
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
     <changeSet id="01" author="karpovich">
-        <insert tableName="user_entity">
+        <insert tableName="account_entity">
             <column name="id" valueNumeric="1"/>
             <column name="password" value="$2a$04$ypxka9nxoZxvPXlvQtXVNO72T.RQNCXHuh5Whji3E1Gm1u2t1Rg7W"/>
-            <column name="username" value="dima"/>
+            <column name="name" value="dima"/>
         </insert>
         <insert tableName="oauth_client_details">
             <column name="client_id" value="dima"/>

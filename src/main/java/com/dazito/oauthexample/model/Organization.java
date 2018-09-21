@@ -5,7 +5,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -29,5 +28,5 @@ public class Organization {
     private String salary;
 
     @OneToMany(mappedBy = "organization")
-    private List<UserEntity> users;
+    private List<AccountEntity> users;
 }

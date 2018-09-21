@@ -13,14 +13,14 @@ import javax.validation.constraints.NotNull;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "user_entity")
-public class UserEntity {
+@Table(name = "account_entity")
+public class AccountEntity {
 
     @Id
     @GeneratedValue
     private Integer id;
 
-    @Column(name = "username", length = 128)
+    @Column(name = "name", length = 128)
     private String username;
 
     @Column(name = "password", length = 128)
@@ -30,7 +30,7 @@ public class UserEntity {
     @JoinColumn(name="organization_id")
     private Organization organization;
 
-    UserEntity(String username, String password){
+    AccountEntity(String username, String password){
         this.username = username;
         this.password = password;
     }
