@@ -1,7 +1,7 @@
 package com.dazito.oauthexample.controller;
 
 import com.dazito.oauthexample.service.UserService;
-import com.dazito.oauthexample.service.dto.request.AccountDto;
+import com.dazito.oauthexample.service.dto.request.UserDto;
 import com.dazito.oauthexample.service.dto.request.EditNameDto;
 import com.dazito.oauthexample.service.dto.request.EditPasswordDto;
 import com.dazito.oauthexample.service.dto.response.NameDto;
@@ -21,7 +21,7 @@ public class UserController {
 
     // get current user
     @GetMapping("/current")
-    public AccountDto getAccountCurrentUser() {
+    public UserDto getAccountCurrentUser() {
         return userService.getCurrentUser(findOutNameUser());
     }
 

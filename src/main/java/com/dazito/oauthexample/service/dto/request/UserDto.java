@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 
 @Setter
 @Getter
-public class AccountDto {
+public class UserDto {
 
     @NotNull
     private String username;

@@ -5,10 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @Entity
@@ -16,20 +13,24 @@ import javax.validation.constraints.NotNull;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Account {
+@Table(name = "user_entity")
+public class UserEntity {
 
     @Id
-    @NotNull
     @GeneratedValue
     private Integer id;
-    @NotNull
+
     @Column(name = "username", length = 128)
     private String username;
-    @NotNull
+
     @Column(name = "password", length = 128)
     private String password;
 
-    Account(String username, String password){
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="organization_id")
+    private Organization organization;
+
+    UserEntity(String username, String password){
         this.username = username;
         this.password = password;
     }

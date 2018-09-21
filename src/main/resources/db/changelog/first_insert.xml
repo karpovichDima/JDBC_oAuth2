@@ -6,9 +6,8 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-    <changeSet id="02" author="karpovich">
-        <comment>Inserting Authors</comment>
-        <insert tableName="account">
+    <changeSet id="01" author="karpovich">
+        <insert tableName="user_entity">
             <column name="id" valueNumeric="1"/>
             <column name="password" value="$2a$04$ypxka9nxoZxvPXlvQtXVNO72T.RQNCXHuh5Whji3E1Gm1u2t1Rg7W"/>
             <column name="username" value="dima"/>
