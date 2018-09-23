@@ -10,7 +10,15 @@
         <insert tableName="account_entity">
             <column name="id" valueNumeric="1"/>
             <column name="password" value="$2a$04$ypxka9nxoZxvPXlvQtXVNO72T.RQNCXHuh5Whji3E1Gm1u2t1Rg7W"/>
+            <column name="role" value="USER"/>
             <column name="name" value="dima"/>
+        </insert>
+
+        <insert tableName="account_entity">
+            <column name="id" valueNumeric="2"/>
+            <column name="password" value="$2a$04$ypxka9nxoZxvPXlvQtXVNO72T.RQNCXHuh5Whji3E1Gm1u2t1Rg7W"/>
+            <column name="role" value="ADMIN"/>
+            <column name="name" value="admin"/>
         </insert>
         <insert tableName="oauth_client_details">
             <column name="client_id" value="dima"/>

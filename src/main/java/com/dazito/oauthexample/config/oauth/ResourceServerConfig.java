@@ -36,8 +36,8 @@ class ResourceServerConfig extends ResourceServerConfigurerAdapter {
             // Prescribe the roles that our paths are available
             http
                     .authorizeRequests()
-                    .antMatchers("/users/current").access("hasRole('ADMIN')")
-                    .antMatchers("/admins/current").access("hasRole('USER')")
+                    .antMatchers("/users/*").access("hasRole('USER')")
+                    .antMatchers("/admins/*").access("hasRole('ADMIN')")
                     .anyRequest().hasRole("USER")
                     // all it for logout
                     .and()

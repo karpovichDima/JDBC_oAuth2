@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping(path = "/account")
+@RequestMapping(path = "/accounts")
 public class AccountController {
 
-    @Autowired
+    /*@Autowired
     private UserService userService;
 
     // get current user
@@ -42,7 +42,7 @@ public class AccountController {
     // get name of the current user
     private String findOutNameUser(){
         return SecurityContextHolder.getContext().getAuthentication().getName();
-    }
+    }*/
 
 
 }

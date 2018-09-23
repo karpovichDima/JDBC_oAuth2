@@ -26,6 +26,9 @@ public class AccountEntity {
     @Column(name = "password", length = 128)
     private String password;
 
+    @Column(name = "role", length = 128)
+    private String role;
+
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="organization_id")
     private Organization organization;

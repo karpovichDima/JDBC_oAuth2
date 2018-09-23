@@ -24,7 +24,7 @@ public class AccountUserDetailsService implements UserDetailsService {
 
         return accountRepository
                 .findByUsername(username)
-                .map(account -> new User(account.getUsername(), account.getPassword(), AuthorityUtils.createAuthorityList("ROLE_USER")))
+                .map(account -> new User(account.getUsername(), account.getPassword(), AuthorityUtils.createAuthorityList("ROLE_" + account.getRole())))
                 .orElseThrow(() -> new UsernameNotFoundException("Could not find " + username));
     }
 }
