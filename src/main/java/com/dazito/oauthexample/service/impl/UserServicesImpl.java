@@ -12,6 +12,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServicesImpl implements UserService {
@@ -54,8 +56,20 @@ public class UserServicesImpl implements UserService {
         accountRepository.saveAndFlush(accountEntity);
 
         NameDto nameDto = new NameDto();
-        nameDto.setName(newName);
+        nameDto.setUsername(newName);
         return nameDto;
+    }
+
+    @Override
+    public Collection<NameDto> getAccountsByRole(String role) {
+        Collection<AccountEntity> byRole = accountRepository.findByRole(role);
+        if (byRole == null)return null;
+        List<NameDto> collectionNames = new ArrayList<>();
+        for (AccountEntity entity : byRole) {
+            NameDto convertedEntity = conversionService.convert(entity, NameDto.class);
+            collectionNames.add(convertedEntity);
+        }
+        return collectionNames;
     }
 
     private AccountEntity findUserByName(String name){

@@ -1,9 +1,13 @@
 package com.dazito.oauthexample.service;
 
+import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.response.NameDto;
 import com.dazito.oauthexample.service.dto.response.PasswordDto;
 import org.springframework.stereotype.Service;
+
+import java.util.Collection;
+import java.util.Optional;
 
 @Service
 public interface UserService {
@@ -26,5 +30,9 @@ public interface UserService {
      */
     NameDto editName(String name, String newName);
 
-
+    /**
+     * get all accounts by role
+     * @param role is role users, that you want to get
+     */
+    Collection<NameDto> getAccountsByRole(String role);
 }

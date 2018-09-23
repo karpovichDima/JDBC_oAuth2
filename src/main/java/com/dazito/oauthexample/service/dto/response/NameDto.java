@@ -10,5 +10,7 @@ import javax.validation.constraints.NotNull;
 public class NameDto {
 
     @NotNull
-    private String name;
+    private String username;
+    @NotNull
+    private String role;
 }
