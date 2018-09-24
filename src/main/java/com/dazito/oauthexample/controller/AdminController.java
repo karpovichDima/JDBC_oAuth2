@@ -1,6 +1,5 @@
 package com.dazito.oauthexample.controller;
 
-import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.request.EditNameDto;
@@ -13,7 +12,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
-import java.util.Optional;
 
 @RestController
 @RequestMapping(path = "/admins")
@@ -42,14 +40,14 @@ public class AdminController {
         return ResponseEntity.ok(nameDto);
     }
 
-    // get name of the current admin
-    private String findOutNameUser(){
-        return SecurityContextHolder.getContext().getAuthentication().getName();
-    }
-
     // get all accounts with roles user
     @PostMapping("/getAccountsByRole")
     public Collection<NameDto> getAllAccountsByRole(@RequestBody AccountDto accountDto){
         return userService.getAccountsByRole(accountDto.getRole());
+    }
+
+    // get name of the current admin
+    private String findOutNameUser(){
+        return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 }
