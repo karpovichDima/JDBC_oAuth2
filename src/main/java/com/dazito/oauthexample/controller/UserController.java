@@ -8,8 +8,11 @@ import com.dazito.oauthexample.service.dto.response.NameDto;
 import com.dazito.oauthexample.service.dto.response.PasswordDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Collection;
 
 @RestController
 @RequestMapping(path = "/users")
@@ -36,6 +39,13 @@ public class UserController {
     public ResponseEntity<NameDto> editNames(@RequestBody EditNameDto editNameDto) {
         NameDto nameDto = userService.editName(findOutNameUser(), editNameDto.getNewName());
         return ResponseEntity.ok(nameDto);
+    }
+
+    // get all accounts with roles user
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PostMapping("/getAccountsByRole")
+    public Collection<NameDto> getAllAccountsByRole(@RequestBody AccountDto accountDto){
+        return userService.getAccountsByRole(accountDto.getRole());
     }
 
     // get name of the current user
