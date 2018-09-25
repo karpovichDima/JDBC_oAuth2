@@ -9,17 +9,22 @@
     <changeSet id="01" author="karpovich">
 
         <createTable tableName="organizations">
-            <column name="id" type="int"><constraints primaryKey="true"/></column>
+            <column name="id" type="bigint"><constraints primaryKey="true"/></column>
+            <column name="org_name" type="varchar(255)"/>
+            <column name="salary" type="varchar(255)"/>
         </createTable>
         <createTable tableName="account_entity">
-            <column name="id" type="int"><constraints primaryKey="true"/></column>
+            <column name="id" type="bigint"><constraints primaryKey="true"/></column>
             <column name="password" type="varchar(128)"/>
             <column name="name" type="varchar(128)"/>
             <column name="role" type="varchar(128)"/>
-            <column name="organization_id" type="int">
-            <constraints foreignKeyName="fk_organization" referencedTableName="organizations"
-                         referencedColumnNames="id" nullable="true"/>
-        </column>
+            <column name="organization_id" type="bigint">
+                <constraints foreignKeyName="fk_organization" referencedTableName="organizations"
+                             referencedColumnNames="id" nullable="true"/>
+            </column>
+            <column name="is_activated" type="bit(1)"/>
+            <column name="email" type="varchar(255)"/>
+
         </createTable>
 
         <createTable tableName="clientdetails">

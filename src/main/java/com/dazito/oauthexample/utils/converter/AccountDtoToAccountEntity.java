@@ -1,8 +1,8 @@
 package com.dazito.oauthexample.utils.converter;
 
 import com.dazito.oauthexample.model.AccountEntity;
-import com.dazito.oauthexample.service.dto.response.EmailNameDto;
+import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.utils.converter.config.AutoConverter;
 
-public class AccountEntityToNameDto extends AutoConverter<AccountEntity, EmailNameDto> {
+public class AccountDtoToAccountEntity extends AutoConverter<AccountDto, AccountEntity> {
 }

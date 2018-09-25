@@ -8,4 +8,5 @@
 
     <include file="changelog/create_tabs.xml" relativeToChangelogFile="true"/>
     <include file="changelog/first_insert.xml" relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

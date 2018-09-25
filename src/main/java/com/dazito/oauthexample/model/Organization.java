@@ -14,12 +14,9 @@ import java.util.List;
 @NoArgsConstructor
 public class Organization {
 
-    //TODO: dto
-    //TODO: converter
-
     @Id
     @GeneratedValue
-    private Integer id;
+    private Long id;
 
     @Column(name = "org_name")
     private String organizationName;

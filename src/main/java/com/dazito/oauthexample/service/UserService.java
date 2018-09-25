@@ -2,37 +2,55 @@ package com.dazito.oauthexample.service;
 
 import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
-import com.dazito.oauthexample.service.dto.response.NameDto;
+import com.dazito.oauthexample.service.dto.request.DtoForEditingPersonalData;
+import com.dazito.oauthexample.service.dto.request.OrganizationDto;
+import com.dazito.oauthexample.service.dto.response.EmailNameDto;
 import com.dazito.oauthexample.service.dto.response.PasswordDto;
 import org.springframework.stereotype.Service;
-
-import java.util.Collection;
-import java.util.Optional;
 
 @Service
 public interface UserService {
 
     /**
-     * get current user
-     * @param name is name current user
-     */
-    AccountDto getCurrentUser(String name);
-
-    /**
      * edit password of the current user
-     * @param name is name user, whose password we edit
+     * @param id is id user, whose password we edit
+     * @param newPassword
+     * @param rawOldPassword is current password, unencrypted
+     * @return PasswordDto is successful password change response
      */
-    PasswordDto editPassword(String name, String newPassword, String rawOldPassword);
+    PasswordDto editPassword(Long id, String newPassword, String rawOldPassword);
 
     /**
-     * edit name of the current user
-     * @param newName is the user name to which the user changes their name
+     * edit name/email of the current user
+     * @param personalData is case of the different properties user
+     * @return EmailNameDto is successful edit of the edit
      */
-    NameDto editName(String name, String newName);
+    EmailNameDto editPersonData(Long id, DtoForEditingPersonalData personalData);
 
     /**
-     * get all accounts by role
-     * @param role is role users, that you want to get
+     * edit name/email of the current user
+     * @param id the identifier of the user we are looking for
+     * @return AccountEntity
      */
-    Collection<NameDto> getAccountsByRole(String role);
+    AccountEntity findById(Long id);
+
+    /**
+     * returns the current authorized user
+     * @return AccountEntity
+     */
+    AccountEntity getCurrentUser();
+
+    /**
+     * converting AccountEntity to AccountDto
+     * @return AccountDto
+     */
+    AccountDto converterAccountEntityToDto(AccountEntity accountEntity);
+
+    /**
+     * Adds an organization to AccountDto
+     * @param foundedUser is user which we will convert to AccountDto
+     * @return AccountDto
+     */
+    AccountDto addToAccountDtoOrganization(AccountEntity foundedUser);
+
 }

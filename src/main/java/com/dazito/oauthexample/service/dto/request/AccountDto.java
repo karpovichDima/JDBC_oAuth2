@@ -1,21 +1,23 @@
 package com.dazito.oauthexample.service.dto.request;
 
+import com.dazito.oauthexample.model.Organization;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 
 @Setter
 @Getter
-public class AccountDto {
+public class AccountDto implements Serializable {
 
-    @NotNull
-    private String username;
-    @NotNull
-    private String password;
-    @NotNull
+    private static final long serialVersionUID = 1L;
+
+    private Long id;
     private String role;
+    private String email;
+    private String username;
+    private String password;
+    private Boolean isActivated;
+    private String organizationName;
 }

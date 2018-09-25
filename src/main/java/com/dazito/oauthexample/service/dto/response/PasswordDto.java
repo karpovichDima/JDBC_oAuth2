@@ -10,6 +10,7 @@ import java.io.Serializable;
 @Getter
 public class PasswordDto implements Serializable {
 
+    private static final long serialVersionUID = 6L;
     @NotNull
     private String password;
 

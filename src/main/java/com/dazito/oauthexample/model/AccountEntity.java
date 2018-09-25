@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 
 @Entity
 @Getter
@@ -14,11 +13,11 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "account_entity")
-public class AccountEntity {
+public class AccountEntity{
 
     @Id
     @GeneratedValue
-    private Integer id;
+    private Long id;
 
     @Column(name = "name", length = 128)
     private String username;
@@ -29,13 +28,16 @@ public class AccountEntity {
     @Column(name = "role", length = 128)
     private String role;
 
-    @ManyToOne(fetch=FetchType.LAZY)
+    @ManyToOne(targetEntity = Organization.class)
     @JoinColumn(name="organization_id")
     private Organization organization;
+
+    private Boolean isActivated;
+
+    private String email;
 
     AccountEntity(String username, String password){
         this.username = username;
         this.password = password;
     }
-
 }
