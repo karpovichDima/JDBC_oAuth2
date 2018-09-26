@@ -88,4 +88,13 @@
         </createTable>
     </changeSet>
 
+    <changeSet author="karpovich" id="02">
+               <addAutoIncrement columnDataType="bigint"
+                          columnName="id"
+                          incrementBy="1"
+                          schemaName="liqui"
+                          startWith="1"
+                          tableName="account_entity"/>
+    </changeSet>
+
 </databaseChangeLog>

@@ -4,13 +4,16 @@ import com.dazito.oauthexample.config.oauth.CustomUserDetails;
 import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
+import com.dazito.oauthexample.service.dto.request.DeleteAccountDto;
 import com.dazito.oauthexample.service.dto.request.DtoForEditingPersonalData;
 import com.dazito.oauthexample.service.dto.response.EmailNameDto;
 import com.dazito.oauthexample.service.dto.response.PasswordDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping(path = "/users/{id}")
@@ -40,9 +43,28 @@ public class ConcreteUserController {
         return ResponseEntity.ok(passwordDto);
     }
 
+    @PostMapping("/")
+    public ResponseEntity<EmailNameDto> createUser(@RequestBody AccountDto accountDto){
+        EmailNameDto newUser = userService.createUser(accountDto);
+        return ResponseEntity.ok(newUser);
+    }
+
+    @DeleteMapping("/")
+    @ResponseStatus(value = HttpStatus.OK)
+    public void deleteUser(@PathVariable Long id){
+        userService.deleteUser(id, null);
+    }
+
     // get id of the user by id
     private Long findOutIdUser(){
         return ((CustomUserDetails)(SecurityContextHolder.getContext().getAuthentication().getPrincipal())).getUser().getId();
     }
+
+
+    /*@PostMapping("/")
+    public ResponseEntity<EmailNameDto> createUser(@RequestParam MultipartFile file){
+        EmailNameDto newUser = userService.createUser(accountDto);
+        return ResponseEntity.ok(newUser);
+    }*/
 
 }

@@ -5,10 +5,12 @@ import com.dazito.oauthexample.dao.OrganizationRepo;
 import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
+import com.dazito.oauthexample.service.dto.request.DeleteAccountDto;
 import com.dazito.oauthexample.service.dto.request.DtoForEditingPersonalData;
 import com.dazito.oauthexample.service.dto.response.EmailNameDto;
 import com.dazito.oauthexample.service.dto.response.PasswordDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,16 +18,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(path = "/users/current")
 public class CurrentUserController {
 
-    private final UserService userService;
-    private final AccountRepository accountRepository;
-    private final OrganizationRepo organizationRepo;
-
     @Autowired
-    public CurrentUserController(UserService userService, AccountRepository accountRepository, OrganizationRepo organizationRepo) {
-        this.userService = userService;
-        this.accountRepository = accountRepository;
-        this.organizationRepo = organizationRepo;
-    }
+    UserService userService;
 
     // get current user
     @GetMapping()
@@ -36,7 +30,7 @@ public class CurrentUserController {
 
     // edit email and name of the current user
     @PatchMapping("/")
-    public ResponseEntity<EmailNameDto> editEmail(@RequestBody DtoForEditingPersonalData dtoForEditingPersonalData) {
+    public ResponseEntity<EmailNameDto> editNameEmail(@RequestBody DtoForEditingPersonalData dtoForEditingPersonalData) {
         EmailNameDto editEmail = userService.editPersonData(null, dtoForEditingPersonalData);
         return ResponseEntity.ok(editEmail);
     }
@@ -48,7 +42,17 @@ public class CurrentUserController {
         return ResponseEntity.ok(passwordDto);
     }
 
+    @PostMapping("/")
+    public ResponseEntity<EmailNameDto> createUser(@RequestBody AccountDto accountDto){
+        EmailNameDto newUser = userService.createUser(accountDto);
+        return ResponseEntity.ok(newUser);
+    }
 
+    @DeleteMapping("/")
+    @ResponseStatus(value = HttpStatus.OK)
+    public void deleteUser(@RequestBody DeleteAccountDto accountDto){
+        userService.deleteUser(null, accountDto);
+    }
 
 //    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
 //    @PostMapping("/getAccountsByRole")

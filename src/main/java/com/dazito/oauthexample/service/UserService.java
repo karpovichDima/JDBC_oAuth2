@@ -2,6 +2,7 @@ package com.dazito.oauthexample.service;
 
 import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
+import com.dazito.oauthexample.service.dto.request.DeleteAccountDto;
 import com.dazito.oauthexample.service.dto.request.DtoForEditingPersonalData;
 import com.dazito.oauthexample.service.dto.request.OrganizationDto;
 import com.dazito.oauthexample.service.dto.response.EmailNameDto;
@@ -46,6 +47,8 @@ public interface UserService {
      */
     AccountDto converterAccountEntityToDto(AccountEntity accountEntity);
 
+    public AccountEntity converterAccountDtoToEntity(AccountDto accountDto);
+
     /**
      * Adds an organization to AccountDto
      * @param foundedUser is user which we will convert to AccountDto
@@ -53,4 +56,7 @@ public interface UserService {
      */
     AccountDto addToAccountDtoOrganization(AccountEntity foundedUser);
 
+    EmailNameDto createUser(AccountDto accountDto);
+    AccountEntity findUserByEmail(String email);
+    void deleteUser(Long id, DeleteAccountDto accountDto);
 }

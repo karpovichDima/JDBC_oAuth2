@@ -1,5 +1,6 @@
 package com.dazito.oauthexample.model;
 
+import com.dazito.oauthexample.model.type.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,8 +26,9 @@ public class AccountEntity{
     @Column(name = "password", length = 128)
     private String password;
 
+    @Enumerated(value = EnumType.STRING)
     @Column(name = "role", length = 128)
-    private String role;
+    private UserRole role;
 
     @ManyToOne(targetEntity = Organization.class)
     @JoinColumn(name="organization_id")
