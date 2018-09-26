@@ -4,7 +4,6 @@ import com.dazito.oauthexample.config.oauth.CustomUserDetails;
 import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
-import com.dazito.oauthexample.service.dto.request.DeleteAccountDto;
 import com.dazito.oauthexample.service.dto.request.DtoForEditingPersonalData;
 import com.dazito.oauthexample.service.dto.response.EmailNameDto;
 import com.dazito.oauthexample.service.dto.response.PasswordDto;
@@ -13,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping(path = "/users/{id}")
@@ -43,12 +41,14 @@ public class ConcreteUserController {
         return ResponseEntity.ok(passwordDto);
     }
 
+    // create new user from accountDto
     @PostMapping("/")
     public ResponseEntity<EmailNameDto> createUser(@RequestBody AccountDto accountDto){
         EmailNameDto newUser = userService.createUser(accountDto);
         return ResponseEntity.ok(newUser);
     }
 
+    // delete user by email from accountDto
     @DeleteMapping("/")
     @ResponseStatus(value = HttpStatus.OK)
     public void deleteUser(@PathVariable Long id){

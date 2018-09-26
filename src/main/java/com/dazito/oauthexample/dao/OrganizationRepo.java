@@ -1,6 +1,5 @@
 package com.dazito.oauthexample.dao;
 
-import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.model.Organization;
 import org.springframework.data.jpa.repository.JpaRepository;
 

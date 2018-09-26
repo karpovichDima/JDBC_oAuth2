@@ -1,7 +1,5 @@
 package com.dazito.oauthexample.controller;
 
-import com.dazito.oauthexample.dao.AccountRepository;
-import com.dazito.oauthexample.dao.OrganizationRepo;
 import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
@@ -42,12 +40,14 @@ public class CurrentUserController {
         return ResponseEntity.ok(passwordDto);
     }
 
+    // create new user from accountDto
     @PostMapping("/")
     public ResponseEntity<EmailNameDto> createUser(@RequestBody AccountDto accountDto){
         EmailNameDto newUser = userService.createUser(accountDto);
         return ResponseEntity.ok(newUser);
     }
 
+    // delete user by email from accountDto
     @DeleteMapping("/")
     @ResponseStatus(value = HttpStatus.OK)
     public void deleteUser(@RequestBody DeleteAccountDto accountDto){

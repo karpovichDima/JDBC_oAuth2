@@ -29,7 +29,7 @@ public interface UserService {
     EmailNameDto editPersonData(Long id, DtoForEditingPersonalData personalData);
 
     /**
-     * edit name/email of the current user
+     * find user
      * @param id the identifier of the user we are looking for
      * @return AccountEntity
      */
@@ -47,7 +47,12 @@ public interface UserService {
      */
     AccountDto converterAccountEntityToDto(AccountEntity accountEntity);
 
-    public AccountEntity converterAccountDtoToEntity(AccountDto accountDto);
+    /**
+     * converting AccountDto to AccountEntity
+     * @param accountDto is user which we will convert to AccountEntity
+     * @return AccountEntity
+     */
+    AccountEntity converterAccountDtoToEntity(AccountDto accountDto);
 
     /**
      * Adds an organization to AccountDto
@@ -56,7 +61,23 @@ public interface UserService {
      */
     AccountDto addToAccountDtoOrganization(AccountEntity foundedUser);
 
+    /**
+     * We pass the user to understand whether he is in our database or not
+     * @param accountDto is userDto which we will find in DB
+     * @return EmailNameDto is successful search result user
+     */
     EmailNameDto createUser(AccountDto accountDto);
+
+    /**
+     * find user by email
+     * @param email is email which we will find in DB
+     * @return AccountEntity is successful search result user
+     */
     AccountEntity findUserByEmail(String email);
+
+    /**
+     * delete user from DB, by id or DeleteAccountDto
+     * @param accountDto is entity which we will find in DB and after that, delete
+     */
     void deleteUser(Long id, DeleteAccountDto accountDto);
 }
