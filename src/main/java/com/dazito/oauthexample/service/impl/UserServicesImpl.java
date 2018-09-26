@@ -1,6 +1,6 @@
 package com.dazito.oauthexample.service.impl;
 
-import com.dazito.oauthexample.config.oauth.CustomUserDetails;
+import com.dazito.oauthexample.config.oauth.UserDetailsConfig;
 import com.dazito.oauthexample.dao.AccountRepository;
 import com.dazito.oauthexample.dao.OrganizationRepo;
 import com.dazito.oauthexample.model.AccountEntity;
@@ -126,7 +126,7 @@ public class UserServicesImpl implements UserService {
     // get AccountEntity of the current user, documentation on it in UserService
     @Override
     public AccountEntity getCurrentUser() {
-        Long id = ((CustomUserDetails) (SecurityContextHolder.getContext().getAuthentication().getPrincipal())).getUser().getId();
+        Long id = ((UserDetailsConfig) (SecurityContextHolder.getContext().getAuthentication().getPrincipal())).getUser().getId();
         Optional<AccountEntity> optionalById = accountRepository.findById(id);
         if (optionalById.isPresent()) {
             return optionalById.get();
@@ -187,7 +187,7 @@ public class UserServicesImpl implements UserService {
         String password = accountDto.getPassword();
         String userName = accountDto.getUsername();
         Boolean isActivated = accountDto.getIsActivated();
-        String role = accountDto.getRole();
+        UserRole role = accountDto.getRole();
 
         AccountEntity newUser = new AccountEntity();
         newUser.setEmail(email);
@@ -309,6 +309,6 @@ public class UserServicesImpl implements UserService {
 
     // get id of the current user
     private Long findOutIdUser() {
-        return ((CustomUserDetails) (SecurityContextHolder.getContext().getAuthentication().getPrincipal())).getUser().getId();
+        return ((UserDetailsConfig) (SecurityContextHolder.getContext().getAuthentication().getPrincipal())).getUser().getId();
     }
 }

@@ -14,13 +14,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class CustomUserDetails implements UserDetails, Serializable{
+public class UserDetailsConfig implements UserDetails, Serializable{
     private AccountDto user;
 
     @Autowired
     AccountRepository accountRepository;
 
-    public CustomUserDetails(AccountDto user) {
+    public UserDetailsConfig(AccountDto user) {
         this.user = user;
     }
 

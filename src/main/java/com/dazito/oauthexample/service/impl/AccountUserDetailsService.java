@@ -1,6 +1,6 @@
 package com.dazito.oauthexample.service.impl;
 
-import com.dazito.oauthexample.config.oauth.CustomUserDetails;
+import com.dazito.oauthexample.config.oauth.UserDetailsConfig;
 import com.dazito.oauthexample.dao.AccountRepository;
 import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.model.Organization;
@@ -39,6 +39,6 @@ public class AccountUserDetailsService implements UserDetailsService {
         OrganizationDto convertedOrganization = conversionService.convert(organization, OrganizationDto.class);
 
         accountDto.setOrganizationName(convertedOrganization.getOrganizationName());
-        return new CustomUserDetails(accountDto);
+        return new UserDetailsConfig(accountDto);
     }
 }

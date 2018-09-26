@@ -1,6 +1,6 @@
 package com.dazito.oauthexample.controller;
 
-import com.dazito.oauthexample.config.oauth.CustomUserDetails;
+import com.dazito.oauthexample.config.oauth.UserDetailsConfig;
 import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
@@ -57,7 +57,7 @@ public class ConcreteUserController {
 
     // get id of the user by id
     private Long findOutIdUser(){
-        return ((CustomUserDetails)(SecurityContextHolder.getContext().getAuthentication().getPrincipal())).getUser().getId();
+        return ((UserDetailsConfig)(SecurityContextHolder.getContext().getAuthentication().getPrincipal())).getUser().getId();
     }
 
 

@@ -1,5 +1,6 @@
 package com.dazito.oauthexample.service.dto.request;
 
+import com.dazito.oauthexample.model.type.UserRole;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,7 +14,7 @@ public class AccountDto implements Serializable {
     private static long serialVersionUID;
 
     private Long id;
-    private String role;
+    private UserRole role;
     private String email;
     private String username;
     private String password;
