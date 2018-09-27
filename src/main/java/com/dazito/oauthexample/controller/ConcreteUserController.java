@@ -62,7 +62,7 @@ public class ConcreteUserController {
 
 
     /*@PostMapping("/")
-    public ResponseEntity<EmailNameDto> createUser(@RequestParam MultipartFile file){
+    public ResponseEntity<EmailNameDto> createUser(@RequestParam MultipartFile FileEntity){
         EmailNameDto newUser = userService.createUser(accountDto);
         return ResponseEntity.ok(newUser);
     }*/

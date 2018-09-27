@@ -15,7 +15,7 @@ public interface UserService {
     /**
      * edit password of the current user
      * @param id is id user, whose password we edit
-     * @param newPassword
+     * @param newPassword is new password
      * @param rawOldPassword is current password, unencrypted
      * @return PasswordDto is successful password change response
      */
