@@ -13,7 +13,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Entity
 @DiscriminatorColumn(name = "type")
-@Inheritance//(strategy = InheritanceType.SINGLE_TABLE)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public abstract class StorageElement{
 
     // Lombok
