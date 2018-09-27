@@ -1,0 +1,18 @@
+{
+  "properties": [
+    {
+      "name": "spring.jpa.hibernate.naming-strategy",
+      "type": "java.lang.String",
+      "description": "Description for spring.jpa.hibernate.naming-strategy."
+    },
+    {
+      "name": "spring.servlet.multipart.max-file-size",
+      "type": "java.lang.String",
+      "description": "Description for spring.servlet.multipart.max-file-size."
+    },
+    {
+      "name": "spring.jpa.hibernate.naming-strategy",
+      "type": "java.lang.String",
+      "description": "Description for spring.jpa.hibernate.naming-strategy."
+    }
+  ] }

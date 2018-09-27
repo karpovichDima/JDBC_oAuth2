@@ -69,7 +69,7 @@ public abstract class AutoConverter<S, T> implements Converter<S, T> {
             return;
         }
 
-        // getting name and type field from source object
+        // getting name and someType field from source object
         if (targetFieldsMap.containsKey(currentFieldName)) {
             Field targetField = targetFieldsMap.get(currentFieldName);
             Class<?> sourceFieldType = sourceField.getType();
@@ -133,13 +133,13 @@ public abstract class AutoConverter<S, T> implements Converter<S, T> {
         return type.newInstance();
     }
 
-    // Returns arg for TARGET_CLASS_POSITION(type-target)
+    // Returns arg for TARGET_CLASS_POSITION(someType-target)
     @SuppressWarnings("unchecked")
     private Class<T> getTargetType() {
         return (Class<T>) getPositionalGenericArgument(TARGET_CLASS_POSITION);
     }
 
-    // Returns arg for SOURCE_CLASS_POSITION(type-source)
+    // Returns arg for SOURCE_CLASS_POSITION(someType-source)
     @SuppressWarnings("unchecked")
     private Class<S> getSourceType() {
         return (Class<S>) getPositionalGenericArgument(SOURCE_CLASS_POSITION);

@@ -13,6 +13,7 @@
             <column name="org_name" type="varchar(255)"/>
             <column name="salary" type="varchar(255)"/>
         </createTable>
+
         <createTable tableName="account_entity">
             <column name="id" type="bigint"><constraints primaryKey="true"/></column>
             <column name="password" type="varchar(128)"/>
