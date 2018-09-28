@@ -1,5 +1,7 @@
 package com.dazito.oauthexample.controller;
 
+import com.dazito.oauthexample.service.FileService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
@@ -15,21 +17,22 @@ import java.io.IOException;
 
 
 @RestController
-@RequestMapping(path = "/uploads")
+@RequestMapping(path = "/files")
 public class FileUploadController {
 
-    @Value("${root.path}")
-    private String root;
+    @Autowired
+    private FileService fileService;
 
-    @PostMapping("/")
+    @PostMapping("/upload")
+    public void upload(@RequestParam MultipartFile file) throws IOException {
+        fileService.upload(file);
+    }
+
+
+    @PostMapping("/test")
     public String handleFileUpload(@RequestParam MultipartFile file) throws IOException {
         if (file == null) return null;
         String originalFilename = file.getOriginalFilename();
-
-
-        if (createSinglePath(root).exists()) {
-            file.transferTo(new File(root + File.separator + file.getOriginalFilename()));
-        }
         return originalFilename;
     }
 

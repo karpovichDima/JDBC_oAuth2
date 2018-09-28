@@ -16,6 +16,8 @@ import javax.persistence.*;
 @Table(name = "account_entity")
 public class AccountEntity{
 
+    // lombok
+
     @Id
     @GeneratedValue
     private Long id;
@@ -37,6 +39,9 @@ public class AccountEntity{
     private Boolean isActivated;
 
     private String email;
+
+    @Column
+    private String rootPath;
 
     AccountEntity(String username, String password){
         this.username = username;

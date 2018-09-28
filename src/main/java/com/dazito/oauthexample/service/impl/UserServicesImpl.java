@@ -14,6 +14,7 @@ import com.dazito.oauthexample.service.dto.request.OrganizationDto;
 import com.dazito.oauthexample.service.dto.response.EmailNameDto;
 import com.dazito.oauthexample.service.dto.response.PasswordDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,6 +29,9 @@ public class UserServicesImpl implements UserService {
     private final AccountRepository accountRepository;
     private final OrganizationRepo organizationRepo;
     private final PasswordEncoder passwordEncoder;
+
+    @Value("${root.path}")
+    String root;
 
     @Autowired
     public UserServicesImpl(AccountRepository accountRepository, OrganizationRepo organizationRepo, PasswordEncoder passwordEncoder) {
@@ -196,6 +200,7 @@ public class UserServicesImpl implements UserService {
         newUser.setIsActivated(isActivated);
         newUser.setRole(UserRole.ADMIN);
         newUser.setOrganization(findOrganizationByName(organizationName));
+        newUser.setRootPath(root);
         accountRepository.saveAndFlush(newUser);
 
         return responseDto(newUser);
