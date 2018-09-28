@@ -10,13 +10,8 @@ import java.util.Random;
 @Setter
 public class EmailNameDto implements Serializable{
 
-    private static long serialVersionUID;
-
+    private final static long serialVersionUID = 484661590;
     private String email;
     private String username;
 
-    public EmailNameDto(){
-        Random random = new Random();
-        serialVersionUID = random.nextInt();
-    }
 }

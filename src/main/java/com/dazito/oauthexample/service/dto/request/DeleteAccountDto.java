@@ -10,13 +10,8 @@ import java.util.Random;
 @Setter
 public class DeleteAccountDto  implements Serializable {
 
-    private static long serialVersionUID;
+    private final static long serialVersionUID = 421502874;
 
     private String email;
     private String rawPassword;
-
-    public DeleteAccountDto(){
-        Random random = new Random();
-        serialVersionUID = random.nextInt();
-    }
 }

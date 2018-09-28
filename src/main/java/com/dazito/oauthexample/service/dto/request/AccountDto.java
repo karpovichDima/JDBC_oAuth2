@@ -11,7 +11,7 @@ import java.util.Random;
 @Getter
 public class AccountDto implements Serializable {
 
-    private static long serialVersionUID;
+    private final static long serialVersionUID = 108423696;
 
     private Long id;
     private UserRole role;
@@ -21,8 +21,4 @@ public class AccountDto implements Serializable {
     private Boolean isActivated;
     private String organizationName;
 
-    public AccountDto(){
-        Random random = new Random();
-        serialVersionUID = random.nextInt();
-    }
 }

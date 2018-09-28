@@ -13,15 +13,11 @@ import java.util.Random;
 @Getter
 public class OrganizationDto implements Serializable {
 
-    private static long serialVersionUID;
+    private final static long serialVersionUID = 759674978;
 
     private Long id;
     private String salary;
     private String organizationName;
     private List<AccountEntity> users;
 
-    public OrganizationDto(){
-        Random random = new Random();
-        serialVersionUID = random.nextInt();
-    }
 }

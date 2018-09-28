@@ -11,16 +11,11 @@ import java.util.Random;
 @Setter
 public class DtoForEditingPersonalData implements Serializable{
 
-    private static long serialVersionUID;
+    private final static long serialVersionUID = 286930429;
 
     private String newEmail;
     private String newName;
     private String newPassword;
     private String rawOldPassword;
-
-    public DtoForEditingPersonalData(){
-        Random random = new Random();
-        serialVersionUID = random.nextInt();
-    }
 
 }

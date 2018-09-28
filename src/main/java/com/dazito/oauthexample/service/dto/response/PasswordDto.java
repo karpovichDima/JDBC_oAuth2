@@ -11,12 +11,8 @@ import java.util.Random;
 @Getter
 public class PasswordDto implements Serializable {
 
-    private static long serialVersionUID;
+    private final static long serialVersionUID = 653407663;
     @NotNull
     private String password;
 
-    public PasswordDto(){
-        Random random = new Random();
-        serialVersionUID = random.nextInt();
-    }
 }
