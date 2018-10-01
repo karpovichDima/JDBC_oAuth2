@@ -16,8 +16,6 @@ import javax.persistence.*;
 @Table(name = "account_entity")
 public class AccountEntity{
 
-    // lombok
-
     @Id
     @GeneratedValue
     private Long id;

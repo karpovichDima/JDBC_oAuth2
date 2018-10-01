@@ -9,6 +9,8 @@ import com.dazito.oauthexample.service.dto.response.EmailNameDto;
 import com.dazito.oauthexample.service.dto.response.PasswordDto;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 public interface UserService {
 
     /**
@@ -79,4 +81,6 @@ public interface UserService {
      * @param accountDto is entity which we will find in DB and after that, delete
      */
     void deleteUser(Long id, DeleteAccountDto accountDto);
+
+    boolean checkOptionalOnNull(Optional val);
 }

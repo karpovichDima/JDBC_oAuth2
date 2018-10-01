@@ -245,6 +245,12 @@ public class UserServicesImpl implements UserService {
         accountRepository.delete(foundedUser);
     }
 
+    // Check optional on null
+    @Override
+    public boolean checkOptionalOnNull(Optional val) {
+        return val.isPresent();
+    }
+
     // Check rights "ADMIN" to change personal data
     private boolean adminRightsCheck(AccountEntity entity) {
         UserRole role = entity.getRole();
@@ -290,11 +296,6 @@ public class UserServicesImpl implements UserService {
             return true;
         }
         return false;
-    }
-
-    // Check optional on null
-    private boolean checkOptionalOnNull(Optional val) {
-        return val.isPresent();
     }
 
     // Reply to the user when changing personal data

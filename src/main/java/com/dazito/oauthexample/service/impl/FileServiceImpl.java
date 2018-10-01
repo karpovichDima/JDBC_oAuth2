@@ -1,34 +1,37 @@
 package com.dazito.oauthexample.service.impl;
 
-import com.dazito.oauthexample.dao.FileRepository;
+import com.dazito.oauthexample.dao.FileEntityRepository;
 import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.model.FileEntity;
 import com.dazito.oauthexample.service.FileService;
 import com.dazito.oauthexample.service.UserService;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import java.io.File;
-import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
-
-import static antlr.build.ANTLR.root;
 
 @Service
 public class FileServiceImpl implements FileService {
 
 
     @Autowired
-    FileRepository fileRepository;
+    FileEntityRepository fileEntityRepository;
 
     @Resource(name = "userService")
     UserService userServices;
+
+    @Value("${root.path}")
+    String root;
 
     @Override
     public void upload(MultipartFile file) throws IOException {
@@ -38,7 +41,7 @@ public class FileServiceImpl implements FileService {
         AccountEntity currentUser = userServices.getCurrentUser();
         Path rootPath = Paths.get(currentUser.getRootPath());
 
-        if (!Files.exists(rootPath))return;
+        if (!Files.exists(rootPath)) return;
 
         UUID uuid = UUID.randomUUID();
         String uuidString = uuid + "";
@@ -49,24 +52,23 @@ public class FileServiceImpl implements FileService {
         fileEntity.setName(file.getOriginalFilename());
         fileEntity.setFileUUID(uuidString);
 
-        fileRepository.saveAndFlush(fileEntity);
+        fileEntityRepository.saveAndFlush(fileEntity);
+    }
 
+    @Override
+    public void download(String uuid, HttpServletResponse response) throws IOException {
+        Path file = Paths.get(root, uuid);
+        if (Files.exists(file)) {
+            try {
+                Files.copy(file, response.getOutputStream());
+                response.getOutputStream().flush();
+                //byte[] data = Files.readAllBytes(file);
+            } catch (Exception e){}
+        }
     }
 
 
-
-//    public AccountEntity getCurrentUser() {
-//        Long id = ((UserDetailsConfig) (SecurityContextHolder.getContext().getAuthentication().getPrincipal())).getUser().getId();
-//        Optional<AccountEntity> optionalById = accountRepository.findById(id);
-//        if (optionalById.isPresent()) {
-//            return optionalById.get();
-//        }
-//        return null;
-//    }
-
-
-
-    public File createSinglePath(String path){
+    public File createSinglePath(String path) {
         File rootPath = new File(path);
         if (!rootPath.exists()) {
             if (rootPath.mkdir()) {
@@ -78,7 +80,7 @@ public class FileServiceImpl implements FileService {
         return rootPath;
     }
 
-    public File createMultiplyPath(String path){
+    public File createMultiplyPath(String path) {
         File rootPath2 = new File(path + "\\Directory\\Sub\\Sub-Sub");
         if (!rootPath2.exists()) {
             if (rootPath2.mkdirs()) {
