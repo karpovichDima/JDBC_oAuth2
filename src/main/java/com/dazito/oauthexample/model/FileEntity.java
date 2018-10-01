@@ -14,4 +14,7 @@ public class FileEntity extends StorageElement {
 
     @Column(unique = true)
     private String fileUUID;
+
+    @Column
+    private String owner;
 }

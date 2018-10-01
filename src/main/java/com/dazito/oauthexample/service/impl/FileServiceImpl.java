@@ -18,6 +18,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -39,9 +40,12 @@ public class FileServiceImpl implements FileService {
 
         String originalFilename = file.getOriginalFilename();
         AccountEntity currentUser = userServices.getCurrentUser();
+        String email = currentUser.getEmail();
+
         Path rootPath = Paths.get(currentUser.getRootPath());
 
         if (!Files.exists(rootPath)) return;
+
 
         UUID uuid = UUID.randomUUID();
         String uuidString = uuid + "";
@@ -51,12 +55,29 @@ public class FileServiceImpl implements FileService {
         FileEntity fileEntity = new FileEntity();
         fileEntity.setName(file.getOriginalFilename());
         fileEntity.setFileUUID(uuidString);
+        fileEntity.setOwner(email);
 
         fileEntityRepository.saveAndFlush(fileEntity);
     }
 
     @Override
     public void download(String uuid, HttpServletResponse response) throws IOException {
+
+        AccountEntity currentUser = userServices.getCurrentUser();
+        String emailCurrent = currentUser.getEmail();
+
+        Optional<FileEntity> byfileUUID = fileEntityRepository.findByfileUUID(uuid);
+        boolean checkedOnNull = userServices.checkOptionalOnNull(byfileUUID);
+        if (!checkedOnNull) return;
+
+        FileEntity fileEntity = byfileUUID.get();
+        String ownerEmail = fileEntity.getOwner();
+
+        if (!matchesOwner(emailCurrent, ownerEmail)){
+            if (!userServices.adminRightsCheck(currentUser)) return;
+            // user is not admin and not owner of the file
+        }
+
         Path file = Paths.get(root, uuid);
         if (Files.exists(file)) {
             try {
@@ -65,6 +86,11 @@ public class FileServiceImpl implements FileService {
                 //byte[] data = Files.readAllBytes(file);
             } catch (Exception e){}
         }
+    }
+
+    private boolean matchesOwner(String emailCurrent, String ownerEmail) {
+        if (emailCurrent.equals(ownerEmail))return true;
+        return false;
     }
 
 

@@ -252,7 +252,7 @@ public class UserServicesImpl implements UserService {
     }
 
     // Check rights "ADMIN" to change personal data
-    private boolean adminRightsCheck(AccountEntity entity) {
+    public boolean adminRightsCheck(AccountEntity entity) {
         UserRole role = entity.getRole();
         if (role == UserRole.ADMIN) {
             return true;

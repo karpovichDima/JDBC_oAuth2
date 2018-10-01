@@ -83,4 +83,6 @@ public interface UserService {
     void deleteUser(Long id, DeleteAccountDto accountDto);
 
     boolean checkOptionalOnNull(Optional val);
+
+    boolean adminRightsCheck(AccountEntity entity);
 }
