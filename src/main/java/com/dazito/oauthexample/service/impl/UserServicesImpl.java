@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.Optional;
 
-@Service
+@Service(value = "userService")
 public class UserServicesImpl implements UserService {
 
     private final AccountRepository accountRepository;

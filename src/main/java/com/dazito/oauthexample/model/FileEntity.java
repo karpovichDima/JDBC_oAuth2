@@ -12,8 +12,6 @@ import java.util.UUID;
 @DiscriminatorValue("FILE")
 public class FileEntity extends StorageElement {
 
-    // lombok
-
     @Column(unique = true)
     private String fileUUID;
 }

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="01" author="karpovich">
+        <sql>
+            INSERT INTO organizations (id, org_name, salary) VALUES(1, 'exposit', '9000');
+            INSERT INTO organizations (id, org_name, salary) VALUES(2, 'sal', '1000');
+            INSERT INTO organizations (id, org_name, salary) VALUES(3, 'epam', '1000');
+        </sql>
+    </changeSet>
+
+    <changeSet id="02" author="karpovich">
+        <sql>
+            INSERT INTO account_entity
+                (id, password, name, `role`, organization_id, is_activated, email, root_path)
+            VALUES(1, '$2a$04$ypxka9nxoZxvPXlvQtXVNO72T.RQNCXHuh5Whji3E1Gm1u2t1Rg7W', 'dima', 'USER', 1, 1, 'dima@yandex.ru', NULL);
+            INSERT INTO account_entity
+                (id, password, name, `role`, organization_id, is_activated, email, root_path)
+            VALUES(2, '$2a$04$ypxka9nxoZxvPXlvQtXVNO72T.RQNCXHuh5Whji3E1Gm1u2t1Rg7W', 'admin', 'ADMIN', 1, 1, 'admin@yandex.ru', NULL);
+            INSERT INTO account_entity
+                (id, password, name, `role`, organization_id, is_activated, email, root_path)
+            VALUES(3, '$2a$10$0F8pOZ.fKxNQsQh0HhGfye0/IAzrWtEQiqJvIoq8rGRKof.1tljm2', 'mouse', 'ADMIN', 1, 1, 'mouser@yandex.ru', 'C:\\Users\\Karpo\\Desktop\\oauth2-with-jdbc-master\\src\\main\\resources\\uploads');
+
+
+            INSERT INTO oauth_client_details
+                (client_id, resource_ids, client_secret, `scope`, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity, additional_information, autoapprove)
+            VALUES('admin', NULL, '$2a$04$ypxka9nxoZxvPXlvQtXVNO72T.RQNCXHuh5Whji3E1Gm1u2t1Rg7W', 'write', 'authorization_code,password,refresh_token,implicit', NULL, NULL, 900, NULL, '{}', NULL);
+            INSERT INTO oauth_client_details
+                (client_id, resource_ids, client_secret, `scope`, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity, additional_information, autoapprove)
+            VALUES('dima', NULL, '$2a$04$ypxka9nxoZxvPXlvQtXVNO72T.RQNCXHuh5Whji3E1Gm1u2t1Rg7W', 'write', 'authorization_code,password,refresh_token,implicit', NULL, NULL, 900, NULL, '{}', NULL);
+        </sql>
+    </changeSet>
+</databaseChangeLog>

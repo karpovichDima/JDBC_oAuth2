@@ -16,8 +16,6 @@ import java.io.Serializable;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public abstract class StorageElement{
 
-    // Lombok
-
     @Id
     @GeneratedValue
     private Long id;

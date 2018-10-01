@@ -9,7 +9,6 @@ import com.dazito.oauthexample.service.dto.response.EmailNameDto;
 import com.dazito.oauthexample.service.dto.response.PasswordDto;
 import org.springframework.stereotype.Service;
 
-@Service
 public interface UserService {
 
     /**

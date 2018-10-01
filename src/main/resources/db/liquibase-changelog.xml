@@ -6,7 +6,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-    <include file="changelog/create_tabs.xml" relativeToChangelogFile="true"/>
-    <include file="changelog/first_insert.xml" relativeToChangelogFile="true"/>
+    <include file="changelog/create_tab_copy.xml" relativeToChangelogFile="true"/>
+    <include file="changelog/first_insert_copy.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

@@ -31,8 +31,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private DataSource dataSource;
     // don't creating constructor for autowiring
-    @Autowired
-    private PasswordEncoder bCryptPasswordEncoder;
+//    @Autowired
+//    private PasswordEncoder bCryptPasswordEncoder;
 
     @Override
     @Bean
@@ -56,7 +56,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth
                 .userDetailsService(accountUserDetailsService)
-                .passwordEncoder(bCryptPasswordEncoder);
+                .passwordEncoder(encoder());
     }
 
     @Bean

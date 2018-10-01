@@ -1,8 +1,7 @@
 package com.dazito.oauthexample.controller;
 
-import com.dazito.oauthexample.service.FileService;
+import com.dazito.oauthexample.service.impl.FileServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,7 +20,7 @@ import java.io.IOException;
 public class FileUploadController {
 
     @Autowired
-    private FileService fileService;
+    private FileServiceImpl fileService;
 
     @PostMapping("/upload")
     public void upload(@RequestParam MultipartFile file) throws IOException {
