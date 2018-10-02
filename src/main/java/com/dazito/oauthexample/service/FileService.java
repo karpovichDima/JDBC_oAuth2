@@ -24,11 +24,11 @@ public interface FileService{
 
     /**
      * check matches email of the current user and email ot the file owner
-     * @param emailCurrent is email of the current user
-     * @param ownerEmail is email ot the file owner
+     * @param idCurrent is id of the current user
+     * @param ownerId is id ot the file owner
      * @return true = if emailCurrent == ownerEmail
      */
-    boolean matchesOwner(String emailCurrent, String ownerEmail);
+    boolean matchesOwner(Long idCurrent, Long ownerId);
 
     /**
      * create single directory by path

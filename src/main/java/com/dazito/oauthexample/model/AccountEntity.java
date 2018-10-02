@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Getter
@@ -37,6 +38,9 @@ public class AccountEntity{
     private Boolean isActivated;
 
     private String email;
+
+    @OneToMany
+    private List<FileEntity> files;
 
     @Column
     private String rootPath;

@@ -13,8 +13,9 @@ import java.util.UUID;
 public class FileEntity extends StorageElement {
 
     @Column(unique = true)
-    private String fileUUID;
+    private String uuid;
 
-    @Column
-    private String owner;
+    @ManyToOne(targetEntity = AccountEntity.class)
+    @JoinColumn(name="user_id")
+    private AccountEntity owner;
 }

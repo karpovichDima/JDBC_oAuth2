@@ -58,8 +58,8 @@ public class FileServiceImpl implements FileService {
 
         FileEntity fileEntity = new FileEntity();
         fileEntity.setName(file.getOriginalFilename());
-        fileEntity.setFileUUID(uuidString);
-        fileEntity.setOwner(email);
+        fileEntity.setUuid(uuidString);
+        fileEntity.setOwner(userServices.getCurrentUser());
 
         fileEntityRepository.saveAndFlush(fileEntity);
     }
@@ -69,16 +69,16 @@ public class FileServiceImpl implements FileService {
     public ResponseEntity<org.springframework.core.io.Resource> download(String uuid) throws IOException {
 
         AccountEntity currentUser = userServices.getCurrentUser();
-        String emailCurrent = currentUser.getEmail();
+        Long idCurrent = currentUser.getId();
 
-        Optional<FileEntity> byfileUUID = fileEntityRepository.findByfileUUID(uuid);
+        Optional<FileEntity> byfileUUID = fileEntityRepository.findByUuid(uuid);
         boolean checkedOnNull = userServices.checkOptionalOnNull(byfileUUID);
         if (!checkedOnNull) return null;
 
         FileEntity fileEntity = byfileUUID.get();
-        String ownerEmail = fileEntity.getOwner();
 
-        if (!matchesOwner(emailCurrent, ownerEmail)){
+
+        if (!matchesOwner(idCurrent, fileEntity.getOwner().getId())){
             if (!userServices.adminRightsCheck(currentUser)) return null;
             // user is not admin and not owner of the file
         }
@@ -121,8 +121,8 @@ public class FileServiceImpl implements FileService {
 
     // check matches email of the current user and email ot the file owner
     @Override
-    public boolean matchesOwner(String emailCurrent, String ownerEmail) {
-        if (emailCurrent.equals(ownerEmail))return true;
+    public boolean matchesOwner(Long idCurrent, Long ownerId) {
+        if (idCurrent == ownerId)return true;
         return false;
     }
 }
