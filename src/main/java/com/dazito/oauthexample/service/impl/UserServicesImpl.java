@@ -245,13 +245,14 @@ public class UserServicesImpl implements UserService {
         accountRepository.delete(foundedUser);
     }
 
-    // Check optional on null
+    // Check optional on null, documentation on it in UserService
     @Override
     public boolean checkOptionalOnNull(Optional val) {
         return val.isPresent();
     }
 
-    // Check rights "ADMIN" to change personal data
+    // Check rights "ADMIN" to change personal data, documentation on it in UserService
+    @Override
     public boolean adminRightsCheck(AccountEntity entity) {
         UserRole role = entity.getRole();
         if (role == UserRole.ADMIN) {
@@ -282,6 +283,7 @@ public class UserServicesImpl implements UserService {
         return organizationName;
     }
 
+    // return organization from DB by Name
     Organization findOrganizationByName(String organizationName) {
         Optional<Organization> foundedOrganization = organizationRepo.findByOrganizationName(organizationName);
         if (checkOptionalOnNull(foundedOrganization)) {

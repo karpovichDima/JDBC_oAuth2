@@ -34,6 +34,7 @@ public class FileServiceImpl implements FileService {
     @Value("${root.path}")
     String root;
 
+    // upload multipart file on the server
     @Override
     public void upload(MultipartFile file) throws IOException {
         if (file == null) return;
@@ -60,6 +61,7 @@ public class FileServiceImpl implements FileService {
         fileEntityRepository.saveAndFlush(fileEntity);
     }
 
+    // download file by uuid and response
     @Override
     public void download(String uuid, HttpServletResponse response) throws IOException {
 
@@ -88,12 +90,8 @@ public class FileServiceImpl implements FileService {
         }
     }
 
-    private boolean matchesOwner(String emailCurrent, String ownerEmail) {
-        if (emailCurrent.equals(ownerEmail))return true;
-        return false;
-    }
-
-
+    // create single directory
+    @Override
     public File createSinglePath(String path) {
         File rootPath = new File(path);
         if (!rootPath.exists()) {
@@ -106,6 +104,8 @@ public class FileServiceImpl implements FileService {
         return rootPath;
     }
 
+    // create multiply path directory
+    @Override
     public File createMultiplyPath(String path) {
         File rootPath2 = new File(path + "\\Directory\\Sub\\Sub-Sub");
         if (!rootPath2.exists()) {
@@ -118,5 +118,10 @@ public class FileServiceImpl implements FileService {
         return rootPath2;
     }
 
-
+    // check matches email of the current user and email ot the file owner
+    @Override
+    public boolean matchesOwner(String emailCurrent, String ownerEmail) {
+        if (emailCurrent.equals(ownerEmail))return true;
+        return false;
+    }
 }

@@ -82,7 +82,17 @@ public interface UserService {
      */
     void deleteUser(Long id, DeleteAccountDto accountDto);
 
+    /**
+     * check optional on null
+     * @param val is optinal, which we want to check on null
+     * @return true = if not null, false = null
+     */
     boolean checkOptionalOnNull(Optional val);
 
+    /**
+     * check rights of the Admin
+     * @param entity is entity, on which we want to check of the admin right
+     * @return true = if current user hasRole(ADMIN), false = hasRole(NOT ADMIN)
+     */
     boolean adminRightsCheck(AccountEntity entity);
 }
