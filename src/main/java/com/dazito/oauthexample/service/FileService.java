@@ -1,5 +1,7 @@
 package com.dazito.oauthexample.service;
 
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -15,10 +17,10 @@ public interface FileService{
     void upload(MultipartFile file) throws IOException;
 
     /**
-     * upload multipart file
+     * download multipart file
      * @param uuid is uuid of the file which we want to download on the client
      */
-    void download(String uuid, HttpServletResponse response) throws IOException;
+    ResponseEntity<Resource> download(String uuid) throws IOException;
 
     /**
      * check matches email of the current user and email ot the file owner
@@ -41,4 +43,6 @@ public interface FileService{
      * @return new File directory
      */
     File createMultiplyPath(String path);
+
+
 }

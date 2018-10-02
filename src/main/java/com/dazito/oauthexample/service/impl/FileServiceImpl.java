@@ -8,7 +8,10 @@ import com.dazito.oauthexample.service.UserService;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -63,31 +66,29 @@ public class FileServiceImpl implements FileService {
 
     // download file by uuid and response
     @Override
-    public void download(String uuid, HttpServletResponse response) throws IOException {
+    public ResponseEntity<org.springframework.core.io.Resource> download(String uuid) throws IOException {
 
         AccountEntity currentUser = userServices.getCurrentUser();
         String emailCurrent = currentUser.getEmail();
 
         Optional<FileEntity> byfileUUID = fileEntityRepository.findByfileUUID(uuid);
         boolean checkedOnNull = userServices.checkOptionalOnNull(byfileUUID);
-        if (!checkedOnNull) return;
+        if (!checkedOnNull) return null;
 
         FileEntity fileEntity = byfileUUID.get();
         String ownerEmail = fileEntity.getOwner();
 
         if (!matchesOwner(emailCurrent, ownerEmail)){
-            if (!userServices.adminRightsCheck(currentUser)) return;
+            if (!userServices.adminRightsCheck(currentUser)) return null;
             // user is not admin and not owner of the file
         }
 
         Path file = Paths.get(root, uuid);
-        if (Files.exists(file)) {
-            try {
-                Files.copy(file, response.getOutputStream());
-                response.getOutputStream().flush();
-                //byte[] data = Files.readAllBytes(file);
-            } catch (Exception e){}
-        }
+
+        if (!Files.exists(file)) return null;
+
+        ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(file));
+        return ResponseEntity.ok().body(resource);
     }
 
     // create single directory
