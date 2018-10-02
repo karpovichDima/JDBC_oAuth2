@@ -5,6 +5,7 @@ import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.model.FileEntity;
 import com.dazito.oauthexample.service.FileService;
 import com.dazito.oauthexample.service.UserService;
+import liquibase.util.file.FilenameUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,6 +51,8 @@ public class FileServiceImpl implements FileService {
 
         if (!Files.exists(rootPath)) return;
 
+        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+        String name = FilenameUtils.getBaseName(file.getOriginalFilename());
 
         UUID uuid = UUID.randomUUID();
         String uuidString = uuid + "";
@@ -57,9 +60,11 @@ public class FileServiceImpl implements FileService {
         file.transferTo(new File(root + File.separator + uuid));
 
         FileEntity fileEntity = new FileEntity();
-        fileEntity.setName(file.getOriginalFilename());
+        fileEntity.setName(name);
         fileEntity.setUuid(uuidString);
         fileEntity.setOwner(userServices.getCurrentUser());
+        fileEntity.setSize(file.getSize());
+        fileEntity.setExtension(extension);
 
         fileEntityRepository.saveAndFlush(fileEntity);
     }
