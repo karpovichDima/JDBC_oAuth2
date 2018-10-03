@@ -4,7 +4,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 
@@ -14,7 +13,7 @@ public interface FileService{
      * upload multipart file
      * @param file which we want to upload on the server
      */
-    void upload(MultipartFile file) throws IOException;
+    void upload(MultipartFile file, Long parent_id) throws IOException;
 
     /**
      * download multipart file
@@ -23,7 +22,7 @@ public interface FileService{
     ResponseEntity<Resource> download(String uuid) throws IOException;
 
     /**
-     * check matches email of the current user and email ot the file owner
+     * check matches if of the current user and if ot the file owner
      * @param idCurrent is id of the current user
      * @param ownerId is id ot the file owner
      * @return true = if emailCurrent == ownerEmail
@@ -45,4 +44,5 @@ public interface FileService{
     File createMultiplyPath(String path);
 
 
+    void createContentPath(String path);
 }

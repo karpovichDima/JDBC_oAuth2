@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.MultipartConfigElement;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 
@@ -25,9 +24,9 @@ public class FileController {
     @Value("${root.path}")
     String root;
 
-    @PostMapping("/upload")
-    public void upload(@RequestParam MultipartFile file) throws IOException {
-        fileService.upload(file);
+    @PostMapping("/upload/{parent_id}")
+    public void upload(@RequestParam MultipartFile file, @PathVariable Long parent_id) throws IOException {
+        fileService.upload(file, parent_id);
     }
 
     @GetMapping("/download/{uuid:.+}")
@@ -35,6 +34,10 @@ public class FileController {
         return fileService.download(uuid);
     }
 
+    @PostMapping("/root/{path}")
+    public void root(@PathVariable String path) {
+        fileService.createContentPath(path);
+    }
 
     @Bean
     public MultipartConfigElement multipartConfigElement() {

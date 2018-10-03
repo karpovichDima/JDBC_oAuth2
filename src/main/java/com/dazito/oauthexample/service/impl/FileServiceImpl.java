@@ -1,24 +1,25 @@
 package com.dazito.oauthexample.service.impl;
 
+import com.dazito.oauthexample.dao.ContentRepository;
 import com.dazito.oauthexample.dao.FileEntityRepository;
 import com.dazito.oauthexample.model.AccountEntity;
+import com.dazito.oauthexample.model.Content;
 import com.dazito.oauthexample.model.FileEntity;
+import com.dazito.oauthexample.model.StorageElement;
+import com.dazito.oauthexample.model.type.SomeType;
 import com.dazito.oauthexample.service.FileService;
 import com.dazito.oauthexample.service.UserService;
 import liquibase.util.file.FilenameUtils;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.omg.CORBA.CODESET_INCOMPATIBLE;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -32,6 +33,9 @@ public class FileServiceImpl implements FileService {
     @Autowired
     FileEntityRepository fileEntityRepository;
 
+    @Autowired
+    ContentRepository contentRepository;
+
     @Resource(name = "userService")
     UserService userServices;
 
@@ -40,7 +44,7 @@ public class FileServiceImpl implements FileService {
 
     // upload multipart file on the server
     @Override
-    public void upload(MultipartFile file) throws IOException {
+    public void upload(MultipartFile file, Long parent_id) throws IOException {
         if (file == null) return;
 
         String originalFilename = file.getOriginalFilename();
@@ -65,6 +69,18 @@ public class FileServiceImpl implements FileService {
         fileEntity.setOwner(userServices.getCurrentUser());
         fileEntity.setSize(file.getSize());
         fileEntity.setExtension(extension);
+
+        if (parent_id == 0){
+            Optional<StorageElement> content = contentRepository.findByName("CONTENT");
+            if (!userServices.checkOptionalOnNull(content))return;
+            StorageElement rootContent = content.get();
+            fileEntity.setParentId(rootContent);
+        } else {
+            Optional<StorageElement> byId = contentRepository.findById(parent_id);
+            if (!userServices.checkOptionalOnNull(byId))return;
+            StorageElement storageElement = byId.get();
+            fileEntity.setParentId(storageElement);
+        }
 
         fileEntityRepository.saveAndFlush(fileEntity);
     }
@@ -93,6 +109,7 @@ public class FileServiceImpl implements FileService {
         if (!Files.exists(file)) return null;
 
         ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(file));
+
         return ResponseEntity.ok().body(resource);
     }
 
@@ -124,7 +141,16 @@ public class FileServiceImpl implements FileService {
         return rootPath2;
     }
 
-    // check matches email of the current user and email ot the file owner
+    @Override
+    public void createContentPath(String path) {
+       Content content = new Content();
+       content.setParentId(null);
+       content.setName("CONTENT");
+       content.setRoot(root);
+       contentRepository.saveAndFlush(content);
+    }
+
+    // check matches id of the current user and id ot the file owner
     @Override
     public boolean matchesOwner(Long idCurrent, Long ownerId) {
         if (idCurrent == ownerId)return true;

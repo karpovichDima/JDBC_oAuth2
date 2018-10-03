@@ -23,8 +23,9 @@ public abstract class StorageElement{
     @Column
     private String name;
 
-    @Column
-    private Long parentId;
+    @OneToOne
+    @JoinColumn(name="parent_id")
+    private StorageElement parentId;
 
     @Enumerated(value = EnumType.STRING)
     @Column(updatable = false, insertable = false)
