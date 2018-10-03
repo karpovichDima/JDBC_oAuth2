@@ -2,6 +2,7 @@ package com.dazito.oauthexample.service;
 
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
 import com.dazito.oauthexample.service.dto.response.DirectoryCreated;
+import com.dazito.oauthexample.service.dto.response.FileUploadResponse;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,7 +16,7 @@ public interface FileService{
      * upload multipart file
      * @param file which we want to upload on the server
      */
-    void upload(MultipartFile file, Long parent_id) throws IOException;
+    FileUploadResponse upload(MultipartFile file, Long parent_id) throws IOException;
 
     /**
      * download multipart file

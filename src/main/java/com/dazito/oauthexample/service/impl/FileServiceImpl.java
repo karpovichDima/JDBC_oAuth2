@@ -7,6 +7,7 @@ import com.dazito.oauthexample.service.FileService;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
 import com.dazito.oauthexample.service.dto.response.DirectoryCreated;
+import com.dazito.oauthexample.service.dto.response.FileUploadResponse;
 import liquibase.util.file.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,18 +40,19 @@ public class FileServiceImpl implements FileService {
     @Value("${root.path}")
     String root;
 
+    @Value("${path.downloadFile}")
+    String downloadPath;
+
     // upload multipart file on the server
     @Override
-    public void upload(MultipartFile file, Long parent_id) throws IOException {
-        if (file == null) return;
+    public FileUploadResponse upload(MultipartFile file, Long parent_id) throws IOException {
+        if (file == null) return null;
 
-        String originalFilename = file.getOriginalFilename();
         AccountEntity currentUser = userServices.getCurrentUser();
-        String email = currentUser.getEmail();
 
         Path rootPath = Paths.get(currentUser.getRootPath());
 
-        if (!Files.exists(rootPath)) return;
+        if (!Files.exists(rootPath)) return null;
 
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
         String name = FilenameUtils.getBaseName(file.getOriginalFilename());
@@ -67,19 +69,28 @@ public class FileServiceImpl implements FileService {
         fileEntity.setSize(file.getSize());
         fileEntity.setExtension(extension);
 
+        Optional<StorageElement> byId;
         if (parent_id == 0){
-            Optional<StorageElement> content = storageRepository.findByName("CONTENT");
-            if (!userServices.checkOptionalOnNull(content))return;
-            StorageElement rootContent = content.get();
-            fileEntity.setParentId(rootContent);
+            byId = storageRepository.findByName("CONTENT");
         } else {
-            Optional<StorageElement> byId = storageRepository.findById(parent_id);
-            if (!userServices.checkOptionalOnNull(byId))return;
-            StorageElement storageElement = byId.get();
-            fileEntity.setParentId(storageElement);
+            byId = storageRepository.findById(parent_id);
         }
 
+        if (!userServices.checkOptionalOnNull(byId))return null;
+        StorageElement storageElement = byId.get();
+        fileEntity.setParentId(storageElement);
         storageRepository.saveAndFlush(fileEntity);
+
+        return responseFileUploaded(fileEntity);
+    }
+
+    private FileUploadResponse responseFileUploaded(FileEntity fileEntity) {
+        FileUploadResponse fileUploadResponse = new FileUploadResponse();
+        fileUploadResponse.setName(fileEntity.getName());
+        fileUploadResponse.setSize(fileEntity.getSize());
+        fileUploadResponse.setReferenceToDownloadFile(downloadPath + fileEntity.getUuid());
+
+        return fileUploadResponse;
     }
 
     // download file by uuid and response
@@ -184,18 +195,18 @@ public class FileServiceImpl implements FileService {
         }
     }
 
+    // check matches id of the current user and id ot the file owner
+    @Override
+    public boolean matchesOwner(Long idCurrent, Long ownerId) {
+        if (idCurrent == ownerId)return true;
+        return false;
+    }
+
     private DirectoryCreated responseDirectoryCreated(Directory directory) {
         DirectoryCreated directoryResponseDto = new DirectoryCreated();
         directoryResponseDto.setName(directory.getName());
         directoryResponseDto.setParentId(directory.getParentId().getId());
 
         return directoryResponseDto;
-    }
-
-    // check matches id of the current user and id ot the file owner
-    @Override
-    public boolean matchesOwner(Long idCurrent, Long ownerId) {
-        if (idCurrent == ownerId)return true;
-        return false;
     }
 }

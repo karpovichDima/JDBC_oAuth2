@@ -5,6 +5,7 @@ import com.dazito.oauthexample.service.FileService;
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
 import com.dazito.oauthexample.service.dto.request.DtoForEditingPersonalData;
 import com.dazito.oauthexample.service.dto.response.DirectoryCreated;
+import com.dazito.oauthexample.service.dto.response.FileUploadResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
@@ -29,8 +30,8 @@ public class FileController {
     String root;
 
     @PostMapping("/upload/{parent_id}")
-    public void upload(@RequestParam MultipartFile file, @PathVariable Long parent_id) throws IOException {
-        fileService.upload(file, parent_id);
+    public FileUploadResponse upload(@RequestParam MultipartFile file, @PathVariable Long parent_id) throws IOException {
+        return fileService.upload(file, parent_id);
     }
 
     @GetMapping("/download/{uuid:.+}")
