@@ -1,6 +1,10 @@
 package com.dazito.oauthexample.controller;
 
+import com.dazito.oauthexample.model.Directory;
 import com.dazito.oauthexample.service.FileService;
+import com.dazito.oauthexample.service.dto.request.DirectoryDto;
+import com.dazito.oauthexample.service.dto.request.DtoForEditingPersonalData;
+import com.dazito.oauthexample.service.dto.response.DirectoryCreated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
@@ -34,10 +38,18 @@ public class FileController {
         return fileService.download(uuid);
     }
 
+    // create setRootContent path (CONTENT), FOR ADMINS
     @PostMapping("/root/{path}")
-    public void root(@PathVariable String path) {
+    public void setRootContent(@PathVariable String path) {
         fileService.createContentPath(path);
     }
+
+    // create directory
+    @PostMapping("/dir")
+    public DirectoryCreated createDirectory(@RequestBody DirectoryDto directoryDto) {
+        return fileService.createDirectory(directoryDto);
+    }
+
 
     @Bean
     public MultipartConfigElement multipartConfigElement() {

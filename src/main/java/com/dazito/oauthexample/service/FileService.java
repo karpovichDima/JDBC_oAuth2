@@ -1,5 +1,7 @@
 package com.dazito.oauthexample.service;
 
+import com.dazito.oauthexample.service.dto.request.DirectoryDto;
+import com.dazito.oauthexample.service.dto.response.DirectoryCreated;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,4 +47,6 @@ public interface FileService{
 
 
     void createContentPath(String path);
+
+    DirectoryCreated createDirectory(DirectoryDto directoryDto);
 }

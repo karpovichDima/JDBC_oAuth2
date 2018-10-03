@@ -1,16 +1,13 @@
 package com.dazito.oauthexample.service.impl;
 
-import com.dazito.oauthexample.dao.ContentRepository;
-import com.dazito.oauthexample.dao.FileEntityRepository;
-import com.dazito.oauthexample.model.AccountEntity;
-import com.dazito.oauthexample.model.Content;
-import com.dazito.oauthexample.model.FileEntity;
-import com.dazito.oauthexample.model.StorageElement;
-import com.dazito.oauthexample.model.type.SomeType;
+import com.dazito.oauthexample.dao.FileRepository;
+import com.dazito.oauthexample.dao.StorageRepository;
+import com.dazito.oauthexample.model.*;
 import com.dazito.oauthexample.service.FileService;
 import com.dazito.oauthexample.service.UserService;
+import com.dazito.oauthexample.service.dto.request.DirectoryDto;
+import com.dazito.oauthexample.service.dto.response.DirectoryCreated;
 import liquibase.util.file.FilenameUtils;
-import org.omg.CORBA.CODESET_INCOMPATIBLE;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
@@ -31,10 +28,10 @@ public class FileServiceImpl implements FileService {
 
 
     @Autowired
-    FileEntityRepository fileEntityRepository;
+    StorageRepository storageRepository;
 
     @Autowired
-    ContentRepository contentRepository;
+    FileRepository fileRepository;
 
     @Resource(name = "userService")
     UserService userServices;
@@ -71,18 +68,18 @@ public class FileServiceImpl implements FileService {
         fileEntity.setExtension(extension);
 
         if (parent_id == 0){
-            Optional<StorageElement> content = contentRepository.findByName("CONTENT");
+            Optional<StorageElement> content = storageRepository.findByName("CONTENT");
             if (!userServices.checkOptionalOnNull(content))return;
             StorageElement rootContent = content.get();
             fileEntity.setParentId(rootContent);
         } else {
-            Optional<StorageElement> byId = contentRepository.findById(parent_id);
+            Optional<StorageElement> byId = storageRepository.findById(parent_id);
             if (!userServices.checkOptionalOnNull(byId))return;
             StorageElement storageElement = byId.get();
             fileEntity.setParentId(storageElement);
         }
 
-        fileEntityRepository.saveAndFlush(fileEntity);
+        storageRepository.saveAndFlush(fileEntity);
     }
 
     // download file by uuid and response
@@ -92,7 +89,7 @@ public class FileServiceImpl implements FileService {
         AccountEntity currentUser = userServices.getCurrentUser();
         Long idCurrent = currentUser.getId();
 
-        Optional<FileEntity> byfileUUID = fileEntityRepository.findByUuid(uuid);
+        Optional<FileEntity> byfileUUID = fileRepository.findByUuid(uuid);
         boolean checkedOnNull = userServices.checkOptionalOnNull(byfileUUID);
         if (!checkedOnNull) return null;
 
@@ -147,7 +144,52 @@ public class FileServiceImpl implements FileService {
        content.setParentId(null);
        content.setName("CONTENT");
        content.setRoot(root);
-       contentRepository.saveAndFlush(content);
+       storageRepository.saveAndFlush(content);
+    }
+
+    @Override
+    public DirectoryCreated createDirectory(DirectoryDto directoryDto) {
+        String name = directoryDto.getName();
+        Long parent_id = directoryDto.getParentId();
+
+        if (parent_id == 0){
+            // find Content
+            Optional<StorageElement> content = storageRepository.findByName("CONTENT");
+            if (!userServices.checkOptionalOnNull(content)) return null;
+            StorageElement parent = content.get();
+
+            Directory directory = new Directory();
+            directory.setName(name);
+            directory.setParentId(parent);
+
+            storageRepository.saveAndFlush(directory);
+
+            return responseDirectoryCreated(directory);
+        } else {
+            // find parent
+            Optional<StorageElement> parent = storageRepository.findById(parent_id);
+            if (!userServices.checkOptionalOnNull(parent)) return null;
+            StorageElement parentStorage = parent.get();
+
+            // check parent on type DIRECTORY or CONTENT
+            if (parentStorage.getType().equals("FILE")) return null;
+
+            Directory directory = new Directory();
+            directory.setName(name);
+            directory.setParentId(parentStorage);
+
+            storageRepository.saveAndFlush(directory);
+
+            return responseDirectoryCreated(directory);
+        }
+    }
+
+    private DirectoryCreated responseDirectoryCreated(Directory directory) {
+        DirectoryCreated directoryResponseDto = new DirectoryCreated();
+        directoryResponseDto.setName(directory.getName());
+        directoryResponseDto.setParentId(directory.getParentId().getId());
+
+        return directoryResponseDto;
     }
 
     // check matches id of the current user and id ot the file owner

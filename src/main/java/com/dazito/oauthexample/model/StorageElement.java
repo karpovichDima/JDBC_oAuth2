@@ -31,4 +31,5 @@ public abstract class StorageElement{
     @Column(updatable = false, insertable = false)
     private SomeType type;
 
+
 }
