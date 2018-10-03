@@ -25,6 +25,14 @@
         </sql>
     </changeSet>
 
+    <changeSet id="delete_column_root_path" author="karpovich">
+        <sql>
+            ALTER TABLE account DROP COLUMN root_path;
+        </sql>
+    </changeSet>
+
+
+
 
 </databaseChangeLog>
 

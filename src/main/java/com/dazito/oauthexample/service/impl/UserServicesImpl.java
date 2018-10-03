@@ -200,7 +200,6 @@ public class UserServicesImpl implements UserService {
         newUser.setIsActivated(isActivated);
         newUser.setRole(UserRole.ADMIN);
         newUser.setOrganization(findOrganizationByName(organizationName));
-        newUser.setRootPath(root);
         accountRepository.saveAndFlush(newUser);
 
         return responseDto(newUser);

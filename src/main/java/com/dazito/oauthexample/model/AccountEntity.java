@@ -42,9 +42,6 @@ public class AccountEntity{
     @OneToMany
     private List<FileEntity> files;
 
-    @Column
-    private String rootPath;
-
     AccountEntity(String username, String password){
         this.username = username;
         this.password = password;

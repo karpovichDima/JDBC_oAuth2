@@ -50,7 +50,7 @@ public class FileServiceImpl implements FileService {
 
         AccountEntity currentUser = userServices.getCurrentUser();
 
-        Path rootPath = Paths.get(currentUser.getRootPath());
+        Path rootPath = Paths.get(root);
 
         if (!Files.exists(rootPath)) return null;
 
@@ -86,7 +86,7 @@ public class FileServiceImpl implements FileService {
 
     private FileUploadResponse responseFileUploaded(FileEntity fileEntity) {
         FileUploadResponse fileUploadResponse = new FileUploadResponse();
-        fileUploadResponse.setName(fileEntity.getName());
+        fileUploadResponse.setName(fileEntity.getName() + "." + fileEntity.getExtension());
         fileUploadResponse.setSize(fileEntity.getSize());
         fileUploadResponse.setReferenceToDownloadFile(downloadPath + fileEntity.getUuid());
 
