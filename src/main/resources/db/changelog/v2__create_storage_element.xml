@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="add_table" author="karpovich">
+
+        <createTable tableName="storage_element">
+            <column name="type" type="varchar(128)"/>
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" unique="true"/>
+            </column>
+            <column name="name" type="varchar(128)"/>
+            <column name="parent_id" type="bigint(20)">
+            <constraints foreignKeyName="fk_storage_element_parent_id" referencedTableName="storage_element"
+                         referencedColumnNames="id" nullable="true"/></column>
+            <column name="user_id" type="bigint">
+                <constraints foreignKeyName="fk_account_user_id" referencedTableName="account"
+                             referencedColumnNames="id" nullable="true"/></column>
+            <column name="uuid" type="varchar(128)"><constraints unique="true"/></column>
+            <column name="extension" type="varchar(128)"/>
+            <column name="size" type="bigint(20)"/>
+            <column name="root" type="varchar(128)"/>
+            <column name="content_id" type="bigint">
+                <constraints foreignKeyName="fk_content_id" referencedTableName="storage_element"
+                             referencedColumnNames="id"/>
+            </column>
+
+        </createTable>
+
+    </changeSet>
+
+
+
+
+</databaseChangeLog>
+
+
+
+
+

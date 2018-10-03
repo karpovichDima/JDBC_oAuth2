@@ -7,32 +7,65 @@
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
     <changeSet id="01" author="karpovich">
-        <sql>
-            INSERT INTO organizations (id, org_name, salary) VALUES(1, 'exposit', '9000');
-            INSERT INTO organizations (id, org_name, salary) VALUES(2, 'sal', '1000');
-            INSERT INTO organizations (id, org_name, salary) VALUES(3, 'epam', '1000');
-        </sql>
+
+        <insert tableName="organization">
+            <column name="id" value="3"/>
+            <column name="name" value="epam"/>
+            <column name="salary" value="1000"/>
+        </insert>
+
+        <insert tableName="organization">
+            <column name="id" value="1"/>
+            <column name="name" value="exposit"/>
+            <column name="salary" value="9000"/>
+        </insert>
+
+        <insert tableName="organization">
+            <column name="id" value="2"/>
+            <column name="name" value="sal"/>
+            <column name="salary" value="1000"/>
+        </insert>
     </changeSet>
 
     <changeSet id="02" author="karpovich">
-        <sql>
-            INSERT INTO account_entity
-                (id, password, name, `role`, organization_id, is_activated, email, root_path)
-            VALUES(1, '$2a$04$ypxka9nxoZxvPXlvQtXVNO72T.RQNCXHuh5Whji3E1Gm1u2t1Rg7W', 'dima', 'USER', 1, 1, 'dima@yandex.ru', NULL);
-            INSERT INTO account_entity
-                (id, password, name, `role`, organization_id, is_activated, email, root_path)
-            VALUES(2, '$2a$04$ypxka9nxoZxvPXlvQtXVNO72T.RQNCXHuh5Whji3E1Gm1u2t1Rg7W', 'admin', 'ADMIN', 1, 1, 'admin@yandex.ru', NULL);
-            INSERT INTO account_entity
-                (id, password, name, `role`, organization_id, is_activated, email, root_path)
-            VALUES(3, '$2a$10$0F8pOZ.fKxNQsQh0HhGfye0/IAzrWtEQiqJvIoq8rGRKof.1tljm2', 'mouse', 'ADMIN', 1, 1, 'mouser@yandex.ru', 'C:\\Users\\Karpo\\Desktop\\oauth2-with-jdbc-master\\src\\main\\resources\\uploads');
 
+        <insert tableName="account">
+            <column name="id" valueNumeric="2"/>
+            <column name="password" value="$2a$04$ypxka9nxoZxvPXlvQtXVNO72T.RQNCXHuh5Whji3E1Gm1u2t1Rg7W"/>
+            <column name="role" value="ADMIN"/>
+            <column name="name" value="admin"/>
+            <column name="organization_id" value="1"/>
+            <column name="is_activated" valueBoolean="true"/>
+            <column name="email" value="admin@yandex.ru"/>
+        </insert>
 
-            INSERT INTO oauth_client_details
-                (client_id, resource_ids, client_secret, `scope`, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity, additional_information, autoapprove)
-            VALUES('admin', NULL, '$2a$04$ypxka9nxoZxvPXlvQtXVNO72T.RQNCXHuh5Whji3E1Gm1u2t1Rg7W', 'write', 'authorization_code,password,refresh_token,implicit', NULL, NULL, 900, NULL, '{}', NULL);
-            INSERT INTO oauth_client_details
-                (client_id, resource_ids, client_secret, `scope`, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity, additional_information, autoapprove)
-            VALUES('dima', NULL, '$2a$04$ypxka9nxoZxvPXlvQtXVNO72T.RQNCXHuh5Whji3E1Gm1u2t1Rg7W', 'write', 'authorization_code,password,refresh_token,implicit', NULL, NULL, 900, NULL, '{}', NULL);
-        </sql>
+        <insert tableName="account">
+            <column name="id" valueNumeric="1"/>
+            <column name="password" value="$2a$04$ypxka9nxoZxvPXlvQtXVNO72T.RQNCXHuh5Whji3E1Gm1u2t1Rg7W"/>
+            <column name="role" value="USER"/>
+            <column name="name" value="dima"/>
+            <column name="organization_id" value="1"/>
+            <column name="is_activated" valueBoolean="true"/>
+            <column name="email" value="dima@yandex.ru"/>
+        </insert>
+
+        <insert tableName="oauth_client_details">
+            <column name="client_id" value="dima"/>
+            <column name="client_secret" value="$2a$04$ypxka9nxoZxvPXlvQtXVNO72T.RQNCXHuh5Whji3E1Gm1u2t1Rg7W"/>
+            <column name="scope" value="write"/>
+            <column name="authorized_grant_types" value="authorization_code,password,refresh_token,implicit"/>
+            <column name="access_token_validity" value="900"/>
+            <column name="additional_information" value="{}"/>
+        </insert>
+
+        <insert tableName="oauth_client_details">
+            <column name="client_id" value="admin"/>
+            <column name="client_secret" value="$2a$04$ypxka9nxoZxvPXlvQtXVNO72T.RQNCXHuh5Whji3E1Gm1u2t1Rg7W"/>
+            <column name="scope" value="write"/>
+            <column name="authorized_grant_types" value="authorization_code,password,refresh_token,implicit"/>
+            <column name="access_token_validity" value="900"/>
+            <column name="additional_information" value="{}"/>
+        </insert>
+
     </changeSet>
 </databaseChangeLog>

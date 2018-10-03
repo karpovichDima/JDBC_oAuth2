@@ -27,6 +27,10 @@ public abstract class StorageElement{
     @JoinColumn(name="parent_id")
     private StorageElement parentId;
 
+    @ManyToOne
+    @JoinColumn(name="content_id")
+    Content contentId;
+
     @Enumerated(value = EnumType.STRING)
     @Column(updatable = false, insertable = false)
     private SomeType type;

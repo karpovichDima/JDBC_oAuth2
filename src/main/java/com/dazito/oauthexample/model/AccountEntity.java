@@ -42,8 +42,14 @@ public class AccountEntity{
     @OneToMany
     private List<FileEntity> files;
 
+    @OneToOne
+    @JoinColumn(name="content_id")
+    private Content content_id;
+
     AccountEntity(String username, String password){
         this.username = username;
         this.password = password;
     }
 }
+
+
