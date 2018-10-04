@@ -1,5 +1,8 @@
 package com.dazito.oauthexample.service;
 
+import com.dazito.oauthexample.model.AccountEntity;
+import com.dazito.oauthexample.model.Content;
+import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
 import com.dazito.oauthexample.service.dto.response.DirectoryCreated;
 import com.dazito.oauthexample.service.dto.response.FileUploadResponse;
@@ -47,7 +50,9 @@ public interface FileService{
     File createMultiplyPath(String path);
 
 
-    void createContentPath(String path);
+    Content createContent(AccountEntity newUser, AccountDto accountDto);
 
     DirectoryCreated createDirectory(DirectoryDto directoryDto);
+
+
 }

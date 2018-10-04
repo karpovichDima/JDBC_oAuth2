@@ -39,11 +39,11 @@ public class FileController {
         return fileService.download(uuid);
     }
 
-    // create setRootContent path (CONTENT), FOR ADMINS
-    @PostMapping("/root/{path}")
-    public void setRootContent(@PathVariable String path) {
-        fileService.createContentPath(path);
-    }
+//    // create setRootContent path (CONTENT), FOR ADMINS
+//    @PostMapping("/root/{path}")
+//    public void setRootContent(@PathVariable String path) {
+//        fileService.createContentPath(path);
+//    }
 
     // create directory
     @PostMapping("/dir")

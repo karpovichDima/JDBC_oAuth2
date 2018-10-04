@@ -21,7 +21,4 @@ public class FileEntity extends StorageElement {
     @Column
     private Long size;
 
-    @ManyToOne(targetEntity = AccountEntity.class)
-    @JoinColumn(name="user_id")
-    private AccountEntity owner;
 }

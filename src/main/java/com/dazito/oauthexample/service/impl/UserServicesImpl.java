@@ -2,10 +2,16 @@ package com.dazito.oauthexample.service.impl;
 
 import com.dazito.oauthexample.config.oauth.UserDetailsConfig;
 import com.dazito.oauthexample.dao.AccountRepository;
+import com.dazito.oauthexample.dao.FileRepository;
 import com.dazito.oauthexample.dao.OrganizationRepo;
+import com.dazito.oauthexample.dao.StorageRepository;
 import com.dazito.oauthexample.model.AccountEntity;
+import com.dazito.oauthexample.model.Content;
 import com.dazito.oauthexample.model.Organization;
+import com.dazito.oauthexample.model.StorageElement;
+import com.dazito.oauthexample.model.type.SomeType;
 import com.dazito.oauthexample.model.type.UserRole;
+import com.dazito.oauthexample.service.FileService;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.request.DeleteAccountDto;
@@ -32,6 +38,18 @@ public class UserServicesImpl implements UserService {
 
     @Value("${root.path}")
     String root;
+
+    @Value("${content.admin}")
+    String contentName;
+
+    @Autowired
+    FileService fileService;
+
+    @Autowired
+    FileRepository fileRepository;
+
+    @Autowired
+    StorageRepository storageRepository;
 
     @Autowired
     public UserServicesImpl(AccountRepository accountRepository, OrganizationRepo organizationRepo, PasswordEncoder passwordEncoder) {
@@ -66,7 +84,8 @@ public class UserServicesImpl implements UserService {
         if (!adminRightsCheck(getCurrentUser())) return null; // current user is not Admin;
 
         String organizationName = getOrganizationNameFoundedUser(foundedUser);
-        if (!organizationMatch(organizationName)) return null; // organization current user and user from account dto is not match
+        if (!organizationMatch(organizationName))
+            return null; // organization current user and user from account dto is not match
 
         accountToBeEdited = getCurrentUser();
         boolean matches = passwordEncoder.matches(rawOldPassword, currentUser.getPassword());
@@ -117,7 +136,8 @@ public class UserServicesImpl implements UserService {
         AccountEntity foundedAccount = findById(id);
         String organizationName = getOrganizationNameFoundedUser(foundedAccount);
 
-        if (!organizationMatch(organizationName)) return null; // organization current user and user from account dto is not match
+        if (!organizationMatch(organizationName))
+            return null; // organization current user and user from account dto is not match
 
         accountToBeEdited = getCurrentUser();
         accountToBeEdited.setUsername(newName);
@@ -198,9 +218,27 @@ public class UserServicesImpl implements UserService {
         newUser.setPassword(passwordEncoder.encode(password));
         newUser.setUsername(userName);
         newUser.setIsActivated(isActivated);
-        newUser.setRole(UserRole.ADMIN);
+        newUser.setRole(role);
         newUser.setOrganization(findOrganizationByName(organizationName));
+
+        Content rootContent = null;
+
+        switch (role) {
+            case USER:
+                rootContent = fileService.createContent(newUser,accountDto);
+                break;
+            case ADMIN:
+                Optional<StorageElement> content = storageRepository.findByNameAndType(contentName, SomeType.CONTENT);
+                if (!checkOptionalOnNull(content)) {
+                    rootContent = fileService.createContent(newUser, accountDto);
+                }
+                break;
+        }
+
+        newUser.setContent_id(rootContent);
+        newUser.setId(accountDto.getId());
         accountRepository.saveAndFlush(newUser);
+
 
         return responseDto(newUser);
     }
@@ -220,7 +258,7 @@ public class UserServicesImpl implements UserService {
     public void deleteUser(Long id, DeleteAccountDto accountDto) {
         String email;
         String password;
-        if(id == null){
+        if (id == null) {
             email = accountDto.getEmail();
             password = accountDto.getRawPassword();
 
@@ -239,7 +277,8 @@ public class UserServicesImpl implements UserService {
 
         AccountEntity foundedUser = findById(id);
         String organizationName = getOrganizationNameFoundedUser(foundedUser);
-        if (!organizationMatch(organizationName)) return; // organization current user and user from account dto is not match
+        if (!organizationMatch(organizationName))
+            return; // organization current user and user from account dto is not match
 
         accountRepository.delete(foundedUser);
     }

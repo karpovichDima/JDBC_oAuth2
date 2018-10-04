@@ -3,8 +3,10 @@ package com.dazito.oauthexample.service.impl;
 import com.dazito.oauthexample.dao.FileRepository;
 import com.dazito.oauthexample.dao.StorageRepository;
 import com.dazito.oauthexample.model.*;
+import com.dazito.oauthexample.model.type.UserRole;
 import com.dazito.oauthexample.service.FileService;
 import com.dazito.oauthexample.service.UserService;
+import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
 import com.dazito.oauthexample.service.dto.response.DirectoryCreated;
 import com.dazito.oauthexample.service.dto.response.FileUploadResponse;
@@ -17,7 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -42,6 +45,9 @@ public class FileServiceImpl implements FileService {
 
     @Value("${path.downloadFile}")
     String downloadPath;
+
+    @Value("${content.admin}")
+    String contentName;
 
     // upload multipart file on the server
     @Override
@@ -70,13 +76,13 @@ public class FileServiceImpl implements FileService {
         fileEntity.setExtension(extension);
 
         Optional<StorageElement> byId;
-        if (parent_id == 0){
+        if (parent_id == 0) {
             byId = storageRepository.findByName("CONTENT");
         } else {
             byId = storageRepository.findById(parent_id);
         }
 
-        if (!userServices.checkOptionalOnNull(byId))return null;
+        if (!userServices.checkOptionalOnNull(byId)) return null;
         StorageElement storageElement = byId.get();
         fileEntity.setParentId(storageElement);
         storageRepository.saveAndFlush(fileEntity);
@@ -107,7 +113,7 @@ public class FileServiceImpl implements FileService {
         FileEntity fileEntity = byfileUUID.get();
 
 
-        if (!matchesOwner(idCurrent, fileEntity.getOwner().getId())){
+        if (!matchesOwner(idCurrent, fileEntity.getOwner().getId())) {
             if (!userServices.adminRightsCheck(currentUser)) return null;
             // user is not admin and not owner of the file
         }
@@ -150,12 +156,29 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public void createContentPath(String path) {
-       Content content = new Content();
-       content.setParentId(null);
-       content.setName("CONTENT");
-       content.setRoot(root);
-       storageRepository.saveAndFlush(content);
+    public Content createContent(AccountEntity newUser, AccountDto accountDto) {
+
+        UserRole role = newUser.getRole();
+        String nameNewFolder = newUser.getEmail();
+
+        Content content = new Content();
+
+        switch (role) {
+            case USER:
+                content.setName("Content " + newUser.getEmail());
+                createSinglePath(root + File.pathSeparator + nameNewFolder);
+                content.setRoot(root + File.pathSeparator + nameNewFolder);
+                break;
+            case ADMIN:
+                content.setName(contentName);
+                content.setRoot(root);
+                break;
+        }
+        content.setId(Long.valueOf(1));
+        content.setOwner(newUser);
+        content.setParentId(null);
+
+        return content;
     }
 
     @Override
@@ -163,7 +186,7 @@ public class FileServiceImpl implements FileService {
         String name = directoryDto.getName();
         Long parent_id = directoryDto.getParentId();
 
-        if (parent_id == 0){
+        if (parent_id == 0) {
             // find Content
             Optional<StorageElement> content = storageRepository.findByName("CONTENT");
             if (!userServices.checkOptionalOnNull(content)) return null;
@@ -198,7 +221,7 @@ public class FileServiceImpl implements FileService {
     // check matches id of the current user and id ot the file owner
     @Override
     public boolean matchesOwner(Long idCurrent, Long ownerId) {
-        if (idCurrent == ownerId)return true;
+        if (idCurrent == ownerId) return true;
         return false;
     }
 
@@ -209,4 +232,6 @@ public class FileServiceImpl implements FileService {
 
         return directoryResponseDto;
     }
+
+
 }
