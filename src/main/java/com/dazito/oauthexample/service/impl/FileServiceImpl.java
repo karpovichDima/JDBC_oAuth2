@@ -156,7 +156,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public Content createContent(AccountEntity newUser, AccountDto accountDto) {
+    public Content createContent(AccountEntity newUser) {
 
         UserRole role = newUser.getRole();
         String nameNewFolder = newUser.getEmail();
@@ -174,7 +174,6 @@ public class FileServiceImpl implements FileService {
                 content.setRoot(root);
                 break;
         }
-        content.setId(Long.valueOf(1));
         content.setOwner(newUser);
         content.setParentId(null);
 

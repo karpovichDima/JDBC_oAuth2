@@ -43,8 +43,8 @@ public class AccountEntity{
     private List<FileEntity> files;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="content_id")
-    private Content content_id;
+    @JoinColumn(name="content")
+    private Content content;
 
     AccountEntity(String username, String password){
         this.username = username;

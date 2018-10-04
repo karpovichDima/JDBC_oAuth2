@@ -50,7 +50,7 @@ public interface FileService{
     File createMultiplyPath(String path);
 
 
-    Content createContent(AccountEntity newUser, AccountDto accountDto);
+    Content createContent(AccountEntity newUser);
 
     DirectoryCreated createDirectory(DirectoryDto directoryDto);
 

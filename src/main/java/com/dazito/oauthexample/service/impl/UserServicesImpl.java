@@ -8,8 +8,6 @@ import com.dazito.oauthexample.dao.StorageRepository;
 import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.model.Content;
 import com.dazito.oauthexample.model.Organization;
-import com.dazito.oauthexample.model.StorageElement;
-import com.dazito.oauthexample.model.type.SomeType;
 import com.dazito.oauthexample.model.type.UserRole;
 import com.dazito.oauthexample.service.FileService;
 import com.dazito.oauthexample.service.UserService;
@@ -223,22 +221,12 @@ public class UserServicesImpl implements UserService {
 
         Content rootContent = null;
 
-        switch (role) {
-            case USER:
-                rootContent = fileService.createContent(newUser,accountDto);
-                break;
-            case ADMIN:
-                Optional<StorageElement> content = storageRepository.findByNameAndType(contentName, SomeType.CONTENT);
-                if (!checkOptionalOnNull(content)) {
-                    rootContent = fileService.createContent(newUser, accountDto);
-                }
-                break;
+        if (getCountUsersWithContent(UserRole.ADMIN) < 1 || role.equals(UserRole.USER)) {
+            rootContent = fileService.createContent(newUser);
         }
 
-        newUser.setContent_id(rootContent);
-        newUser.setId(accountDto.getId());
+        newUser.setContent(rootContent);
         accountRepository.saveAndFlush(newUser);
-
 
         return responseDto(newUser);
     }
@@ -356,5 +344,9 @@ public class UserServicesImpl implements UserService {
     // get id of the current user
     private Long findOutIdUser() {
         return ((UserDetailsConfig) (SecurityContextHolder.getContext().getAuthentication().getPrincipal())).getUser().getId();
+    }
+
+    public Long getCountUsersWithContent(UserRole userRole){
+        return accountRepository.countAccountEntitiesByRoleAndContentIsNotNull(userRole);
     }
 }

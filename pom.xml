@@ -78,6 +78,11 @@
             <artifactId>guava</artifactId>
             <version>26.0-jre</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>

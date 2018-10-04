@@ -1,6 +1,7 @@
 package com.dazito.oauthexample.dao;
 
 import com.dazito.oauthexample.model.AccountEntity;
+import com.dazito.oauthexample.model.type.UserRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,5 +15,10 @@ public interface AccountRepository extends JpaRepository<AccountEntity, Long> {
     Optional<AccountEntity> findByUsername(String username);
     Collection<AccountEntity> findByRole(String role);
     Optional<AccountEntity> findUserByEmail(String email);
+
+    // никогда не удалять это запрос
+    Optional<AccountEntity> findOneByRoleAndContentIsNotNull(UserRole role);
+
+    Long countAccountEntitiesByRoleAndContentIsNotNull(UserRole role);
 
 }
