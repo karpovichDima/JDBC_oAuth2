@@ -3,6 +3,7 @@ package com.dazito.oauthexample.service.impl;
 import com.dazito.oauthexample.dao.FileRepository;
 import com.dazito.oauthexample.dao.StorageRepository;
 import com.dazito.oauthexample.model.*;
+import com.dazito.oauthexample.model.type.SomeType;
 import com.dazito.oauthexample.model.type.UserRole;
 import com.dazito.oauthexample.service.FileService;
 import com.dazito.oauthexample.service.UserService;
@@ -238,6 +239,46 @@ public class FileServiceImpl implements FileService {
 
             return responseDirectoryCreated(directory);
         }
+    }
+
+    @Override
+    public String createHierarchy(String uuid) {
+        Optional<FileEntity> endOfFileHierarchy = fileRepository.findByUuid(uuid);
+        boolean check = userServices.checkOptionalOnNull(endOfFileHierarchy);
+        if (!check) return null;
+
+        FileEntity fileEntity = endOfFileHierarchy.get();
+
+        boolean hasParent = true;
+        String hierarchy = fileEntity.getName();
+        StorageElement parent = fileEntity.getParentId();
+        Long parentId = parent.getId();
+
+        while (hasParent){
+            SomeType type = parent.getType();
+            StorageElement newLevelHierarchy;
+
+            if (type.equals(SomeType.FILE)){
+                Optional<FileEntity> foundedByParentId = fileRepository.findById(parentId);
+                newLevelHierarchy = foundedByParentId.get();
+            } else {
+                Optional<StorageElement> foundedByParentId = storageRepository.findById(parentId);
+                newLevelHierarchy = foundedByParentId.get();
+            }
+
+            String newLeveHierarchyName = newLevelHierarchy.getName();
+            hierarchy = hierarchy + " >>>> " + newLeveHierarchyName;
+            parentId = newLevelHierarchy.getId();
+            parent = newLevelHierarchy.getParentId();
+
+            if (parent.getType().equals(SomeType.CONTENT)) {
+                String levelContent = parent.getName();
+                hierarchy = hierarchy + " >>>> " + levelContent;
+                hasParent = false;
+            }
+
+        }
+        return hierarchy;
     }
 
     // check matches id of the current user and id ot the file owner

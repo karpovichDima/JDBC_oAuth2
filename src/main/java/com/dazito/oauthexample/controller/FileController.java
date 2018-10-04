@@ -1,9 +1,7 @@
 package com.dazito.oauthexample.controller;
 
-import com.dazito.oauthexample.model.Directory;
 import com.dazito.oauthexample.service.FileService;
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
-import com.dazito.oauthexample.service.dto.request.DtoForEditingPersonalData;
 import com.dazito.oauthexample.service.dto.response.DirectoryCreated;
 import com.dazito.oauthexample.service.dto.response.FileUploadResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +47,12 @@ public class FileController {
     @PostMapping("/dir")
     public DirectoryCreated createDirectory(@RequestBody DirectoryDto directoryDto) {
         return fileService.createDirectory(directoryDto);
+    }
+
+
+    @GetMapping("/chierarchy/{uuid:.+}")
+    public String createHierarchy(@PathVariable String uuid) throws IOException {
+        return fileService.createHierarchy(uuid);
     }
 
 

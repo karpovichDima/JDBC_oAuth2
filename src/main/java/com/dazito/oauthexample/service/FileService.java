@@ -55,4 +55,5 @@ public interface FileService{
     DirectoryCreated createDirectory(DirectoryDto directoryDto);
 
 
+    String createHierarchy(String uuid);
 }
