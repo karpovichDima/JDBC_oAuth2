@@ -41,7 +41,7 @@ public class FileServiceImpl implements FileService {
     UserService userServices;
 
     @Value("${root.path}")
-    String root;
+    Path root;
 
     @Value("${path.downloadFile}")
     String downloadPath;
@@ -51,12 +51,23 @@ public class FileServiceImpl implements FileService {
 
     // upload multipart file on the server
     @Override
-    public FileUploadResponse upload(MultipartFile file, Long parent_id) throws IOException {
+    public FileUploadResponse upload(MultipartFile file, Long parentId) throws IOException {
         if (file == null) return null;
 
         AccountEntity currentUser = userServices.getCurrentUser();
+        Path rootPath;
 
-        Path rootPath = Paths.get(root);
+        switch (currentUser.getRole()) {
+            case USER:
+                rootPath = Paths.get(currentUser.getContent().getRoot());
+                break;
+            case ADMIN:
+                rootPath = root;
+                break;
+            default:
+                rootPath = root;
+        }
+
 
         if (!Files.exists(rootPath)) return null;
 
@@ -66,7 +77,7 @@ public class FileServiceImpl implements FileService {
         UUID uuid = UUID.randomUUID();
         String uuidString = uuid + "";
 
-        file.transferTo(new File(root + File.separator + uuid));
+        file.transferTo(new File(rootPath + File.separator + uuid));
 
         FileEntity fileEntity = new FileEntity();
         fileEntity.setName(name);
@@ -76,10 +87,10 @@ public class FileServiceImpl implements FileService {
         fileEntity.setExtension(extension);
 
         Optional<StorageElement> byId;
-        if (parent_id == 0) {
+        if (parentId == 0) {
             byId = storageRepository.findByName("CONTENT");
         } else {
-            byId = storageRepository.findById(parent_id);
+            byId = storageRepository.findById(parentId);
         }
 
         if (!userServices.checkOptionalOnNull(byId)) return null;
@@ -112,13 +123,23 @@ public class FileServiceImpl implements FileService {
 
         FileEntity fileEntity = byfileUUID.get();
 
-
         if (!matchesOwner(idCurrent, fileEntity.getOwner().getId())) {
             if (!userServices.adminRightsCheck(currentUser)) return null;
             // user is not admin and not owner of the file
         }
 
-        Path file = Paths.get(root, uuid);
+        Path file;
+
+        switch (currentUser.getRole()) {
+            case USER:
+                file = Paths.get(currentUser.getContent().getRoot(), uuid);
+                break;
+            case ADMIN:
+                file = Paths.get(root.toString(), uuid);
+                break;
+            default:
+                file = Paths.get(root.toString(), uuid);
+        }
 
         if (!Files.exists(file)) return null;
 
@@ -166,12 +187,12 @@ public class FileServiceImpl implements FileService {
         switch (role) {
             case USER:
                 content.setName("Content " + newUser.getEmail());
-                createSinglePath(root + File.pathSeparator + nameNewFolder);
-                content.setRoot(root + File.pathSeparator + nameNewFolder);
+                createSinglePath(root + File.separator + File.separator + nameNewFolder);
+                content.setRoot(root + File.separator + File.separator + nameNewFolder);
                 break;
             case ADMIN:
                 content.setName(contentName);
-                content.setRoot(root);
+                content.setRoot(root.toString());
                 break;
         }
         content.setOwner(newUser);
