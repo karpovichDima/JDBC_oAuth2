@@ -29,9 +29,9 @@ public class FileController {
     @Value("${root.path}")
     String root;
 
-    @PostMapping("/upload/{parent_id}")
-    public FileUploadResponse upload(@RequestParam MultipartFile file, @PathVariable Long parent_id) throws IOException {
-        return fileService.upload(file, parent_id);
+    @PostMapping("/upload/{parentId}")
+    public FileUploadResponse upload(@RequestParam MultipartFile file, @PathVariable Long parentId) throws IOException {
+        return fileService.upload(file, parentId);
     }
 
     @GetMapping("/download/{uuid:.+}")

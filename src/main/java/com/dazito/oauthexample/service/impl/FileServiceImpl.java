@@ -194,6 +194,7 @@ public class FileServiceImpl implements FileService {
             Directory directory = new Directory();
             directory.setName(name);
             directory.setParentId(parent);
+            directory.setOwner(userServices.getCurrentUser());
 
             storageRepository.saveAndFlush(directory);
 
@@ -210,6 +211,7 @@ public class FileServiceImpl implements FileService {
             Directory directory = new Directory();
             directory.setName(name);
             directory.setParentId(parentStorage);
+            directory.setOwner(userServices.getCurrentUser());
 
             storageRepository.saveAndFlush(directory);
 
