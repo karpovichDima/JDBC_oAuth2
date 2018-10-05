@@ -1,6 +1,7 @@
 package com.dazito.oauthexample.model;
 
 import com.dazito.oauthexample.model.type.SomeType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -33,6 +34,7 @@ public abstract class StorageElement{
 
     @OneToOne
     @JoinColumn(name="user_id")
+    @JsonIgnore
     private AccountEntity owner;
 
 

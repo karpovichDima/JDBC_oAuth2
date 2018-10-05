@@ -2,7 +2,6 @@ package com.dazito.oauthexample.service;
 
 import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.model.Content;
-import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
 import com.dazito.oauthexample.service.dto.response.DirectoryCreated;
 import com.dazito.oauthexample.service.dto.response.FileUploadResponse;
@@ -12,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public interface FileService{
 
@@ -55,5 +55,6 @@ public interface FileService{
     DirectoryCreated createDirectory(DirectoryDto directoryDto);
 
 
-    String createHierarchy(String uuid);
+    String createHierarchy(Long val);
+
 }

@@ -243,38 +243,9 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public String createHierarchy(String uuid) {
-        Optional<FileEntity> endOfFileHierarchy = fileRepository.findByUuid(uuid);
-        boolean check = userServices.checkOptionalOnNull(endOfFileHierarchy);
-        if (!check) return null;
+    public String createHierarchy(Long val) {
 
-        FileEntity file = endOfFileHierarchy.get();
-
-        String fileName = file.getName();
-        List<String> storageElements = new ArrayList<>();
-        StorageElement element = file.getParentId();
-        storageElements.add(fileName);
-
-        boolean hasParent = true;
-
-        while (hasParent) {
-            storageElements.add(" <<<< " + element.getName());
-            element = element.getParentId();
-
-            if (element.getType().equals(SomeType.CONTENT)){
-                hasParent = false;
-            }
-        }
-        storageElements.add(" <<<< " + element.getName());
-
-        return buildHierarchyFromList(storageElements);
-    }
-
-    private String buildHierarchyFromList(List<String> storageElements) {
-        StringBuilder hierarchy = new StringBuilder();
-        for (String element : storageElements) hierarchy.append(element);
-
-        return hierarchy.toString();
+        return null;
     }
 
     // check matches id of the current user and id ot the file owner

@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.MultipartConfigElement;
 import java.io.IOException;
+import java.util.ArrayList;
 
 
 @RestController
@@ -49,12 +50,10 @@ public class FileController {
         return fileService.createDirectory(directoryDto);
     }
 
-
-    @GetMapping("/chierarchy/{uuid:.+}")
-    public String createHierarchy(@PathVariable String uuid) throws IOException {
-        return fileService.createHierarchy(uuid);
+    @GetMapping("/chierarchy/{id:.+}")
+    public String createHierarchy(@PathVariable Long id) throws IOException {
+        return fileService.createHierarchy(id);
     }
-
 
     @Bean
     public MultipartConfigElement multipartConfigElement() {
