@@ -247,36 +247,25 @@ public class FileServiceImpl implements FileService {
         boolean check = userServices.checkOptionalOnNull(endOfFileHierarchy);
         if (!check) return null;
 
-        FileEntity fileEntity = endOfFileHierarchy.get();
+        FileEntity file = endOfFileHierarchy.get();
 
         boolean hasParent = true;
-        String hierarchy = fileEntity.getName();
-        StorageElement parent = fileEntity.getParentId();
+        String fileName = file.getName();
+        StorageElement parent = file.getParentId();
+
+        String hierarchy = fileName;
+
         Long parentId = parent.getId();
 
         while (hasParent){
-            SomeType type = parent.getType();
-            StorageElement newLevelHierarchy;
+            String parentName = parent.getName();
+            hierarchy += " <<<< " + parentName;
+            parent = parent.getParentId();
 
-            if (type.equals(SomeType.FILE)){
-                Optional<FileEntity> foundedByParentId = fileRepository.findById(parentId);
-                newLevelHierarchy = foundedByParentId.get();
-            } else {
-                Optional<StorageElement> foundedByParentId = storageRepository.findById(parentId);
-                newLevelHierarchy = foundedByParentId.get();
-            }
-
-            String newLeveHierarchyName = newLevelHierarchy.getName();
-            hierarchy = hierarchy + " >>>> " + newLeveHierarchyName;
-            parentId = newLevelHierarchy.getId();
-            parent = newLevelHierarchy.getParentId();
-
-            if (parent.getType().equals(SomeType.CONTENT)) {
-                String levelContent = parent.getName();
-                hierarchy = hierarchy + " >>>> " + levelContent;
+            if (parent.getType().equals(SomeType.CONTENT)){
+                hierarchy += " <<<< " + parent.getName();
                 hasParent = false;
             }
-
         }
         return hierarchy;
     }
