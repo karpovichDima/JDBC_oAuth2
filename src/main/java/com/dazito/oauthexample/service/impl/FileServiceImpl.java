@@ -7,7 +7,6 @@ import com.dazito.oauthexample.model.type.SomeType;
 import com.dazito.oauthexample.model.type.UserRole;
 import com.dazito.oauthexample.service.FileService;
 import com.dazito.oauthexample.service.UserService;
-import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
 import com.dazito.oauthexample.service.dto.response.DirectoryCreated;
 import com.dazito.oauthexample.service.dto.response.FileUploadResponse;
@@ -25,6 +24,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -249,25 +250,31 @@ public class FileServiceImpl implements FileService {
 
         FileEntity file = endOfFileHierarchy.get();
 
-        boolean hasParent = true;
         String fileName = file.getName();
-        StorageElement parent = file.getParentId();
+        List<String> storageElements = new ArrayList<>();
+        StorageElement element = file.getParentId();
+        storageElements.add(fileName);
 
-        String hierarchy = fileName;
+        boolean hasParent = true;
 
-        Long parentId = parent.getId();
+        while (hasParent) {
+            storageElements.add(" <<<< " + element.getName());
+            element = element.getParentId();
 
-        while (hasParent){
-            String parentName = parent.getName();
-            hierarchy += " <<<< " + parentName;
-            parent = parent.getParentId();
-
-            if (parent.getType().equals(SomeType.CONTENT)){
-                hierarchy += " <<<< " + parent.getName();
+            if (element.getType().equals(SomeType.CONTENT)){
                 hasParent = false;
             }
         }
-        return hierarchy;
+        storageElements.add(" <<<< " + element.getName());
+
+        return buildHierarchyFromList(storageElements);
+    }
+
+    private String buildHierarchyFromList(List<String> storageElements) {
+        StringBuilder hierarchy = new StringBuilder();
+        for (String element : storageElements) hierarchy.append(element);
+
+        return hierarchy.toString();
     }
 
     // check matches id of the current user and id ot the file owner
