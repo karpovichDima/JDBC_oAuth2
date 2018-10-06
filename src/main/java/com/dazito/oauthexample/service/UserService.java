@@ -1,6 +1,7 @@
 package com.dazito.oauthexample.service;
 
 import com.dazito.oauthexample.model.AccountEntity;
+import com.dazito.oauthexample.model.Organization;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.request.DeleteAccountDto;
 import com.dazito.oauthexample.service.dto.request.DtoForEditingPersonalData;
@@ -30,11 +31,63 @@ public interface UserService {
     EmailNameDto editPersonData(Long id, DtoForEditingPersonalData personalData);
 
     /**
+     * We pass the user to understand whether he is in our database or not
+     * @param accountDto is userDto which we will find in DB
+     * @return EmailNameDto is successful search result user
+     */
+    EmailNameDto createUser(AccountDto accountDto);
+
+    /**
+     * delete user from DB, by id or DeleteAccountDto
+     * @param accountDto is entity which we will find in DB and after that, delete
+     */
+    void deleteUser(Long id, DeleteAccountDto accountDto);
+
+    PasswordDto ifMatchesTrueSetPasswordAndReturn(boolean matches, String encodedPassword, AccountEntity accountToBeEdited);
+
+    void setAndSaveEncodedPassword(String encodedPassword, AccountEntity accountToBeEdited);
+
+    String passwordEncode(String newPassword);
+
+    boolean checkMatches(String rawOldPassword, String passwordCurrentUser);
+
+    PasswordDto responsePassword(String newPassword);
+
+    AccountEntity accountEditedSetEmailAndName(String newEmail, String newName, AccountEntity accountToBeEdited);
+
+    /**
+     * find user by email
+     * @param email is email which we will find in DB
+     * @return AccountEntity is successful search result user
+     */
+    AccountEntity findUserByEmail(String email);
+
+    boolean checkStringOnNull(String val);
+
+    /**
+     * check optional on null
+     * @param val is optinal, which we want to check on null
+     * @return true = if not null, false = null
+     */
+    boolean checkOptionalOnNull(Optional val);
+
+    /**
      * find user
      * @param id the identifier of the user we are looking for
      * @return AccountEntity
      */
-    AccountEntity findById(Long id);
+    AccountEntity findByIdAccountRepo(Long id);
+
+    /**
+     * check rights of the Admin
+     * @param entity is entity, on which we want to check of the admin right
+     * @return true = if current user hasRole(ADMIN), false = hasRole(NOT ADMIN)
+     */
+    boolean adminRightsCheck(AccountEntity entity);
+
+    boolean organizationMatch(String userOrganization, AccountEntity currentUser);
+
+    String getOrganizationNameCurrentUser(AccountEntity currentUser);
 
     /**
      * returns the current authorized user
@@ -46,14 +99,14 @@ public interface UserService {
      * converting AccountEntity to AccountDto
      * @return AccountDto
      */
-    AccountDto converterAccountEntityToDto(AccountEntity accountEntity);
+    AccountDto convertAccountToDto(AccountEntity accountEntity);
 
     /**
      * converting AccountDto to AccountEntity
      * @param accountDto is user which we will convert to AccountEntity
      * @return AccountEntity
      */
-    AccountEntity converterAccountDtoToEntity(AccountDto accountDto);
+    AccountEntity convertAccountToEntity(AccountDto accountDto);
 
     /**
      * Adds an organization to AccountDto
@@ -62,37 +115,21 @@ public interface UserService {
      */
     AccountDto addToAccountDtoOrganization(AccountEntity foundedUser);
 
-    /**
-     * We pass the user to understand whether he is in our database or not
-     * @param accountDto is userDto which we will find in DB
-     * @return EmailNameDto is successful search result user
-     */
-    EmailNameDto createUser(AccountDto accountDto);
+    String getOrganizationNameByUser(AccountEntity accountEntity);
 
-    /**
-     * find user by email
-     * @param email is email which we will find in DB
-     * @return AccountEntity is successful search result user
-     */
-    AccountEntity findUserByEmail(String email);
+    Organization findOrganizationByName(String organizationName);
 
-    /**
-     * delete user from DB, by id or DeleteAccountDto
-     * @param accountDto is entity which we will find in DB and after that, delete
-     */
-    void deleteUser(Long id, DeleteAccountDto accountDto);
+    EmailNameDto responseDto(AccountEntity accountEntity);
 
-    /**
-     * check optional on null
-     * @param val is optinal, which we want to check on null
-     * @return true = if not null, false = null
-     */
-    boolean checkOptionalOnNull(Optional val);
+    Long getCountUsersWithContent();
 
-    /**
-     * check rights of the Admin
-     * @param entity is entity, on which we want to check of the admin right
-     * @return true = if current user hasRole(ADMIN), false = hasRole(NOT ADMIN)
-     */
-    boolean adminRightsCheck(AccountEntity entity);
+
+
+
+
+
+
+
+
+
 }

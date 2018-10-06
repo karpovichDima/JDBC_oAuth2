@@ -23,7 +23,7 @@ public class ConcreteUserController {
     // get user by id
     @GetMapping()
     public AccountDto getAccountCurrentUser(@PathVariable Long id) {
-        AccountEntity foundedUser = userService.findById(id);
+        AccountEntity foundedUser = userService.findByIdAccountRepo(id);
         return userService.addToAccountDtoOrganization(foundedUser);
     }
 

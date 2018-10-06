@@ -2,9 +2,7 @@ package com.dazito.oauthexample.service.impl;
 
 import com.dazito.oauthexample.config.oauth.UserDetailsConfig;
 import com.dazito.oauthexample.dao.AccountRepository;
-import com.dazito.oauthexample.dao.FileRepository;
 import com.dazito.oauthexample.dao.OrganizationRepo;
-import com.dazito.oauthexample.dao.StorageRepository;
 import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.model.Content;
 import com.dazito.oauthexample.model.Organization;
@@ -30,69 +28,53 @@ import java.util.Optional;
 @Service(value = "userService")
 public class UserServicesImpl implements UserService {
 
+    @Value("${root.path}")
+    String root;
+    @Value("${content.admin}")
+    String contentName;
+    @Resource(name = "conversionService")
+    ConversionService conversionService;
+
+    private final FileService fileService;
     private final AccountRepository accountRepository;
     private final OrganizationRepo organizationRepo;
     private final PasswordEncoder passwordEncoder;
 
-    @Value("${root.path}")
-    String root;
-
-    @Value("${content.admin}")
-    String contentName;
-
     @Autowired
-    FileService fileService;
-
-    @Autowired
-    FileRepository fileRepository;
-
-    @Autowired
-    StorageRepository storageRepository;
-
-    @Autowired
-    public UserServicesImpl(AccountRepository accountRepository, OrganizationRepo organizationRepo, PasswordEncoder passwordEncoder) {
+    public UserServicesImpl(AccountRepository accountRepository, OrganizationRepo organizationRepo, PasswordEncoder passwordEncoder, FileService fileService) {
         this.accountRepository = accountRepository;
         this.organizationRepo = organizationRepo;
         this.passwordEncoder = passwordEncoder;
+        this.fileService = fileService;
     }
 
-    @Resource(name = "conversionService")
-    ConversionService conversionService;
-
-    // Change user password, documentation on it in UserService
+    // Change user password
     @Override
     public PasswordDto editPassword(Long id, String newPassword, String rawOldPassword) {
-        AccountEntity foundedUser = findById(id);
+        AccountEntity foundedUser = findByIdAccountRepo(id);
         if (!checkStringOnNull(newPassword)) return null;
         if (!checkStringOnNull(rawOldPassword)) return null;
 
         AccountEntity currentUser = getCurrentUser();
+        String passwordCurrentUser = currentUser.getPassword();
         AccountEntity accountToBeEdited;
+        String encodedPassword = passwordEncode(newPassword);
+        boolean matches;
+
         if (id == null) {
             accountToBeEdited = currentUser;
-            boolean matches = passwordEncoder.matches(rawOldPassword, currentUser.getPassword());
-            if (matches) {
-                accountToBeEdited.setPassword(passwordEncoder.encode(newPassword));
-                accountRepository.saveAndFlush(accountToBeEdited);
-                return responsePassword(accountToBeEdited.getPassword());
-            }
-            return null;
+            matches = checkMatches(rawOldPassword, passwordCurrentUser);
+            return ifMatchesTrueSetPasswordAndReturn(matches, encodedPassword, accountToBeEdited);
         }
 
         if (!adminRightsCheck(getCurrentUser())) return null; // current user is not Admin;
 
-        String organizationName = getOrganizationNameFoundedUser(foundedUser);
-        if (!organizationMatch(organizationName))
-            return null; // organization current user and user from account dto is not match
+        String organizationName = getOrganizationNameByUser(foundedUser);
+        if (organizationMatch(organizationName, currentUser)) return null; // organization current user and user from account dto is not match
 
         accountToBeEdited = getCurrentUser();
-        boolean matches = passwordEncoder.matches(rawOldPassword, currentUser.getPassword());
-        if (matches) {
-            accountToBeEdited.setPassword(passwordEncoder.encode(newPassword));
-            accountRepository.saveAndFlush(accountToBeEdited);
-            return responsePassword(accountToBeEdited.getPassword());
-        }
-        return null;
+        matches = checkMatches(rawOldPassword, passwordCurrentUser);
+        return ifMatchesTrueSetPasswordAndReturn(matches, encodedPassword, accountToBeEdited);
     }
 
     // Change user email and name, documentation on it in UserService
@@ -102,118 +84,60 @@ public class UserServicesImpl implements UserService {
         String newName;
         String newEmail;
 
-        if (checkStringOnNull(personalData.getNewEmail())) {
-            newEmail = personalData.getNewEmail();
-        } else {
-            newEmail = getCurrentUser().getEmail();
-        }
+        AccountEntity currentUser = getCurrentUser();
 
-        if (findUserByEmail(newEmail) != null) {
-            return null; // user with such email exist;
-        }
+        newEmail = personalData.getNewEmail();
+        boolean checkedEmailOnNull = checkStringOnNull(newEmail);
+        if (!checkedEmailOnNull) newEmail = currentUser.getEmail();
 
-        if (checkStringOnNull(personalData.getNewName())) {
-            newName = personalData.getNewName();
-        } else {
-            newName = getCurrentUser().getUsername();
-        }
+        if (findUserByEmail(newEmail) != null) return null; // user with such email exist;
 
-        AccountEntity accountToBeEdited;
+        newName = personalData.getNewName();
+        boolean checkedNameOnNull = checkStringOnNull(newName);
+        if (!checkedNameOnNull) newName = currentUser.getUsername();
 
+        AccountEntity accountWithNewEmail;
         if (id == null) {
-            accountToBeEdited = getCurrentUser();
-            accountToBeEdited.setEmail(newEmail);
-            accountToBeEdited.setUsername(newName);
-
-            accountRepository.saveAndFlush(accountToBeEdited);
-            return responseDto(accountToBeEdited);
+            accountWithNewEmail = accountEditedSetEmailAndName(newEmail, newName, currentUser);
+            accountRepository.saveAndFlush(accountWithNewEmail);
+            return responseDto(accountWithNewEmail);
         }
 
-        if (!adminRightsCheck(getCurrentUser())) return null; // current user is not Admin;
+        if (!adminRightsCheck(currentUser)) return null; // current user is not Admin;
 
-        AccountEntity foundedAccount = findById(id);
-        String organizationName = getOrganizationNameFoundedUser(foundedAccount);
+        AccountEntity foundedAccount = findByIdAccountRepo(id);
+        String organizationName = getOrganizationNameByUser(foundedAccount);
 
-        if (!organizationMatch(organizationName))
-            return null; // organization current user and user from account dto is not match
+        if (!organizationMatch(organizationName, currentUser)) return null; // organization current user and user from account dto is not match
 
-        accountToBeEdited = getCurrentUser();
-        accountToBeEdited.setUsername(newName);
-        accountToBeEdited.setEmail(newEmail);
-
-        accountRepository.saveAndFlush(accountToBeEdited);
-        return responseDto(accountToBeEdited);
-    }
-
-    // get AccountEntity of the current user, documentation on it in UserService
-    @Override
-    public AccountEntity getCurrentUser() {
-        Long id = ((UserDetailsConfig) (SecurityContextHolder.getContext().getAuthentication().getPrincipal())).getUser().getId();
-        Optional<AccountEntity> optionalById = accountRepository.findById(id);
-        if (optionalById.isPresent()) {
-            return optionalById.get();
-        }
-        return null;
-    }
-
-    // get AccountEntity by id, documentation on it in UserService
-    @Override
-    public AccountEntity findById(Long id) {
-        if (id == null) return null;
-        if (accountRepository.findById(id).isPresent()) {
-            return accountRepository.findById(id).get();
-        }
-        return null;
-    }
-
-    // converter, documentation on it in UserService
-    @Override
-    public AccountDto converterAccountEntityToDto(AccountEntity accountEntity) {
-        return conversionService.convert(accountEntity, AccountDto.class);
-    }
-
-    // converter, documentation on it in UserService
-    @Override
-    public AccountEntity converterAccountDtoToEntity(AccountDto accountDto) {
-        return conversionService.convert(accountDto, AccountEntity.class);
-    }
-
-    // Add information about the organization in UserDto, documentation on it in UserService
-    @Override
-    public AccountDto addToAccountDtoOrganization(AccountEntity foundedUser) {
-        Organization organization = foundedUser.getOrganization();
-        OrganizationDto convertedOrganization = conversionService.convert(organization, OrganizationDto.class);
-        AccountDto accountDto = conversionService.convert(foundedUser, AccountDto.class);
-        accountDto.setOrganizationName(convertedOrganization.getOrganizationName());
-        return accountDto;
+        accountWithNewEmail = accountEditedSetEmailAndName(newEmail, newName, currentUser);
+        accountRepository.saveAndFlush(accountWithNewEmail);
+        return responseDto(accountWithNewEmail);
     }
 
     // Create a new user
     @Override
     public EmailNameDto createUser(AccountDto accountDto) {
+
+        AccountEntity currentUser = getCurrentUser();
         String email = accountDto.getEmail();
         String organizationName = accountDto.getOrganizationName();
 
-        if (findUserByEmail(email) != null) {
-            return null; // user with such email exist;
-        }
-
-        if (!adminRightsCheck(getCurrentUser())) {
-            return null; // current user is not Admin;
-        }
-
-        if (!organizationMatch(organizationName)) {
-            return null; // organization current user and user from account dto is not match
-        }
+        if (findUserByEmail(email) != null) return null; // user with such email exist;
+        if (!adminRightsCheck(currentUser)) return null; // current user is not Admin;
+        if (!organizationMatch(organizationName, currentUser)) return null; // organization current user and user from account dto is not match
 
         String password = accountDto.getPassword();
         String userName = accountDto.getUsername();
-        Boolean isActivated = accountDto.getIsActivated();
+        boolean isActivated = accountDto.getIsActivated();
         UserRole role = accountDto.getRole();
 
         AccountEntity newUser = new AccountEntity();
         newUser.setEmail(email);
-        newUser.setPassword(passwordEncoder.encode(password));
+
+        String encodedPassword = passwordEncode(password);
+
+        newUser.setPassword(encodedPassword);
         newUser.setUsername(userName);
         newUser.setIsActivated(isActivated);
         newUser.setRole(role);
@@ -221,7 +145,7 @@ public class UserServicesImpl implements UserService {
 
         Content rootContent = null;
 
-        if (getCountUsersWithContent(UserRole.ADMIN) < 1 || role.equals(UserRole.USER)) {
+        if (getCountUsersWithContent() < 1 || role.equals(UserRole.USER)) {
             rootContent = fileService.createContent(newUser);
         }
 
@@ -231,21 +155,12 @@ public class UserServicesImpl implements UserService {
         return responseDto(newUser);
     }
 
-    // Find user by email, documentation on it in UserService
-    @Override
-    public AccountEntity findUserByEmail(String email) {
-        Optional<AccountEntity> foundedUser = accountRepository.findUserByEmail(email);
-        if (checkOptionalOnNull(foundedUser)) {
-            return foundedUser.get();
-        }
-        return null;
-    }
-
     // Delete user by id or current user
     @Override
     public void deleteUser(Long id, DeleteAccountDto accountDto) {
         String email;
         String password;
+        AccountEntity currentUser = getCurrentUser();
         if (id == null) {
             email = accountDto.getEmail();
             password = accountDto.getRawPassword();
@@ -263,90 +178,145 @@ public class UserServicesImpl implements UserService {
 
         if (!adminRightsCheck(getCurrentUser())) return; // current user is not Admin;
 
-        AccountEntity foundedUser = findById(id);
-        String organizationName = getOrganizationNameFoundedUser(foundedUser);
-        if (!organizationMatch(organizationName))
+        AccountEntity foundedUser = findByIdAccountRepo(id);
+        String organizationName = getOrganizationNameByUser(foundedUser);
+        if (organizationMatch(organizationName, currentUser))
             return; // organization current user and user from account dto is not match
 
         accountRepository.delete(foundedUser);
     }
 
-    // Check optional on null, documentation on it in UserService
+    @Override
+    public PasswordDto ifMatchesTrueSetPasswordAndReturn(boolean matches, String encodedPassword, AccountEntity accountToBeEdited) {
+        if (matches) {
+            setAndSaveEncodedPassword(encodedPassword, accountToBeEdited);
+            return responsePassword(accountToBeEdited.getPassword());
+        }
+        return null;
+    }
+
+    @Override
+    public void setAndSaveEncodedPassword(String encodedPassword, AccountEntity accountToBeEdited) {
+        accountToBeEdited.setPassword(encodedPassword);
+        accountRepository.saveAndFlush(accountToBeEdited);
+    }
+
+    @Override
+    public String passwordEncode(String newPassword) {
+        return passwordEncoder.encode(newPassword);
+    }
+
+    @Override
+    public boolean checkMatches(String rawOldPassword, String passwordCurrentUser) {
+        return passwordEncoder.matches(rawOldPassword, passwordCurrentUser);
+    }
+
+    @Override
+    public PasswordDto responsePassword(String newPassword) {
+        PasswordDto passwordDto = new PasswordDto();
+        passwordDto.setPassword(newPassword);
+        return passwordDto;
+    }
+
+    @Override
+    public AccountEntity accountEditedSetEmailAndName(String newEmail, String newName, AccountEntity accountToBeEdited) {
+        accountToBeEdited.setEmail(newEmail);
+        accountToBeEdited.setUsername(newName);
+        return accountToBeEdited;
+    }
+
+    @Override
+    public AccountEntity findUserByEmail(String email) {
+        Optional<AccountEntity> foundedUser = accountRepository.findUserByEmail(email);
+        if (checkOptionalOnNull(foundedUser)) return foundedUser.get();
+        return null;
+    }
+
+    @Override
+    public boolean checkStringOnNull(String val) {
+        return val != null && !val.equals("");
+    }
+
     @Override
     public boolean checkOptionalOnNull(Optional val) {
         return val.isPresent();
     }
 
-    // Check rights "ADMIN" to change personal data, documentation on it in UserService
     @Override
-    public boolean adminRightsCheck(AccountEntity entity) {
-        UserRole role = entity.getRole();
-        if (role == UserRole.ADMIN) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    // We check the organization of the administrator and the user for a match
-    private boolean organizationMatch(String userOrganization) {
-        String userCurrentOrganization = getOrganizationNameCurrentUser(getCurrentUser());
-        if (userOrganization.equals(userCurrentOrganization)) {
-            return true;
-        }
-        return false;
-    }
-
-    // get Organization name user from AccountEntity
-    private String getOrganizationNameCurrentUser(AccountEntity accountEntity) {
-        String organizationName = getCurrentUser().getOrganization().getOrganizationName();
-        return organizationName;
-    }
-
-    // get Organization name user from AccountEntity
-    private String getOrganizationNameFoundedUser(AccountEntity accountEntity) {
-        String organizationName = accountEntity.getOrganization().getOrganizationName();
-        return organizationName;
-    }
-
-    // return organization from DB by Name
-    Organization findOrganizationByName(String organizationName) {
-        Optional<Organization> foundedOrganization = organizationRepo.findByOrganizationName(organizationName);
-        if (checkOptionalOnNull(foundedOrganization)) {
-            return foundedOrganization.get();
-        }
+    public AccountEntity findByIdAccountRepo(Long id) {
+        if (id == null) return null;
+        Optional<AccountEntity> foundByIdOptional = accountRepository.findById(id);
+        boolean checkedOnNull = checkOptionalOnNull(foundByIdOptional);
+        if (checkedOnNull) return foundByIdOptional.get();
         return null;
     }
 
-    // Check strings on null
-    private boolean checkStringOnNull(String val) {
-        if (val != null && !val.equals("")) {
-            return true;
-        }
-        return false;
+    @Override
+    public boolean adminRightsCheck(AccountEntity entity) {
+        UserRole role = entity.getRole();
+        return role == UserRole.ADMIN;
     }
 
-    // Reply to the user when changing personal data
-    private EmailNameDto responseDto(AccountEntity accountEntity) {
+    @Override
+    public boolean organizationMatch(String userOrganization, AccountEntity currentUser) {
+        String userCurrentOrganization = getOrganizationNameCurrentUser(currentUser);
+        return userOrganization.equals(userCurrentOrganization);
+    }
+
+    @Override
+    public String getOrganizationNameCurrentUser(AccountEntity currentUser) {
+        return currentUser.getOrganization().getOrganizationName();
+    }
+
+    @Override
+    public AccountEntity getCurrentUser() {
+        Long id = ((UserDetailsConfig) (SecurityContextHolder.getContext().getAuthentication().getPrincipal())).getUser().getId();
+        Optional<AccountEntity> optionalById = accountRepository.findById(id);
+        return optionalById.orElse(null);
+    }
+
+    @Override
+    public AccountDto convertAccountToDto(AccountEntity accountEntity) {
+        return conversionService.convert(accountEntity, AccountDto.class);
+    }
+
+    @Override
+    public AccountEntity convertAccountToEntity(AccountDto accountDto) {
+        return conversionService.convert(accountDto, AccountEntity.class);
+    }
+
+    @Override
+    public AccountDto addToAccountDtoOrganization(AccountEntity foundedUser) {
+        Organization organization = foundedUser.getOrganization();
+        OrganizationDto convertedOrganization = conversionService.convert(organization, OrganizationDto.class);
+        AccountDto accountDto = conversionService.convert(foundedUser, AccountDto.class);
+        accountDto.setOrganizationName(convertedOrganization.getOrganizationName());
+        return accountDto;
+    }
+
+    @Override
+    public String getOrganizationNameByUser(AccountEntity accountEntity) {
+        return accountEntity.getOrganization().getOrganizationName();
+    }
+
+    @Override
+    public Organization findOrganizationByName(String organizationName) {
+        Optional<Organization> foundedOrganization = organizationRepo.findByOrganizationName(organizationName);
+        if (checkOptionalOnNull(foundedOrganization)) return foundedOrganization.get();
+        return null;
+    }
+
+    @Override
+    public EmailNameDto responseDto(AccountEntity accountEntity) {
         EmailNameDto emailNameDto = new EmailNameDto();
         emailNameDto.setUsername(accountEntity.getUsername());
         emailNameDto.setEmail(accountEntity.getEmail());
         return emailNameDto;
     }
 
-    // Reply to the user when changing password
-    private PasswordDto responsePassword(String newPassword) {
-        PasswordDto passwordDto = new PasswordDto();
-        passwordDto.setPassword(newPassword);
-        return passwordDto;
+    @Override
+    public Long getCountUsersWithContent(){
+        return accountRepository.countAccountEntitiesByRoleAndContentIsNotNull(UserRole.ADMIN);
     }
 
-    // get id of the current user
-    private Long findOutIdUser() {
-        return ((UserDetailsConfig) (SecurityContextHolder.getContext().getAuthentication().getPrincipal())).getUser().getId();
-    }
-
-    public Long getCountUsersWithContent(UserRole userRole){
-        return accountRepository.countAccountEntitiesByRoleAndContentIsNotNull(userRole);
-    }
 }
