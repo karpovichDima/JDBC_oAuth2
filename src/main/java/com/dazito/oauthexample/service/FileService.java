@@ -5,13 +5,13 @@ import com.dazito.oauthexample.model.Content;
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
 import com.dazito.oauthexample.service.dto.response.DirectoryCreated;
 import com.dazito.oauthexample.service.dto.response.FileUploadResponse;
+import com.dazito.oauthexample.service.dto.response.StorageDto;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 
 public interface FileService{
 
@@ -54,7 +54,8 @@ public interface FileService{
 
     DirectoryCreated createDirectory(DirectoryDto directoryDto);
 
+    public StorageDto buildStorageDto(Long id);
 
-    String createHierarchy(Long val);
+
 
 }

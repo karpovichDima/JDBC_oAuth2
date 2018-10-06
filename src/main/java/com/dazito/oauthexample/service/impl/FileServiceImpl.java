@@ -3,13 +3,13 @@ package com.dazito.oauthexample.service.impl;
 import com.dazito.oauthexample.dao.FileRepository;
 import com.dazito.oauthexample.dao.StorageRepository;
 import com.dazito.oauthexample.model.*;
-import com.dazito.oauthexample.model.type.SomeType;
 import com.dazito.oauthexample.model.type.UserRole;
 import com.dazito.oauthexample.service.FileService;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
 import com.dazito.oauthexample.service.dto.response.DirectoryCreated;
 import com.dazito.oauthexample.service.dto.response.FileUploadResponse;
+import com.dazito.oauthexample.service.dto.response.StorageDto;
 import liquibase.util.file.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -242,11 +242,42 @@ public class FileServiceImpl implements FileService {
         }
     }
 
-    @Override
-    public String createHierarchy(Long val) {
+    public StorageDto buildStorageDto(Long id) {
+        StorageElement storageElement = findByIdInStorageRepo(id);
+        StorageDto storageDto = new StorageDto();
 
-        return null;
+        storageDto.setId(storageElement.getId());
+        storageDto.setName(storageElement.getName());
+        storageDto.setType(storageElement.getType());
+
+        List<StorageElement> elementChildren = getChildListElement(storageElement);
+        List<StorageDto> listChildren = createListChildrenFromElementChildren(elementChildren);
+
+        storageDto.setChildren(listChildren);
+
+        return storageDto;
     }
+
+    private StorageElement findByIdInStorageRepo(Long id) {
+        Optional<StorageElement> storageOptional = storageRepository.findById(id);
+        boolean checkOnNull = userServices.checkOptionalOnNull(storageOptional);
+        if (!checkOnNull) return null;
+        return storageOptional.get();
+    }
+
+    private List<StorageElement> getChildListElement(StorageElement storageElement) {
+        return storageRepository.findByParentId(storageElement);
+    }
+
+    private List<StorageDto> createListChildrenFromElementChildren(List<StorageElement> elementChildren) {
+        List<StorageDto> listChildren = new ArrayList<>();
+        for (StorageElement element : elementChildren) {
+            long elementId = element.getId();
+            listChildren.add(buildStorageDto(elementId));
+        }
+        return listChildren;
+    }
+
 
     // check matches id of the current user and id ot the file owner
     @Override

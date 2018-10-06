@@ -4,6 +4,8 @@ import com.dazito.oauthexample.service.FileService;
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
 import com.dazito.oauthexample.service.dto.response.DirectoryCreated;
 import com.dazito.oauthexample.service.dto.response.FileUploadResponse;
+import com.dazito.oauthexample.service.dto.response.StorageDto;
+import com.dazito.oauthexample.service.impl.FileServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
@@ -15,7 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.MultipartConfigElement;
 import java.io.IOException;
-import java.util.ArrayList;
 
 
 @RestController
@@ -38,12 +39,6 @@ public class FileController {
         return fileService.download(uuid);
     }
 
-//    // create setRootContent path (CONTENT), FOR ADMINS
-//    @PostMapping("/root/{path}")
-//    public void setRootContent(@PathVariable String path) {
-//        fileService.createContentPath(path);
-//    }
-
     // create directory
     @PostMapping("/dir")
     public DirectoryCreated createDirectory(@RequestBody DirectoryDto directoryDto) {
@@ -51,8 +46,8 @@ public class FileController {
     }
 
     @GetMapping("/chierarchy/{id:.+}")
-    public String createHierarchy(@PathVariable Long id) throws IOException {
-        return fileService.createHierarchy(id);
+    public StorageDto createHierarchy(@PathVariable Long id) throws IOException {
+        return fileService.buildStorageDto(id);
     }
 
     @Bean
