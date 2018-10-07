@@ -3,6 +3,7 @@ package com.dazito.oauthexample.service.impl;
 import com.dazito.oauthexample.dao.FileRepository;
 import com.dazito.oauthexample.dao.StorageRepository;
 import com.dazito.oauthexample.model.*;
+import com.dazito.oauthexample.model.type.SomeType;
 import com.dazito.oauthexample.model.type.UserRole;
 import com.dazito.oauthexample.service.FileService;
 import com.dazito.oauthexample.service.UserService;
@@ -24,92 +25,66 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class FileServiceImpl implements FileService {
 
-
-    @Autowired
-    StorageRepository storageRepository;
-
-    @Autowired
-    FileRepository fileRepository;
-
+    @Value("${root.path}")
+    Path root;
+    @Value("${path.downloadFile}")
+    String downloadPath;
+    @Value("${content.admin}")
+    String contentName;
     @Resource(name = "userService")
     UserService userServices;
 
-    @Value("${root.path}")
-    Path root;
+    private final StorageRepository storageRepository;
+    private final FileRepository fileRepository;
 
-    @Value("${path.downloadFile}")
-    String downloadPath;
-
-    @Value("${content.admin}")
-    String contentName;
+    @Autowired
+    public FileServiceImpl(StorageRepository storageRepository, FileRepository fileRepository) {
+        this.storageRepository = storageRepository;
+        this.fileRepository = fileRepository;
+    }
 
     // upload multipart file on the server
     @Override
     public FileUploadResponse upload(MultipartFile file, Long parentId) throws IOException {
         if (file == null) return null;
 
+        String originalFilename = file.getOriginalFilename();
+
         AccountEntity currentUser = userServices.getCurrentUser();
+        UserRole role = currentUser.getRole();
+        String rootReference = currentUser.getContent().getRoot();
         Path rootPath;
 
-        switch (currentUser.getRole()) {
-            case USER:
-                rootPath = Paths.get(currentUser.getContent().getRoot());
-                break;
-            case ADMIN:
-                rootPath = root;
-                break;
-            default:
-                rootPath = root;
-        }
-
-
+        rootPath = this.root;
+        if (role == UserRole.USER) rootPath = Paths.get(rootReference);
         if (!Files.exists(rootPath)) return null;
 
-        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-        String name = FilenameUtils.getBaseName(file.getOriginalFilename());
+        String extension = FilenameUtils.getExtension(originalFilename);
+        String name = FilenameUtils.getBaseName(originalFilename);
 
-        UUID uuid = UUID.randomUUID();
-        String uuidString = uuid + "";
+        String uuidString = generateStringUuid();
 
-        file.transferTo(new File(rootPath + File.separator + uuid));
+        String pathNewFile = rootPath + File.separator + uuidString;
+        file.transferTo(new File(pathNewFile));
 
         FileEntity fileEntity = new FileEntity();
         fileEntity.setName(name);
         fileEntity.setUuid(uuidString);
-        fileEntity.setOwner(userServices.getCurrentUser());
+        fileEntity.setOwner(currentUser);
         fileEntity.setSize(file.getSize());
         fileEntity.setExtension(extension);
 
-        Optional<StorageElement> byId;
-        if (parentId == 0) {
-            byId = storageRepository.findByName("CONTENT");
-        } else {
-            byId = storageRepository.findById(parentId);
-        }
+        StorageElement foundStorageElement = findStorageElementDependingOnTheParent(parentId);
 
-        if (!userServices.checkOptionalOnNull(byId)) return null;
-        StorageElement storageElement = byId.get();
-        fileEntity.setParentId(storageElement);
+        fileEntity.setParentId(foundStorageElement);
         storageRepository.saveAndFlush(fileEntity);
 
         return responseFileUploaded(fileEntity);
-    }
-
-    private FileUploadResponse responseFileUploaded(FileEntity fileEntity) {
-        FileUploadResponse fileUploadResponse = new FileUploadResponse();
-        fileUploadResponse.setName(fileEntity.getName() + "." + fileEntity.getExtension());
-        fileUploadResponse.setSize(fileEntity.getSize());
-        fileUploadResponse.setReferenceToDownloadFile(downloadPath + fileEntity.getUuid());
-
-        return fileUploadResponse;
     }
 
     // download file by uuid and response
@@ -119,38 +94,121 @@ public class FileServiceImpl implements FileService {
         AccountEntity currentUser = userServices.getCurrentUser();
         Long idCurrent = currentUser.getId();
 
-        Optional<FileEntity> byfileUUID = fileRepository.findByUuid(uuid);
-        boolean checkedOnNull = userServices.checkOptionalOnNull(byfileUUID);
-        if (!checkedOnNull) return null;
+        StorageElement fileEntityFromDB = findByUUIDInFileRepo(uuid);
+        AccountEntity fileOwner = fileEntityFromDB.getOwner();
+        Long ownerId = fileOwner.getId();
 
-        FileEntity fileEntity = byfileUUID.get();
-
-        if (!matchesOwner(idCurrent, fileEntity.getOwner().getId())) {
-            if (!userServices.adminRightsCheck(currentUser)) return null;
-            // user is not admin and not owner of the file
+        if (!matchesOwner(idCurrent, ownerId)) {
+            if (!userServices.adminRightsCheck(currentUser)) return null; // user is not admin and not owner of the file
         }
 
-        Path file;
+        Path filePath = setFilePathDependingOnTheUserRole(currentUser, uuid);
 
-        switch (currentUser.getRole()) {
-            case USER:
-                file = Paths.get(currentUser.getContent().getRoot(), uuid);
-                break;
-            case ADMIN:
-                file = Paths.get(root.toString(), uuid);
-                break;
-            default:
-                file = Paths.get(root.toString(), uuid);
-        }
+        if (!Files.exists(filePath)) return null;
 
-        if (!Files.exists(file)) return null;
-
-        ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(file));
+        ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(filePath));
 
         return ResponseEntity.ok().body(resource);
     }
 
-    // create single directory
+    // create root for all directories and files(for Admins) or for one User
+    @Override
+    public Content createContent(AccountEntity newUser) {
+
+        UserRole role = newUser.getRole();
+        String nameNewFolder = newUser.getEmail();
+
+        Content content = new Content();
+
+        switch (role) {
+            case USER:
+                content.setName("Content " + newUser.getEmail());
+                createSinglePath(root + File.separator + nameNewFolder);
+                content.setRoot(root + File.separator + nameNewFolder);
+                break;
+            case ADMIN:
+                content.setName(contentName);
+                content.setRoot(root.toString());
+                break;
+        }
+        content.setOwner(newUser);
+        content.setParentId(null);
+
+        return content;
+    }
+
+    // create new Directory by parent id and name
+    @Override
+    public DirectoryCreated createDirectory(DirectoryDto directoryDto) {
+        AccountEntity currentUser = userServices.getCurrentUser();
+        String name = directoryDto.getName();
+        Long parent_id = directoryDto.getParentId();
+
+        StorageElement foundParentElement;
+
+        Directory directory = new Directory();
+        directory.setName(name);
+
+        if (parent_id == 0) {
+            foundParentElement = findByNameInStorageRepo("CONTENT");
+        } else {
+            foundParentElement = findByIdInStorageRepo(parent_id);
+            SomeType type = foundParentElement.getType();
+            if (type.equals(SomeType.FILE)) return null;
+        }
+
+        directory.setParentId(foundParentElement);
+        directory.setOwner(currentUser);
+
+        storageRepository.saveAndFlush(directory);
+
+        return responseDirectoryCreated(directory);
+    }
+
+    @Override
+    public StorageElement findStorageElementDependingOnTheParent(Long parentId) {
+        StorageElement foundStorageElement;
+        if (parentId != 0){
+            foundStorageElement = findByIdInStorageRepo(parentId);
+        }else{
+            foundStorageElement = findByNameInStorageRepo("CONTENT");
+        }
+        return foundStorageElement;
+    }
+
+    @Override
+    public String generateStringUuid() {
+        UUID uuid = UUID.randomUUID();
+        return uuid + "";
+}
+
+    @Override
+    public FileUploadResponse responseFileUploaded(FileEntity fileEntity) {
+        String name = fileEntity.getName();
+        String extension = fileEntity.getExtension();
+        Long size = fileEntity.getSize();
+        String uuid = fileEntity.getUuid();
+
+        FileUploadResponse fileUploadResponse = new FileUploadResponse();
+        fileUploadResponse.setName(name + "." + extension);
+        fileUploadResponse.setSize(size);
+        fileUploadResponse.setReferenceToDownloadFile(downloadPath + uuid);
+
+        return fileUploadResponse;
+    }
+
+    @Override
+    public Path setFilePathDependingOnTheUserRole(AccountEntity currentUser, String uuid) {
+        UserRole role = currentUser.getRole();
+        Path filePath;
+        if (role.equals(UserRole.USER)){
+            filePath = Paths.get(currentUser.getContent().getRoot(), uuid);
+        } else {
+            filePath = Paths.get(root.toString(), uuid);
+        }
+        return filePath;
+    }
+
     @Override
     public File createSinglePath(String path) {
         File rootPath = new File(path);
@@ -164,7 +222,94 @@ public class FileServiceImpl implements FileService {
         return rootPath;
     }
 
-    // create multiply path directory
+    @Override
+    public StorageDto buildStorageDto(Long id) {
+        StorageElement storageElement = findByIdInStorageRepo(id);
+
+        Long idElement = storageElement.getId();
+        String nameElement = storageElement.getName();
+        SomeType typeElement = storageElement.getType();
+
+        StorageDto storageDto = new StorageDto();
+
+        storageDto.setId(idElement);
+        storageDto.setName(nameElement);
+        storageDto.setType(typeElement);
+
+        List<StorageElement> elementChildren = getChildListElement(storageElement);
+        List<StorageDto> listChildren = createListChildrenFromElementChildren(elementChildren);
+
+        storageDto.setChildren(listChildren);
+
+        return storageDto;
+    }
+
+    @Override
+    public StorageElement findByIdInStorageRepo(Long id) {
+        Optional<StorageElement> storageOptional = storageRepository.findById(id);
+        return getStorageIfOptionalNotNull(storageOptional);
+    }
+
+    @Override
+    public StorageElement findByNameInStorageRepo(String name) {
+        Optional<StorageElement> storageOptional = storageRepository.findByName(name);
+        return getStorageIfOptionalNotNull(storageOptional);
+    }
+
+    @Override
+    public FileEntity findByUUIDInFileRepo(String uuid) {
+        Optional<FileEntity> storageOptional = fileRepository.findByUuid(uuid);
+        return getFileIfOptionalNotNull(storageOptional);
+    }
+
+    @Override
+    public StorageElement getStorageIfOptionalNotNull(Optional<StorageElement> storageOptional){
+        boolean checkOnNull = userServices.checkOptionalOnNull(storageOptional);
+        if (!checkOnNull) return null;
+        return storageOptional.get();
+    }
+
+    @Override
+    public FileEntity getFileIfOptionalNotNull(Optional<FileEntity> fileOptional){
+        boolean checkOnNull = userServices.checkOptionalOnNull(fileOptional);
+        if (!checkOnNull) return null;
+        return fileOptional.get();
+    }
+
+    @Override
+    public List<StorageElement> getChildListElement(StorageElement storageElement) {
+        return storageRepository.findByParentId(storageElement);
+    }
+
+    @Override
+    public List<StorageDto> createListChildrenFromElementChildren(List<StorageElement> elementChildren) {
+        List<StorageDto> listChildren = new ArrayList<>();
+        for (StorageElement element : elementChildren) {
+            long elementId = element.getId();
+            listChildren.add(buildStorageDto(elementId));
+        }
+        return listChildren;
+    }
+
+    @Override
+    public boolean matchesOwner(Long idCurrent, Long ownerId) {
+        return Objects.equals(idCurrent, ownerId);
+    }
+
+    @Override
+    public DirectoryCreated responseDirectoryCreated(Directory directory) {
+        String nameDir = directory.getName();
+        StorageElement parentDir = directory.getParentId();
+        Long idDir = parentDir.getId();
+
+        DirectoryCreated directoryResponseDto = new DirectoryCreated();
+
+        directoryResponseDto.setName(nameDir);
+        directoryResponseDto.setParentId(idDir);
+
+        return directoryResponseDto;
+    }
+
     @Override
     public File createMultiplyPath(String path) {
         File rootPath2 = new File(path + "\\Directory\\Sub\\Sub-Sub");
@@ -177,122 +322,4 @@ public class FileServiceImpl implements FileService {
         }
         return rootPath2;
     }
-
-    @Override
-    public Content createContent(AccountEntity newUser) {
-
-        UserRole role = newUser.getRole();
-        String nameNewFolder = newUser.getEmail();
-
-        Content content = new Content();
-
-        switch (role) {
-            case USER:
-                content.setName("Content " + newUser.getEmail());
-                createSinglePath(root + File.separator + File.separator + nameNewFolder);
-                content.setRoot(root + File.separator + File.separator + nameNewFolder);
-                break;
-            case ADMIN:
-                content.setName(contentName);
-                content.setRoot(root.toString());
-                break;
-        }
-        content.setOwner(newUser);
-        content.setParentId(null);
-
-        return content;
-    }
-
-    @Override
-    public DirectoryCreated createDirectory(DirectoryDto directoryDto) {
-        String name = directoryDto.getName();
-        Long parent_id = directoryDto.getParentId();
-
-        if (parent_id == 0) {
-            // find Content
-            Optional<StorageElement> content = storageRepository.findByName("CONTENT");
-            if (!userServices.checkOptionalOnNull(content)) return null;
-            StorageElement parent = content.get();
-
-            Directory directory = new Directory();
-            directory.setName(name);
-            directory.setParentId(parent);
-            directory.setOwner(userServices.getCurrentUser());
-
-            storageRepository.saveAndFlush(directory);
-
-            return responseDirectoryCreated(directory);
-        } else {
-            // find parent
-            Optional<StorageElement> parent = storageRepository.findById(parent_id);
-            if (!userServices.checkOptionalOnNull(parent)) return null;
-            StorageElement parentStorage = parent.get();
-
-            // check parent on type DIRECTORY or CONTENT
-            if (parentStorage.getType().equals("FILE")) return null;
-
-            Directory directory = new Directory();
-            directory.setName(name);
-            directory.setParentId(parentStorage);
-            directory.setOwner(userServices.getCurrentUser());
-
-            storageRepository.saveAndFlush(directory);
-
-            return responseDirectoryCreated(directory);
-        }
-    }
-
-    public StorageDto buildStorageDto(Long id) {
-        StorageElement storageElement = findByIdInStorageRepo(id);
-        StorageDto storageDto = new StorageDto();
-
-        storageDto.setId(storageElement.getId());
-        storageDto.setName(storageElement.getName());
-        storageDto.setType(storageElement.getType());
-
-        List<StorageElement> elementChildren = getChildListElement(storageElement);
-        List<StorageDto> listChildren = createListChildrenFromElementChildren(elementChildren);
-
-        storageDto.setChildren(listChildren);
-
-        return storageDto;
-    }
-
-    private StorageElement findByIdInStorageRepo(Long id) {
-        Optional<StorageElement> storageOptional = storageRepository.findById(id);
-        boolean checkOnNull = userServices.checkOptionalOnNull(storageOptional);
-        if (!checkOnNull) return null;
-        return storageOptional.get();
-    }
-
-    private List<StorageElement> getChildListElement(StorageElement storageElement) {
-        return storageRepository.findByParentId(storageElement);
-    }
-
-    private List<StorageDto> createListChildrenFromElementChildren(List<StorageElement> elementChildren) {
-        List<StorageDto> listChildren = new ArrayList<>();
-        for (StorageElement element : elementChildren) {
-            long elementId = element.getId();
-            listChildren.add(buildStorageDto(elementId));
-        }
-        return listChildren;
-    }
-
-
-    // check matches id of the current user and id ot the file owner
-    @Override
-    public boolean matchesOwner(Long idCurrent, Long ownerId) {
-        if (idCurrent == ownerId) return true;
-        return false;
-    }
-
-    private DirectoryCreated responseDirectoryCreated(Directory directory) {
-        DirectoryCreated directoryResponseDto = new DirectoryCreated();
-        directoryResponseDto.setName(directory.getName());
-        directoryResponseDto.setParentId(directory.getParentId().getId());
-
-        return directoryResponseDto;
-    }
-
-
 }

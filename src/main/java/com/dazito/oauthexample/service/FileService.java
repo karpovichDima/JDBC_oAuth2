@@ -1,7 +1,6 @@
 package com.dazito.oauthexample.service;
 
-import com.dazito.oauthexample.model.AccountEntity;
-import com.dazito.oauthexample.model.Content;
+import com.dazito.oauthexample.model.*;
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
 import com.dazito.oauthexample.service.dto.response.DirectoryCreated;
 import com.dazito.oauthexample.service.dto.response.FileUploadResponse;
@@ -12,6 +11,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
 
 public interface FileService{
 
@@ -27,13 +29,17 @@ public interface FileService{
      */
     ResponseEntity<Resource> download(String uuid) throws IOException;
 
-    /**
-     * check matches if of the current user and if ot the file owner
-     * @param idCurrent is id of the current user
-     * @param ownerId is id ot the file owner
-     * @return true = if emailCurrent == ownerEmail
-     */
-    boolean matchesOwner(Long idCurrent, Long ownerId);
+    Content createContent(AccountEntity newUser);
+
+    DirectoryCreated createDirectory(DirectoryDto directoryDto);
+
+    StorageElement findStorageElementDependingOnTheParent(Long parentId);
+
+    String generateStringUuid();
+
+    FileUploadResponse responseFileUploaded(FileEntity fileEntity);
+
+    Path setFilePathDependingOnTheUserRole(AccountEntity currentUser, String uuid);
 
     /**
      * create single directory by path
@@ -42,19 +48,42 @@ public interface FileService{
      */
     File createSinglePath(String path);
 
+    StorageDto buildStorageDto(Long id);
+
+
+    StorageElement findByIdInStorageRepo(Long id);
+
+    StorageElement findByNameInStorageRepo(String name);
+
+    FileEntity findByUUIDInFileRepo(String uuid);
+
+    StorageElement getStorageIfOptionalNotNull(Optional<StorageElement> storageOptional);
+
+    FileEntity getFileIfOptionalNotNull(Optional<FileEntity> fileOptional);
+
+    List<StorageElement> getChildListElement(StorageElement storageElement);
+
+    List<StorageDto> createListChildrenFromElementChildren(List<StorageElement> elementChildren);
+
     /**
-     * create multiply path directory by path
-     * @param path of the which we will create directories
-     * @return new File directory
+     * check matches if of the current user and if ot the file owner
+     * @param idCurrent is id of the current user
+     * @param ownerId is id ot the file owner
+     * @return true = if emailCurrent == ownerEmail
      */
+    boolean matchesOwner(Long idCurrent, Long ownerId);
+
+    DirectoryCreated responseDirectoryCreated(Directory directory);
+
     File createMultiplyPath(String path);
 
 
-    Content createContent(AccountEntity newUser);
 
-    DirectoryCreated createDirectory(DirectoryDto directoryDto);
 
-    public StorageDto buildStorageDto(Long id);
+
+
+
+
 
 
 
