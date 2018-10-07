@@ -16,10 +16,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(path = "/users/current")
 public class CurrentUserController {
 
-    @Autowired
-    UserService userService;
+    private final UserService userService;
 
-    // get current user
+    @Autowired
+    public CurrentUserController(UserService userService) {
+        this.userService = userService;
+    }
+
     @GetMapping()
     public AccountDto getAccountCurrentUser() {
         AccountEntity foundedUser = userService.getCurrentUser();
@@ -47,15 +50,10 @@ public class CurrentUserController {
         return ResponseEntity.ok(newUser);
     }
 
-    // delete user by email from accountDto
     @DeleteMapping("/")
     @ResponseStatus(value = HttpStatus.OK)
     public void deleteUser(@RequestBody DeleteAccountDto accountDto){
         userService.deleteUser(null, accountDto);
     }
 
-//    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-//    @PostMapping("/getAccountsByRole")
-//    public Collection<NameDto> getAllAccountsByRole(@RequestBody AccountDto accountDto){
-//        return userService.getAccountsByRole(accountDto.getRole());
 }

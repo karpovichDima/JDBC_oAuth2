@@ -17,8 +17,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(path = "/users/{id}")
 public class ConcreteUserController {
 
+    private final UserService userService;
+
     @Autowired
-    private UserService userService;
+    public ConcreteUserController(UserService userService) {
+        this.userService = userService;
+    }
 
     // get user by id
     @GetMapping()
