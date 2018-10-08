@@ -56,7 +56,7 @@ public class FileController {
     @GetMapping("/chierarchy/{id:.+}")
     @ResponseStatus(value = HttpStatus.OK)
     public StorageDto createHierarchy(@PathVariable Long id) throws IOException {
-        return fileService.buildStorageDto(id);
+        return fileService.createHierarchy(id);
     }
 
 

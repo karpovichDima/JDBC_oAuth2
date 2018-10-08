@@ -244,6 +244,13 @@ public class FileServiceImpl implements FileService {
         return storageDto;
     }
 
+    public StorageDto createHierarchy(Long id){
+        StorageDto storageDto = buildStorageDto(id);
+
+        return storageDto;
+    }
+
+
     @Override
     public StorageElement findByIdInStorageRepo(Long id) {
         Optional<StorageElement> storageOptional = storageRepository.findById(id);

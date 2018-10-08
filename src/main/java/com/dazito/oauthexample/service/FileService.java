@@ -74,6 +74,7 @@ public interface FileService{
 
     StorageDto buildStorageDto(Long id);
 
+    StorageDto createHierarchy(Long id);
 
     StorageElement findByIdInStorageRepo(Long id);
 
