@@ -72,19 +72,36 @@ public class FileServiceImpl implements FileService {
         String pathNewFile = rootPath + File.separator + uuidString;
         file.transferTo(new File(pathNewFile));
 
+        Long size = file.getSize();
+
         FileEntity fileEntity = new FileEntity();
         fileEntity.setName(name);
         fileEntity.setUuid(uuidString);
         fileEntity.setOwner(currentUser);
-        fileEntity.setSize(file.getSize());
+        fileEntity.setSize(size);
         fileEntity.setExtension(extension);
 
         StorageElement foundStorageElement = findStorageElementDependingOnTheParent(parentId);
 
         fileEntity.setParentId(foundStorageElement);
+
+        setSizeForParents(size, parentId);
+
         storageRepository.saveAndFlush(fileEntity);
 
         return responseFileUploaded(fileEntity);
+    }
+
+    private void setSizeForParents(Long size, Long parentId) {
+
+        StorageElement parent = findByIdInStorageRepo(parentId);
+        Long sizeParent = parent.getSize();
+        sizeParent = sizeParent + size;
+        parent.setSize(sizeParent);
+        storageRepository.saveAndFlush(parent);
+        if (parent.getType().equals(SomeType.CONTENT)) return;
+        Long idParentParent = parent.getParentId().getId();
+        if (parent.getParentId() != null) setSizeForParents(size, idParentParent);
     }
 
     // download file by uuid and response
@@ -238,28 +255,12 @@ public class FileServiceImpl implements FileService {
         SomeType typeElement = storageElement.getType();
         Long size = storageElement.getSize();
 
-        StorageElement parent;
-
         StorageDto storageDto = new StorageDto();
 
         storageDto.setId(idElement);
         storageDto.setName(nameElement);
         storageDto.setType(typeElement);
-
-//        if (!typeElement.equals(SomeType.CONTENT)) {
-//            parent = storageElement.getParentId();
-//            Long sizeParent = parent.getSize();
-//            sizeParent = sizeParent + size;
-//
-//            parent.setSize(sizeParent);
-//        }
-//
-
-//
-
-
-
-
+        storageDto.setSize(size);
 
         List<StorageElement> elementChildren = getChildListElement(storageElement);
         List<StorageDto> listChildren = createListChildrenFromElementChildren(elementChildren);
