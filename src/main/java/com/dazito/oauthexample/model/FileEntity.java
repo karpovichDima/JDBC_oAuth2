@@ -17,8 +17,4 @@ public class FileEntity extends StorageElement {
 
     @Column
     private String extension;
-
-    @Column
-    private Long size;
-
 }

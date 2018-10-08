@@ -37,5 +37,6 @@ public abstract class StorageElement{
     @JsonIgnore
     private AccountEntity owner;
 
-
+    @Column
+    private Long size;
 }

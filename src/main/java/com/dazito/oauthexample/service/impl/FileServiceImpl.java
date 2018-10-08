@@ -223,18 +223,43 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
+    public StorageDto createHierarchy(Long id){
+        StorageDto storageDto = buildStorageDto(id);
+
+        return storageDto;
+    }
+
+    @Override
     public StorageDto buildStorageDto(Long id) {
         StorageElement storageElement = findByIdInStorageRepo(id);
 
         Long idElement = storageElement.getId();
         String nameElement = storageElement.getName();
         SomeType typeElement = storageElement.getType();
+        Long size = storageElement.getSize();
+
+        StorageElement parent;
 
         StorageDto storageDto = new StorageDto();
 
         storageDto.setId(idElement);
         storageDto.setName(nameElement);
         storageDto.setType(typeElement);
+
+//        if (!typeElement.equals(SomeType.CONTENT)) {
+//            parent = storageElement.getParentId();
+//            Long sizeParent = parent.getSize();
+//            sizeParent = sizeParent + size;
+//
+//            parent.setSize(sizeParent);
+//        }
+//
+
+
+
+
+
+
 
         List<StorageElement> elementChildren = getChildListElement(storageElement);
         List<StorageDto> listChildren = createListChildrenFromElementChildren(elementChildren);
@@ -244,12 +269,15 @@ public class FileServiceImpl implements FileService {
         return storageDto;
     }
 
-    public StorageDto createHierarchy(Long id){
-        StorageDto storageDto = buildStorageDto(id);
-
-        return storageDto;
+    @Override
+    public List<StorageDto> createListChildrenFromElementChildren(List<StorageElement> elementChildren) {
+        List<StorageDto> listChildren = new ArrayList<>();
+        for (StorageElement element : elementChildren) {
+            long elementId = element.getId();
+            listChildren.add(buildStorageDto(elementId));
+        }
+        return listChildren;
     }
-
 
     @Override
     public StorageElement findByIdInStorageRepo(Long id) {
@@ -286,16 +314,6 @@ public class FileServiceImpl implements FileService {
     @Override
     public List<StorageElement> getChildListElement(StorageElement storageElement) {
         return storageRepository.findByParentId(storageElement);
-    }
-
-    @Override
-    public List<StorageDto> createListChildrenFromElementChildren(List<StorageElement> elementChildren) {
-        List<StorageDto> listChildren = new ArrayList<>();
-        for (StorageElement element : elementChildren) {
-            long elementId = element.getId();
-            listChildren.add(buildStorageDto(elementId));
-        }
-        return listChildren;
     }
 
     @Override

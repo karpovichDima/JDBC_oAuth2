@@ -16,5 +16,6 @@ public class StorageDto implements Serializable {
     Long id;
     String name;
     SomeType type;
+    long size;
     List<StorageDto> children;
 }
