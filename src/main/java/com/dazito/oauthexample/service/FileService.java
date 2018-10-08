@@ -30,38 +30,14 @@ public interface FileService{
      */
     ResponseEntity<Resource> download(String uuid) throws IOException;
 
-    /**
-     * create root point for all user directories
-     * @param newUser the user for which we will create the root point
-     * @return Content is root point object
-     */
     Content createContent(AccountEntity newUser);
 
-    /**
-     * create Directory
-     * @param directoryDto is the object from which we take the folder name and the parent element
-     * @return DirectoryCreated is a response object, which indicates that the directory was successfully created
-     */
     DirectoryCreated createDirectory(DirectoryDto directoryDto);
 
-    /**
-     * look for the Storage Element in different ways depending on the parameter passed
-     * @param parentId this is the parent element by which we will search for the storage element
-     * @return StorageElement is found object
-     */
     StorageElement findStorageElementDependingOnTheParent(Long parentId);
 
-    /**
-     * generate uuid and convert to string
-     * @return String uuid
-     */
     String generateStringUuid();
 
-    /**
-     * generate uuid and convert to string
-     * @param fileEntity
-     * @return FileUploadResponse is a response object, which indicates that the file was successfully uploaded
-     */
     FileUploadResponse responseFileUploaded(FileEntity fileEntity);
 
     Path setFilePathDependingOnTheUserRole(AccountEntity currentUser, String uuid);
