@@ -237,9 +237,12 @@ public class FileServiceImpl implements FileService {
         storageDto.setType(typeElement);
 
         List<StorageElement> elementChildren = getChildListElement(storageElement);
-        List<StorageDto> listChildren = createListChildrenFromElementChildren(elementChildren);
 
-        storageDto.setChildren(listChildren);
+        List<StorageDto> listChildrenFiles = getListChildrenFromElementChildrenDependingOnType(SomeType.FILE, elementChildren);
+        storageDto.setChildrenFiles(listChildrenFiles);
+
+        List<StorageDto> listChildrenDirs = getListChildrenFromElementChildrenDependingOnType(SomeType.DIRECTORY, elementChildren);
+        storageDto.setChildrenDirectories(listChildrenDirs);
 
         return storageDto;
     }
@@ -282,12 +285,16 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public List<StorageDto> createListChildrenFromElementChildren(List<StorageElement> elementChildren) {
+    public List<StorageDto> getListChildrenFromElementChildrenDependingOnType(SomeType someType,
+                                                                                   List<StorageElement> elementChildren) {
         List<StorageDto> listChildren = new ArrayList<>();
+
         for (StorageElement element : elementChildren) {
+            SomeType type = element.getType();
             long elementId = element.getId();
-            listChildren.add(buildStorageDto(elementId));
+            if (type.equals(someType))listChildren.add(buildStorageDto(elementId));
         }
+                
         return listChildren;
     }
 

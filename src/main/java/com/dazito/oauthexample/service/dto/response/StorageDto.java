@@ -11,10 +11,11 @@ import java.util.List;
 @Getter
 public class StorageDto implements Serializable {
 
-    private final static long serialVersionUID = 60902145;
+    private final static long serialVersionUID = 865767972;
 
     Long id;
     String name;
     SomeType type;
-    List<StorageDto> children;
+    List<StorageDto> childrenDirectories;
+    List<StorageDto> childrenFiles;
 }

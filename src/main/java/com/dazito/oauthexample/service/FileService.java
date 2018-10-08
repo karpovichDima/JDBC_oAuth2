@@ -1,6 +1,7 @@
 package com.dazito.oauthexample.service;
 
 import com.dazito.oauthexample.model.*;
+import com.dazito.oauthexample.model.type.SomeType;
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
 import com.dazito.oauthexample.service.dto.response.DirectoryCreated;
 import com.dazito.oauthexample.service.dto.response.FileUploadResponse;
@@ -74,7 +75,6 @@ public interface FileService{
 
     StorageDto buildStorageDto(Long id);
 
-
     StorageElement findByIdInStorageRepo(Long id);
 
     StorageElement findByNameInStorageRepo(String name);
@@ -87,8 +87,8 @@ public interface FileService{
 
     List<StorageElement> getChildListElement(StorageElement storageElement);
 
-    List<StorageDto> createListChildrenFromElementChildren(List<StorageElement> elementChildren);
-
+    List<StorageDto> getListChildrenFromElementChildrenDependingOnType(SomeType someType,
+                                                                       List<StorageElement> elementChildren);
     /**
      * check matches if of the current user and if ot the file owner
      * @param idCurrent is id of the current user

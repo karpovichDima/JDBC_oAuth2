@@ -5,7 +5,6 @@ import com.dazito.oauthexample.service.dto.request.DirectoryDto;
 import com.dazito.oauthexample.service.dto.response.DirectoryCreated;
 import com.dazito.oauthexample.service.dto.response.FileUploadResponse;
 import com.dazito.oauthexample.service.dto.response.StorageDto;
-import com.dazito.oauthexample.service.impl.FileServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
@@ -58,7 +57,6 @@ public class FileController {
     public StorageDto createHierarchy(@PathVariable Long id) throws IOException {
         return fileService.buildStorageDto(id);
     }
-
 
     @Bean
     public MultipartConfigElement multipartConfigElement() {
