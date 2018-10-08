@@ -101,11 +101,6 @@ public interface UserService {
      */
     AccountDto convertAccountToDto(AccountEntity accountEntity);
 
-    /**
-     * converting AccountDto to AccountEntity
-     * @param accountDto is user which we will convert to AccountEntity
-     * @return AccountEntity
-     */
     AccountEntity convertAccountToEntity(AccountDto accountDto);
 
     /**
@@ -121,7 +116,6 @@ public interface UserService {
 
     EmailNameDto responseDto(AccountEntity accountEntity);
 
-    Long getCountUsersWithContent();
 
 
 

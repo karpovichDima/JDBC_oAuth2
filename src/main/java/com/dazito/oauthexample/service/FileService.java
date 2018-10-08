@@ -46,10 +46,10 @@ public interface FileService{
     /**
      * look for the Storage Element in different ways depending on the parameter passed
      * @param parentId this is the parent element by which we will search for the storage element
+     * @param organization this is the organization by which we will search for the storage element
      * @return StorageElement is found object
      */
-    StorageElement findStorageElementDependingOnTheParent(Long parentId);
-
+    StorageElement findStorageElementDependingOnTheParent(Long parentId, Organization organization);
     /**
      * generate uuid and convert to string
      * @return String uuid
@@ -99,6 +99,8 @@ public interface FileService{
     DirectoryCreated responseDirectoryCreated(Directory directory);
 
     File createMultiplyPath(String path);
+
+    void setSizeForParents(Long size, Long parentId);
 
 
 

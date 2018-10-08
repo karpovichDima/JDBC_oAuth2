@@ -56,6 +56,7 @@ public class FileServiceImpl implements FileService {
         String originalFilename = file.getOriginalFilename();
 
         AccountEntity currentUser = userServices.getCurrentUser();
+        Organization organization = currentUser.getOrganization();
         UserRole role = currentUser.getRole();
         String rootReference = currentUser.getContent().getRoot();
         Path rootPath;
@@ -81,7 +82,7 @@ public class FileServiceImpl implements FileService {
         fileEntity.setSize(size);
         fileEntity.setExtension(extension);
 
-        StorageElement foundStorageElement = findStorageElementDependingOnTheParent(parentId);
+        StorageElement foundStorageElement = findStorageElementDependingOnTheParent(parentId, organization);
 
         fileEntity.setParentId(foundStorageElement);
 
@@ -92,9 +93,11 @@ public class FileServiceImpl implements FileService {
         return responseFileUploaded(fileEntity);
     }
 
-    private void setSizeForParents(Long size, Long parentId) {
+    @Override
+    public void setSizeForParents(Long size, Long parentId) {
 
         StorageElement parent = findByIdInStorageRepo(parentId);
+        if (parent == null) return;
         Long sizeParent = parent.getSize();
         sizeParent = sizeParent + size;
         parent.setSize(sizeParent);
@@ -134,6 +137,7 @@ public class FileServiceImpl implements FileService {
 
         UserRole role = newUser.getRole();
         String nameNewFolder = newUser.getEmail();
+        Organization organization = newUser.getOrganization();
 
         Content content = new Content();
 
@@ -144,12 +148,13 @@ public class FileServiceImpl implements FileService {
                 content.setRoot(root + File.separator + nameNewFolder);
                 break;
             case ADMIN:
-                content.setName(contentName);
+                content.setName("CONTENT_" + organization.getOrganizationName());
                 content.setRoot(root.toString());
                 break;
         }
         content.setOwner(newUser);
         content.setParentId(null);
+        content.setSize(0L);
 
         return content;
     }
@@ -165,6 +170,7 @@ public class FileServiceImpl implements FileService {
 
         Directory directory = new Directory();
         directory.setName(name);
+        directory.setSize(0L);
 
         if (parent_id == 0) {
             foundParentElement = findByNameInStorageRepo("CONTENT");
@@ -183,12 +189,12 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public StorageElement findStorageElementDependingOnTheParent(Long parentId) {
+    public StorageElement findStorageElementDependingOnTheParent(Long parentId, Organization organization) {
         StorageElement foundStorageElement;
         if (parentId != 0){
             foundStorageElement = findByIdInStorageRepo(parentId);
         }else{
-            foundStorageElement = findByNameInStorageRepo("CONTENT");
+            foundStorageElement = findByNameInStorageRepo("CONTENT_" + organization.getOrganizationName());
         }
         return foundStorageElement;
     }

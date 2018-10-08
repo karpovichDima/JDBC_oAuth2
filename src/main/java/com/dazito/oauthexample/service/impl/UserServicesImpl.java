@@ -137,15 +137,17 @@ public class UserServicesImpl implements UserService {
 
         String encodedPassword = passwordEncode(password);
 
+        Organization organization = findOrganizationByName(organizationName);
+
         newUser.setPassword(encodedPassword);
         newUser.setUsername(userName);
         newUser.setIsActivated(isActivated);
         newUser.setRole(role);
-        newUser.setOrganization(findOrganizationByName(organizationName));
+        newUser.setOrganization(organization);
 
         Content rootContent = null;
 
-        if (getCountUsersWithContent() < 1 || role.equals(UserRole.USER)) {
+        if (getCountUsersWithContentByOrganization(organization) < 1 || role.equals(UserRole.USER)) {
             rootContent = fileService.createContent(newUser);
         }
 
@@ -314,9 +316,8 @@ public class UserServicesImpl implements UserService {
         return emailNameDto;
     }
 
-    @Override
-    public Long getCountUsersWithContent(){
-        return accountRepository.countAccountEntitiesByRoleAndContentIsNotNull(UserRole.ADMIN);
+    public Long getCountUsersWithContentByOrganization(Organization organization){
+        return accountRepository.countAccountEntitiesByRoleAndContentIsNotNullAndOrganization_OrganizationName(UserRole.ADMIN, organization.getOrganizationName());
     }
 
 }
