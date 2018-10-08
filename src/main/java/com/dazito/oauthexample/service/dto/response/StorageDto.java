@@ -17,5 +17,7 @@ public class StorageDto implements Serializable {
     String name;
     SomeType type;
     long size;
-    List<StorageDto> children;
+    List<StorageDto> childrenFiles;
+    List<StorageDto> childrenDirectories;
+
 }

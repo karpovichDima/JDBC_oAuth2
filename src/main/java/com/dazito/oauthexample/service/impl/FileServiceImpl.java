@@ -241,9 +241,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public StorageDto createHierarchy(Long id){
-        StorageDto storageDto = buildStorageDto(id);
-
-        return storageDto;
+        return buildStorageDto(id);
     }
 
     @Override
@@ -263,21 +261,21 @@ public class FileServiceImpl implements FileService {
         storageDto.setSize(size);
 
         List<StorageElement> elementChildren = getChildListElement(storageElement);
-        List<StorageDto> listChildren = createListChildrenFromElementChildren(elementChildren);
 
-        storageDto.setChildren(listChildren);
+        List<StorageDto> listChildrenDirectories = new ArrayList<>();
+        List<StorageDto> listChildrenFiles = new ArrayList<>();
+
+        for (StorageElement element : elementChildren){
+            SomeType type = element.getType();
+            long elementId = element.getId();
+            if (type.equals(SomeType.DIRECTORY)) listChildrenDirectories.add(buildStorageDto(elementId));
+            if (type.equals(SomeType.FILE)) listChildrenFiles.add(buildStorageDto(elementId));
+        }
+
+        storageDto.setChildrenDirectories(listChildrenDirectories);
+        storageDto.setChildrenFiles(listChildrenFiles);
 
         return storageDto;
-    }
-
-    @Override
-    public List<StorageDto> createListChildrenFromElementChildren(List<StorageElement> elementChildren) {
-        List<StorageDto> listChildren = new ArrayList<>();
-        for (StorageElement element : elementChildren) {
-            long elementId = element.getId();
-            listChildren.add(buildStorageDto(elementId));
-        }
-        return listChildren;
     }
 
     @Override

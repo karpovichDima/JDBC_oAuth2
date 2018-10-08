@@ -88,8 +88,6 @@ public interface FileService{
 
     List<StorageElement> getChildListElement(StorageElement storageElement);
 
-    List<StorageDto> createListChildrenFromElementChildren(List<StorageElement> elementChildren);
-
     /**
      * check matches if of the current user and if ot the file owner
      * @param idCurrent is id of the current user
