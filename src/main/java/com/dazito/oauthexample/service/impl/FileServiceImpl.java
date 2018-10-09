@@ -187,9 +187,9 @@ public class FileServiceImpl implements FileService {
     @Override
     public StorageElement findStorageElementDependingOnTheParent(Long parentId, Organization organization) {
         StorageElement foundStorageElement;
-        if (parentId != 0){
+        if (parentId != 0) {
             foundStorageElement = findByIdInStorageRepo(parentId);
-        }else{
+        } else {
             foundStorageElement = findByNameInStorageRepo("CONTENT_" + organization.getOrganizationName());
         }
         return foundStorageElement;
@@ -199,7 +199,7 @@ public class FileServiceImpl implements FileService {
     public String generateStringUuid() {
         UUID uuid = UUID.randomUUID();
         return uuid + "";
-}
+    }
 
     @Override
     public FileUploadResponse responseFileUploaded(FileEntity fileEntity) {
@@ -220,7 +220,7 @@ public class FileServiceImpl implements FileService {
     public Path setFilePathDependingOnTheUserRole(AccountEntity currentUser, String uuid) {
         UserRole role = currentUser.getRole();
         Path filePath;
-        if (role.equals(UserRole.USER)){
+        if (role.equals(UserRole.USER)) {
             filePath = Paths.get(currentUser.getContent().getRoot(), uuid);
         } else {
             filePath = Paths.get(root.toString(), uuid);
@@ -242,7 +242,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public StorageDto createHierarchy(Long id){
+    public StorageDto createHierarchy(Long id) {
         return buildStorageDto(id);
     }
 
@@ -255,39 +255,38 @@ public class FileServiceImpl implements FileService {
         SomeType typeElement = storageElement.getType();
         Long size = storageElement.getSize();
 
-        StorageDtoFile storageDtoFile;
-        StorageDtoDir storageDtoDir;
+        StorageDto storageDto;
 
         if (typeElement.equals(SomeType.FILE)) {
-            storageDtoFile = new StorageDtoFile();
-            storageDtoFile.setId(idElement);
-            storageDtoFile.setName(nameElement);
-            storageDtoFile.setType(typeElement);
-            storageDtoFile.setSize(size);
-            return storageDtoFile;
+            storageDto = new StorageDtoFile();
         } else {
-            storageDtoDir = new StorageDtoDir();
-            storageDtoDir.setId(idElement);
-            storageDtoDir.setName(nameElement);
-            storageDtoDir.setType(typeElement);
-            storageDtoDir.setSize(size);
-
-            List<StorageElement> elementChildren = getChildListElement(storageElement);
-
-            List<StorageDto> listChildrenDirectories = new ArrayList<>();
-            List<StorageDto> listChildrenFiles = new ArrayList<>();
-
-            for (StorageElement element : elementChildren){
-                SomeType type = element.getType();
-                long elementId = element.getId();
-                if (type.equals(SomeType.DIRECTORY)) listChildrenDirectories.add(buildStorageDto(elementId));
-                if (type.equals(SomeType.FILE)) listChildrenFiles.add(buildStorageDto(elementId));
-            }
-
-            storageDtoDir.setChildrenDirectories(listChildrenDirectories);
-            storageDtoDir.setChildrenFiles(listChildrenFiles);
-            return storageDtoDir;
+            storageDto = new StorageDtoDir();
         }
+
+        storageDto.setId(idElement);
+        storageDto.setName(nameElement);
+        storageDto.setType(typeElement);
+        storageDto.setSize(size);
+
+        if (typeElement.equals(SomeType.FILE)) return storageDto;
+
+        List<StorageElement> elementChildren = getChildListElement(storageElement);
+
+        List<StorageDto> listChildrenDirectories = new ArrayList<>();
+        List<StorageDto> listChildrenFiles = new ArrayList<>();
+
+        for (StorageElement element : elementChildren) {
+            SomeType type = element.getType();
+            long elementId = element.getId();
+            if (type.equals(SomeType.DIRECTORY)) listChildrenDirectories.add(buildStorageDto(elementId));
+            if (type.equals(SomeType.FILE)) listChildrenFiles.add(buildStorageDto(elementId));
+        }
+
+        StorageDtoDir storageDtoDirectory = (StorageDtoDir) storageDto;
+        storageDtoDirectory.setChildrenDirectories(listChildrenDirectories);
+        storageDtoDirectory.setChildrenFiles(listChildrenFiles);
+
+        return storageDto;
     }
 
     @Override
@@ -309,14 +308,14 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public StorageElement getStorageIfOptionalNotNull(Optional<StorageElement> storageOptional){
+    public StorageElement getStorageIfOptionalNotNull(Optional<StorageElement> storageOptional) {
         boolean checkOnNull = userServices.checkOptionalOnNull(storageOptional);
         if (!checkOnNull) return null;
         return storageOptional.get();
     }
 
     @Override
-    public FileEntity getFileIfOptionalNotNull(Optional<FileEntity> fileOptional){
+    public FileEntity getFileIfOptionalNotNull(Optional<FileEntity> fileOptional) {
         boolean checkOnNull = userServices.checkOptionalOnNull(fileOptional);
         if (!checkOnNull) return null;
         return fileOptional.get();
