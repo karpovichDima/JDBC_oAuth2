@@ -83,8 +83,7 @@ public interface FileService{
      * @param id of the object from which we will begin the hierarchy
      * @return new object of the hierarchy
      */
-    StorageDto buildStorageDto(Long id);
-
+    StorageDto buildStorageDto(Long id, StorageDto storageDtoParent);
     /**
      * the method that starts the creation of the hierarchy
      * is needed in order to process the object after recursion
@@ -118,8 +117,7 @@ public interface FileService{
 
     File createMultiplyPath(String path);
 
-    void setSizeForParents(Long size, Long parentId);
-
+    void setSizeForParents(Long size, StorageDto storageDtoParent);
 
 
 

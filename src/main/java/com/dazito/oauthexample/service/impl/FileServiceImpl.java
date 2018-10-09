@@ -90,17 +90,15 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public void setSizeForParents(Long size, Long parentId) {
+    public void setSizeForParents(Long size, StorageDto storageDtoParent) {
 
-        StorageElement parent = findByIdInStorageRepo(parentId);
-        if (parent == null) return;
-        Long sizeParent = parent.getSize();
+        if (storageDtoParent == null) return;
+        Long sizeParent = storageDtoParent.getSize();
         sizeParent = sizeParent + size;
-        parent.setSize(sizeParent);
-        storageRepository.saveAndFlush(parent);
-        if (parent.getType().equals(SomeType.CONTENT)) return;
-        Long idParentParent = parent.getParentId().getId();
-        if (parent.getParentId() != null) setSizeForParents(size, idParentParent);
+        storageDtoParent.setSize(sizeParent);
+        if (storageDtoParent.getType().equals(SomeType.CONTENT)) return;
+        StorageDto preParent = storageDtoParent.getParent();
+        if (storageDtoParent.getParent() != null) setSizeForParents(size, preParent);
     }
 
     // download file by uuid and response
@@ -243,11 +241,11 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public StorageDto createHierarchy(Long id) {
-        return buildStorageDto(id);
+        return buildStorageDto(id, null);
     }
 
     @Override
-    public StorageDto buildStorageDto(Long id) {
+    public StorageDto buildStorageDto(Long id, StorageDto storageDtoParent) {
         StorageElement storageElement = findByIdInStorageRepo(id);
 
         Long idElement = storageElement.getId();
@@ -266,9 +264,14 @@ public class FileServiceImpl implements FileService {
         storageDto.setId(idElement);
         storageDto.setName(nameElement);
         storageDto.setType(typeElement);
-        storageDto.setSize(size);
+        storageDto.setParent(storageDtoParent);
 
-        if (typeElement.equals(SomeType.FILE)) return storageDto;
+        if (typeElement.equals(SomeType.FILE)) {
+            setSizeForParents(size, storageDto);
+            return storageDto;
+        }
+
+        storageDto.setSize(size);
 
         List<StorageElement> elementChildren = getChildListElement(storageElement);
 
@@ -278,8 +281,8 @@ public class FileServiceImpl implements FileService {
         for (StorageElement element : elementChildren) {
             SomeType type = element.getType();
             long elementId = element.getId();
-            if (type.equals(SomeType.DIRECTORY)) listChildrenDirectories.add(buildStorageDto(elementId));
-            if (type.equals(SomeType.FILE)) listChildrenFiles.add(buildStorageDto(elementId));
+            if (type.equals(SomeType.DIRECTORY)) listChildrenDirectories.add(buildStorageDto(elementId, storageDto));
+            if (type.equals(SomeType.FILE)) listChildrenFiles.add(buildStorageDto(elementId, storageDto));
         }
 
         StorageDtoDir storageDtoDirectory = (StorageDtoDir) storageDto;

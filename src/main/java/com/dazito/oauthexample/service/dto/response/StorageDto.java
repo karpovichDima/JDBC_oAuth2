@@ -1,6 +1,7 @@
 package com.dazito.oauthexample.service.dto.response;
 
 import com.dazito.oauthexample.model.type.SomeType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,4 +17,7 @@ public class StorageDto implements Serializable {
     String name;
     SomeType type;
     long size;
+
+    @JsonIgnore
+    StorageDto parent;
 }
