@@ -7,11 +7,11 @@ import java.io.Serializable;
 
 @Setter
 @Getter
-public class DirectoryDto implements Serializable {
+public class ContentUpdateDto implements Serializable {
 
-    private final static long serialVersionUID = 395263742;
+    private final static long serialVersionUID = 424802874;
 
     private Long id;
-    private Long newParentId;
+    private String newRoot;
     private String newName;
 }

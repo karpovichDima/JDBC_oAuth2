@@ -2,6 +2,7 @@ package com.dazito.oauthexample.service;
 
 import com.dazito.oauthexample.model.*;
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
+import com.dazito.oauthexample.service.dto.request.FileUpdateDto;
 import com.dazito.oauthexample.service.dto.response.DirectoryCreated;
 import com.dazito.oauthexample.service.dto.response.FileUploadResponse;
 import com.dazito.oauthexample.service.dto.response.StorageDto;
@@ -35,13 +36,6 @@ public interface FileService{
      * @return Content is root point object
      */
     Content createContent(AccountEntity newUser);
-
-    /**
-     * create Directory
-     * @param directoryDto is the object from which we take the folder name and the parent element
-     * @return DirectoryCreated is a response object, which indicates that the directory was successfully created
-     */
-    DirectoryCreated createDirectory(DirectoryDto directoryDto);
 
     /**
      * look for the Storage Element in different ways depending on the parameter passed
@@ -113,19 +107,19 @@ public interface FileService{
      */
     boolean matchesOwner(Long idCurrent, Long ownerId);
 
-    DirectoryCreated responseDirectoryCreated(Directory directory);
 
     File createMultiplyPath(String path);
 
     void setSizeForParents(Long size, StorageDto storageDtoParent);
 
 
+    FileUploadResponse editFile(FileUpdateDto fileUpdateDto);
 
+    FileUploadResponse updateFile(MultipartFile file, String uuid) throws IOException;
 
+    boolean checkPermissionsOnStorageChanges(AccountEntity currentUser, AccountEntity owner, StorageElement foundFile);
 
+    boolean matchesOrganizations(Organization organizationUser, Organization organizationFile);
 
-
-
-
-
+    void deleteStorage(Long id);
 }

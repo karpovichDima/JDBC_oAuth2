@@ -8,6 +8,7 @@ import com.dazito.oauthexample.model.type.UserRole;
 import com.dazito.oauthexample.service.FileService;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
+import com.dazito.oauthexample.service.dto.request.FileUpdateDto;
 import com.dazito.oauthexample.service.dto.response.*;
 import liquibase.util.file.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,6 +103,126 @@ public class FileServiceImpl implements FileService {
         if (storageDtoParent.getParent() != null) setSizeForParents(size, preParent);
     }
 
+    @Override
+    public FileUploadResponse editFile(FileUpdateDto fileUpdateDto) {
+
+        AccountEntity currentUser = userServices.getCurrentUser();
+
+        String name = fileUpdateDto.getNewName();
+        Long parent = fileUpdateDto.getNewParentId();
+        String uuid = fileUpdateDto.getUuid();
+
+        FileEntity foundFile = findByUUIDInFileRepo(uuid);
+        AccountEntity owner = foundFile.getOwner();
+
+        boolean canChange = checkPermissionsOnStorageChanges(currentUser, owner, foundFile);
+        if (!canChange) return null;
+
+        StorageElement newParent = findByIdInStorageRepo(parent);
+        foundFile.setName(name);
+        foundFile.setParentId(newParent);
+
+        fileRepository.saveAndFlush(foundFile);
+
+        return responseFileUploaded(foundFile);
+    }
+
+    @Override
+    public FileUploadResponse updateFile(MultipartFile file, String uuid) throws IOException {
+        if (file == null)return null;
+
+        AccountEntity currentUser = userServices.getCurrentUser();
+        FileEntity foundFile = findByUUIDInFileRepo(uuid);
+        if (foundFile == null) return null;
+        Long parentId = foundFile.getParentId().getId();
+        AccountEntity owner = foundFile.getOwner();
+        Organization organization = currentUser.getOrganization();
+
+        boolean canChange = checkPermissionsOnStorageChanges(currentUser, owner, foundFile);
+        if (!canChange) return null;
+
+        UserRole role = currentUser.getRole();
+        String rootReference = currentUser.getContent().getRoot();
+        Path rootPath;
+
+        rootPath = this.root;
+        if (role == UserRole.USER) rootPath = Paths.get(rootReference);
+        if (!Files.exists(rootPath)) return null;
+
+        String originalFilename = file.getOriginalFilename();
+        String extension = FilenameUtils.getExtension(originalFilename);
+
+        String name = foundFile.getName();
+
+        String pathNewFile = rootPath + File.separator + uuid;
+        file.transferTo(new File(pathNewFile));
+
+        Long size = file.getSize();
+
+        FileEntity fileEntity = new FileEntity();
+        fileEntity.setName(name);
+        fileEntity.setUuid(uuid);
+        fileEntity.setOwner(currentUser);
+        fileEntity.setSize(size);
+        fileEntity.setExtension(extension);
+        fileEntity.setOrganization(currentUser.getOrganization());
+
+        storageRepository.delete(foundFile);
+
+        StorageElement foundStorageElement = findStorageElementDependingOnTheParent(parentId, organization);
+
+        fileEntity.setParentId(foundStorageElement);
+
+        storageRepository.saveAndFlush(fileEntity);
+
+        return responseFileUploaded(fileEntity);
+    }
+
+    public boolean checkPermissionsOnStorageChanges(AccountEntity currentUser, AccountEntity owner, StorageElement foundFile) {
+        boolean checkedOnTheAdmin = userServices.adminRightsCheck(currentUser);
+        if (!checkedOnTheAdmin) {
+            boolean checkedMatchesOwner = matchesOwner(currentUser.getId(), owner.getId());
+            if (!checkedMatchesOwner) return false;
+        }
+        Organization organizationUser = currentUser.getOrganization();
+        Organization organizationFile = foundFile.getOrganization();
+
+        boolean checkedMatchesOrganization = matchesOrganizations(organizationUser, organizationFile);
+        if(!checkedMatchesOrganization) return false;
+        return true;
+    }
+
+    public boolean matchesOrganizations(Organization organizationUser, Organization organizationFile) {
+        String organizationNameUser = organizationUser.getOrganizationName();
+        String organizationNameFile = organizationFile.getOrganizationName();
+        return organizationNameUser.equals(organizationNameFile);
+    }
+
+    @Override
+    public void deleteStorage(Long id) {
+        AccountEntity currentUser = userServices.getCurrentUser();
+        StorageElement foundStorage = findByIdInStorageRepo(id);
+        AccountEntity owner = foundStorage.getOwner();
+        SomeType type = foundStorage.getType();
+
+        boolean canChange = checkPermissionsOnStorageChanges(currentUser,owner,foundStorage);
+        if (!canChange) return;
+
+        if (!type.equals(SomeType.FILE)){
+            List<StorageElement> listChildren = storageRepository.findByParentId(foundStorage);
+            deleteChildFiles(listChildren);
+        }
+        storageRepository.delete(id);
+    }
+
+    private void deleteChildFiles(List<StorageElement> listChildren) {
+        for (StorageElement element : listChildren) {
+            List<StorageElement> listChildrenElement = storageRepository.findByParentId(element);
+            storageRepository.delete(element);
+            if (listChildrenElement != null) deleteChildFiles(listChildrenElement);
+        }
+    }
+
     // download file by uuid and response
     @Override
     public ResponseEntity<org.springframework.core.io.Resource> download(String uuid) throws IOException {
@@ -152,36 +273,6 @@ public class FileServiceImpl implements FileService {
         content.setOrganization(organization);
 
         return content;
-    }
-
-    // create new Directory by parent id and name
-    @Override
-    public DirectoryCreated createDirectory(DirectoryDto directoryDto) {
-        AccountEntity currentUser = userServices.getCurrentUser();
-        String name = directoryDto.getName();
-        Long parent_id = directoryDto.getParentId();
-
-        StorageElement foundParentElement;
-
-        Directory directory = new Directory();
-        directory.setName(name);
-        directory.setSize(0L);
-        directory.setOrganization(currentUser.getOrganization());
-
-        if (parent_id == 0) {
-            foundParentElement = findByNameInStorageRepo("CONTENT");
-        } else {
-            foundParentElement = findByIdInStorageRepo(parent_id);
-            SomeType type = foundParentElement.getType();
-            if (type.equals(SomeType.FILE)) return null;
-        }
-
-        directory.setParentId(foundParentElement);
-        directory.setOwner(currentUser);
-
-        storageRepository.saveAndFlush(directory);
-
-        return responseDirectoryCreated(directory);
     }
 
     @Override
@@ -334,20 +425,6 @@ public class FileServiceImpl implements FileService {
     @Override
     public boolean matchesOwner(Long idCurrent, Long ownerId) {
         return Objects.equals(idCurrent, ownerId);
-    }
-
-    @Override
-    public DirectoryCreated responseDirectoryCreated(Directory directory) {
-        String nameDir = directory.getName();
-        StorageElement parentDir = directory.getParentId();
-        Long idDir = parentDir.getId();
-
-        DirectoryCreated directoryResponseDto = new DirectoryCreated();
-
-        directoryResponseDto.setName(nameDir);
-        directoryResponseDto.setParentId(idDir);
-
-        return directoryResponseDto;
     }
 
     @Override

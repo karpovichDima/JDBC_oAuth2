@@ -2,6 +2,8 @@ package com.dazito.oauthexample.controller;
 
 import com.dazito.oauthexample.service.FileService;
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
+import com.dazito.oauthexample.service.dto.request.DtoForEditingPersonalData;
+import com.dazito.oauthexample.service.dto.request.FileUpdateDto;
 import com.dazito.oauthexample.service.dto.response.DirectoryCreated;
 import com.dazito.oauthexample.service.dto.response.FileUploadResponse;
 import com.dazito.oauthexample.service.dto.response.StorageDto;
@@ -47,17 +49,30 @@ public class FileController {
         return fileService.download(uuid);
     }
 
-    @PostMapping("/dir")
-    @ResponseStatus(value = HttpStatus.OK)
-    public DirectoryCreated createDirectory(@RequestBody DirectoryDto directoryDto) {
-        return fileService.createDirectory(directoryDto);
-    }
-
     @GetMapping("/chierarchy/{id:.+}")
     @ResponseStatus(value = HttpStatus.OK)
     public StorageDto createHierarchy(@PathVariable Long id) throws IOException {
         return fileService.createHierarchy(id);
     }
+
+    @PatchMapping("/update")
+    @ResponseStatus(value = HttpStatus.OK)
+    public FileUploadResponse updateFile(@RequestBody FileUpdateDto fileUpdateDto) throws IOException {
+        return fileService.editFile(fileUpdateDto);
+    }
+
+    @PostMapping("/update/{uuid:.+}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public FileUploadResponse updateFile(@RequestParam MultipartFile file, @PathVariable String uuid) throws IOException {
+        return fileService.updateFile(file, uuid);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public void deleteFiles(@PathVariable Long id){
+        fileService.deleteStorage(id);
+    }
+
 
 
     @Bean
