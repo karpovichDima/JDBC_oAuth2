@@ -63,6 +63,12 @@ public interface FileService{
      */
     FileUploadResponse responseFileUploaded(FileEntity fileEntity);
 
+    /**
+     * generate uuid and convert to string
+     * @param currentUser
+     * @param uuid
+     * @return FileUploadResponse is a response object, which indicates that the file was successfully uploaded
+     */
     Path setFilePathDependingOnTheUserRole(AccountEntity currentUser, String uuid);
 
     /**
@@ -72,9 +78,21 @@ public interface FileService{
      */
     File createSinglePath(String path);
 
+    /**
+     * create hierarchy object
+     * @param id of the object from which we will begin the hierarchy
+     * @return new object of the hierarchy
+     */
     StorageDto buildStorageDto(Long id);
 
+    /**
+     * the method that starts the creation of the hierarchy
+     * is needed in order to process the object after recursion
+     * @param id of the object from which we will begin the hierarchy
+     * @return new object of the hierarchy
+     */
     StorageDto createHierarchy(Long id);
+
 
     StorageElement findByIdInStorageRepo(Long id);
 

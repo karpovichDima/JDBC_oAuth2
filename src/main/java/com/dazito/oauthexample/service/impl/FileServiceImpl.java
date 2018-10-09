@@ -86,8 +86,6 @@ public class FileServiceImpl implements FileService {
 
         fileEntity.setParentId(foundStorageElement);
 
-        setSizeForParents(size, parentId);
-
         storageRepository.saveAndFlush(fileEntity);
 
         return responseFileUploaded(fileEntity);
