@@ -8,9 +8,7 @@ import com.dazito.oauthexample.model.type.UserRole;
 import com.dazito.oauthexample.service.FileService;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
-import com.dazito.oauthexample.service.dto.response.DirectoryCreated;
-import com.dazito.oauthexample.service.dto.response.FileUploadResponse;
-import com.dazito.oauthexample.service.dto.response.StorageDto;
+import com.dazito.oauthexample.service.dto.response.*;
 import liquibase.util.file.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -257,29 +255,39 @@ public class FileServiceImpl implements FileService {
         SomeType typeElement = storageElement.getType();
         Long size = storageElement.getSize();
 
-        StorageDto storageDto = new StorageDto();
+        StorageDtoFile storageDtoFile;
+        StorageDtoDir storageDtoDir;
 
-        storageDto.setId(idElement);
-        storageDto.setName(nameElement);
-        storageDto.setType(typeElement);
-        storageDto.setSize(size);
+        if (typeElement.equals(SomeType.FILE)) {
+            storageDtoFile = new StorageDtoFile();
+            storageDtoFile.setId(idElement);
+            storageDtoFile.setName(nameElement);
+            storageDtoFile.setType(typeElement);
+            storageDtoFile.setSize(size);
+            return storageDtoFile;
+        } else {
+            storageDtoDir = new StorageDtoDir();
+            storageDtoDir.setId(idElement);
+            storageDtoDir.setName(nameElement);
+            storageDtoDir.setType(typeElement);
+            storageDtoDir.setSize(size);
 
-        List<StorageElement> elementChildren = getChildListElement(storageElement);
+            List<StorageElement> elementChildren = getChildListElement(storageElement);
 
-        List<StorageDto> listChildrenDirectories = new ArrayList<>();
-        List<StorageDto> listChildrenFiles = new ArrayList<>();
+            List<StorageDto> listChildrenDirectories = new ArrayList<>();
+            List<StorageDto> listChildrenFiles = new ArrayList<>();
 
-        for (StorageElement element : elementChildren){
-            SomeType type = element.getType();
-            long elementId = element.getId();
-            if (type.equals(SomeType.DIRECTORY)) listChildrenDirectories.add(buildStorageDto(elementId));
-            if (type.equals(SomeType.FILE)) listChildrenFiles.add(buildStorageDto(elementId));
+            for (StorageElement element : elementChildren){
+                SomeType type = element.getType();
+                long elementId = element.getId();
+                if (type.equals(SomeType.DIRECTORY)) listChildrenDirectories.add(buildStorageDto(elementId));
+                if (type.equals(SomeType.FILE)) listChildrenFiles.add(buildStorageDto(elementId));
+            }
+
+            storageDtoDir.setChildrenDirectories(listChildrenDirectories);
+            storageDtoDir.setChildrenFiles(listChildrenFiles);
+            return storageDtoDir;
         }
-
-        storageDto.setChildrenDirectories(listChildrenDirectories);
-        storageDto.setChildrenFiles(listChildrenFiles);
-
-        return storageDto;
     }
 
     @Override

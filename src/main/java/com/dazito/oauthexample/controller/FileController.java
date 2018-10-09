@@ -5,7 +5,7 @@ import com.dazito.oauthexample.service.dto.request.DirectoryDto;
 import com.dazito.oauthexample.service.dto.response.DirectoryCreated;
 import com.dazito.oauthexample.service.dto.response.FileUploadResponse;
 import com.dazito.oauthexample.service.dto.response.StorageDto;
-import com.dazito.oauthexample.service.impl.FileServiceImpl;
+import com.dazito.oauthexample.service.dto.response.StorageDtoFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
