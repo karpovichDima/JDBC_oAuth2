@@ -39,4 +39,9 @@ public abstract class StorageElement{
 
     @Column
     private Long size;
+
+    @ManyToOne(targetEntity = Organization.class)
+    @JoinColumn(name="organization_id")
+    @JsonIgnore
+    private Organization organization;
 }

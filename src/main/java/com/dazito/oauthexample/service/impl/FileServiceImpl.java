@@ -79,6 +79,7 @@ public class FileServiceImpl implements FileService {
         fileEntity.setOwner(currentUser);
         fileEntity.setSize(size);
         fileEntity.setExtension(extension);
+        fileEntity.setOrganization(currentUser.getOrganization());
 
         StorageElement foundStorageElement = findStorageElementDependingOnTheParent(parentId, organization);
 
@@ -146,9 +147,9 @@ public class FileServiceImpl implements FileService {
                 content.setRoot(root.toString());
                 break;
         }
-        content.setOwner(newUser);
         content.setParentId(null);
         content.setSize(0L);
+        content.setOrganization(organization);
 
         return content;
     }
@@ -165,6 +166,7 @@ public class FileServiceImpl implements FileService {
         Directory directory = new Directory();
         directory.setName(name);
         directory.setSize(0L);
+        directory.setOrganization(currentUser.getOrganization());
 
         if (parent_id == 0) {
             foundParentElement = findByNameInStorageRepo("CONTENT");

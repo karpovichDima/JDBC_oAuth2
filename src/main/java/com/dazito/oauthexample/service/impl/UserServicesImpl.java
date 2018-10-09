@@ -3,6 +3,7 @@ package com.dazito.oauthexample.service.impl;
 import com.dazito.oauthexample.config.oauth.UserDetailsConfig;
 import com.dazito.oauthexample.dao.AccountRepository;
 import com.dazito.oauthexample.dao.OrganizationRepo;
+import com.dazito.oauthexample.dao.StorageRepository;
 import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.model.Content;
 import com.dazito.oauthexample.model.Organization;
@@ -34,6 +35,8 @@ public class UserServicesImpl implements UserService {
     String contentName;
     @Resource(name = "conversionService")
     ConversionService conversionService;
+    @Autowired
+    StorageRepository storageRepository;
 
     private final FileService fileService;
     private final AccountRepository accountRepository;
@@ -147,7 +150,7 @@ public class UserServicesImpl implements UserService {
 
         Content rootContent = null;
 
-        if (getCountUsersWithContentByOrganization(organization) < 1 || role.equals(UserRole.USER)) {
+        if (getCountStorageWithOwnerNullAndNotNullOrganization() < 1 || role.equals(UserRole.USER)) {
             rootContent = fileService.createContent(newUser);
         }
 
@@ -316,8 +319,8 @@ public class UserServicesImpl implements UserService {
         return emailNameDto;
     }
 
-    public Long getCountUsersWithContentByOrganization(Organization organization){
-        return accountRepository.countAccountEntitiesByRoleAndContentIsNotNullAndOrganization_OrganizationName(UserRole.ADMIN, organization.getOrganizationName());
+    public Long getCountStorageWithOwnerNullAndNotNullOrganization(){
+        return storageRepository.countStorageElementByOwnerIsNullAndOrganizationIsNotNull();
     }
 
 }
