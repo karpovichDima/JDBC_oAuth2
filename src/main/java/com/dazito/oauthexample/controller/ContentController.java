@@ -24,11 +24,6 @@ public class ContentController {
         return contentService.updateContent(contentDto);
     }
 
-    @DeleteMapping("/{id}")
-    @ResponseStatus(value = HttpStatus.OK)
-    public void deleteContent(@PathVariable Long id){
-        fileService.deleteStorage(id);
-    }
 
 
 }

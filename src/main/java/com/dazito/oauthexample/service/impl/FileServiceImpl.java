@@ -208,18 +208,22 @@ public class FileServiceImpl implements FileService {
         boolean canChange = checkPermissionsOnStorageChanges(currentUser,owner,foundStorage);
         if (!canChange) return;
 
+        List<StorageElement>childChild = new ArrayList<>();
+
         if (!type.equals(SomeType.FILE)){
             List<StorageElement> listChildren = storageRepository.findByParentId(foundStorage);
-            deleteChildFiles(listChildren);
+            childChild.add(foundStorage);
+            deleteChildFiles(childChild, listChildren);
+            storageRepository.delete(childChild);
         }
-        storageRepository.delete(id);
     }
 
-    private void deleteChildFiles(List<StorageElement> listChildren) {
+    private void deleteChildFiles(List<StorageElement>childChild, List<StorageElement> listChildren) {
         for (StorageElement element : listChildren) {
+            childChild.add(element);
             List<StorageElement> listChildrenElement = storageRepository.findByParentId(element);
-            storageRepository.delete(element);
-            if (listChildrenElement != null) deleteChildFiles(listChildrenElement);
+            List<StorageElement> byParentId = storageRepository.findByParentId(element);
+            if (byParentId.size() != 0) deleteChildFiles(childChild, listChildren);
         }
     }
 
