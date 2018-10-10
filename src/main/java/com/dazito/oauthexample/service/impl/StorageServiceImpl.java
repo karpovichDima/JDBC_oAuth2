@@ -68,18 +68,16 @@ public class StorageServiceImpl implements StorageService {
     @Override
     public StorageElement findById(Long id) {
         Optional<StorageElement> storageOptional = storageRepository.findById(id);
-        if (storageOptional.isPresent()) return storageOptional.get();
-        return null;
+        return storageOptional.orElse(null);
     }
-
 
     @Override
     public StorageDto createHierarchy(Long id) {
-        return buildStorageDto(id, null);
+        return buildStorageDto(id, null, 0);
     }
 
     @Override
-    public StorageDto buildStorageDto(Long id, StorageDto storageDtoParent) {
+    public StorageDto buildStorageDto(Long id, StorageDto storageDtoParent, long sizeFileParent) {
         StorageElement storageElement = findById(id);
 
         Long idElement = storageElement.getId();
@@ -99,26 +97,66 @@ public class StorageServiceImpl implements StorageService {
         storageDto.setName(nameElement);
         storageDto.setType(typeElement);
         storageDto.setParent(storageDtoParent);
+        storageDto.setSize(sizeFileParent);
 
         if (typeElement.equals(SomeType.FILE)) {
-            setSizeForParents(size, storageDto);
+            //setSizeForParents(size, storageDto);
             return storageDto;
         }
 
-        storageDto.setSize(size);
+//        storageDto.setSize(size);
 
         List<StorageElement> elementChildren = getChildListElement(storageElement);
 
         List<StorageDto> listChildrenDirectories = new ArrayList<>();
         List<StorageDto> listChildrenFiles = new ArrayList<>();
 
+        long sizeEl = 0;
+        long sizeParent = 0;
+        long sizeFile = 0;
+        long parentSize = 0;
+        long storageDtoSize = 0;
+        SomeType type = null;
+
         for (StorageElement element : elementChildren) {
-            SomeType type = element.getType();
+            type = element.getType();
             long elementId = element.getId();
-            if (type.equals(SomeType.DIRECTORY)) listChildrenDirectories.add(buildStorageDto(elementId, storageDto));
-            if (type.equals(SomeType.FILE)) listChildrenFiles.add(buildStorageDto(elementId, storageDto));
-            //System.out.println(element+"");
+            if (type.equals(SomeType.DIRECTORY)) {
+                if (storageDtoParent != null) {
+                    sizeFile = element.getSize();
+                    parentSize = storageDtoParent.getSize() + sizeFile;
+                    storageDtoParent.setSize(parentSize);
+                    storageDtoSize = storageDto.getSize();
+                    storageDtoSize = storageDtoSize + sizeFile;
+                    storageDto.setSize(storageDtoSize);
+                }
+                listChildrenDirectories.add(buildStorageDto(elementId, storageDto, sizeFile));
+            }
+            if (type.equals(SomeType.FILE)) {
+                sizeFile = element.getSize();
+                parentSize = storageDtoParent.getSize() + sizeFile;
+                storageDtoParent.setSize(parentSize);
+                storageDtoSize = storageDto.getSize();
+                storageDtoSize = storageDtoSize + sizeFile;
+                storageDto.setSize(storageDtoSize);
+                listChildrenFiles.add(buildStorageDto(elementId, storageDto, sizeFile));
+
+
+            }
         }
+        //long finalStorageDto = storageDto.getSize() + sizeFile;
+        //storageDto.setSize(finalStorageDto);
+        if (storageDtoParent != null){
+            if (!type.equals(SomeType.FILE)) {
+                long currentSizeDto = storageDto.getSize();
+                long parentSizeDto = storageDtoParent.getSize();
+
+                parentSizeDto = parentSizeDto + currentSizeDto;
+                storageDtoParent.setSize(parentSizeDto);
+            }
+        }
+
+
         DirectoryStorageDto directoryStorageDtoDirectory = (DirectoryStorageDto) storageDto;
         directoryStorageDtoDirectory.setChildrenDirectories(listChildrenDirectories);
         directoryStorageDtoDirectory.setChildrenFiles(listChildrenFiles);

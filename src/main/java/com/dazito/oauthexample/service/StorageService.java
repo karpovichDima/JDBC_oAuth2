@@ -20,7 +20,7 @@ public interface StorageService {
      * @param id of the object from which we will begin the hierarchy
      * @return new object of the hierarchy
      */
-    StorageDto buildStorageDto(Long id, StorageDto storageDtoParent);
+    StorageDto buildStorageDto(Long id, StorageDto storageDtoParent, long sizeFile);
 
     StorageDto createHierarchy(Long id);
 
