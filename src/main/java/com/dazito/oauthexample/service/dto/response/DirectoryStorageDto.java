@@ -8,7 +8,7 @@ import java.util.List;
 
 @Setter
 @Getter
-public class StorageDtoDir extends StorageDto implements Serializable {
+public class DirectoryStorageDto extends StorageDto implements Serializable {
 
     private final static long serialVersionUID = 567567568;
 

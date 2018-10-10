@@ -7,7 +7,6 @@ import com.dazito.oauthexample.model.type.SomeType;
 import com.dazito.oauthexample.model.type.UserRole;
 import com.dazito.oauthexample.service.FileService;
 import com.dazito.oauthexample.service.UserService;
-import com.dazito.oauthexample.service.dto.request.DirectoryDto;
 import com.dazito.oauthexample.service.dto.request.FileUpdateDto;
 import com.dazito.oauthexample.service.dto.response.*;
 import liquibase.util.file.FilenameUtils;
@@ -49,7 +48,7 @@ public class FileServiceImpl implements FileService {
 
     // upload multipart file on the server
     @Override
-    public FileUploadResponse upload(MultipartFile file, Long parentId) throws IOException {
+    public FileUploadedDto upload(MultipartFile file, Long parentId) throws IOException {
         if (file == null) return null;
 
         String originalFilename = file.getOriginalFilename();
@@ -104,7 +103,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public FileUploadResponse editFile(FileUpdateDto fileUpdateDto) {
+    public FileUploadedDto editFile(FileUpdateDto fileUpdateDto) {
 
         AccountEntity currentUser = userServices.getCurrentUser();
 
@@ -128,7 +127,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public FileUploadResponse updateFile(MultipartFile file, String uuid) throws IOException {
+    public FileUploadedDto updateFile(MultipartFile file, String uuid) throws IOException {
         if (file == null)return null;
 
         AccountEntity currentUser = userServices.getCurrentUser();
@@ -297,18 +296,18 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public FileUploadResponse responseFileUploaded(FileEntity fileEntity) {
+    public FileUploadedDto responseFileUploaded(FileEntity fileEntity) {
         String name = fileEntity.getName();
         String extension = fileEntity.getExtension();
         Long size = fileEntity.getSize();
         String uuid = fileEntity.getUuid();
 
-        FileUploadResponse fileUploadResponse = new FileUploadResponse();
-        fileUploadResponse.setName(name + "." + extension);
-        fileUploadResponse.setSize(size);
-        fileUploadResponse.setReferenceToDownloadFile(downloadPath + uuid);
+        FileUploadedDto fileUploadedDto = new FileUploadedDto();
+        fileUploadedDto.setName(name + "." + extension);
+        fileUploadedDto.setSize(size);
+        fileUploadedDto.setReferenceToDownloadFile(downloadPath + uuid);
 
-        return fileUploadResponse;
+        return fileUploadedDto;
     }
 
     @Override
@@ -353,9 +352,9 @@ public class FileServiceImpl implements FileService {
         StorageDto storageDto;
 
         if (typeElement.equals(SomeType.FILE)) {
-            storageDto = new StorageDtoFile();
+            storageDto = new FileStorageDto();
         } else {
-            storageDto = new StorageDtoDir();
+            storageDto = new DirectoryStorageDto();
         }
 
         storageDto.setId(idElement);
@@ -382,9 +381,9 @@ public class FileServiceImpl implements FileService {
             if (type.equals(SomeType.FILE)) listChildrenFiles.add(buildStorageDto(elementId, storageDto));
         }
 
-        StorageDtoDir storageDtoDirectory = (StorageDtoDir) storageDto;
-        storageDtoDirectory.setChildrenDirectories(listChildrenDirectories);
-        storageDtoDirectory.setChildrenFiles(listChildrenFiles);
+        DirectoryStorageDto directoryStorageDtoDirectory = (DirectoryStorageDto) storageDto;
+        directoryStorageDtoDirectory.setChildrenDirectories(listChildrenDirectories);
+        directoryStorageDtoDirectory.setChildrenFiles(listChildrenFiles);
 
         return storageDto;
     }

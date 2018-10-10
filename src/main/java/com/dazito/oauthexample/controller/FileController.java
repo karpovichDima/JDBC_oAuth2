@@ -1,13 +1,9 @@
 package com.dazito.oauthexample.controller;
 
 import com.dazito.oauthexample.service.FileService;
-import com.dazito.oauthexample.service.dto.request.DirectoryDto;
-import com.dazito.oauthexample.service.dto.request.DtoForEditingPersonalData;
 import com.dazito.oauthexample.service.dto.request.FileUpdateDto;
-import com.dazito.oauthexample.service.dto.response.DirectoryCreated;
-import com.dazito.oauthexample.service.dto.response.FileUploadResponse;
+import com.dazito.oauthexample.service.dto.response.FileUploadedDto;
 import com.dazito.oauthexample.service.dto.response.StorageDto;
-import com.dazito.oauthexample.service.dto.response.StorageDtoFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
@@ -39,7 +35,7 @@ public class FileController {
 
     @PostMapping("/upload/{parentId}")
     @ResponseStatus(value = HttpStatus.OK)
-    public FileUploadResponse upload(@RequestParam MultipartFile file, @PathVariable Long parentId) throws IOException {
+    public FileUploadedDto upload(@RequestParam MultipartFile file, @PathVariable Long parentId) throws IOException {
         return fileService.upload(file, parentId);
     }
 
@@ -57,13 +53,13 @@ public class FileController {
 
     @PatchMapping("/update")
     @ResponseStatus(value = HttpStatus.OK)
-    public FileUploadResponse updateFile(@RequestBody FileUpdateDto fileUpdateDto) throws IOException {
+    public FileUploadedDto updateFile(@RequestBody FileUpdateDto fileUpdateDto) throws IOException {
         return fileService.editFile(fileUpdateDto);
     }
 
     @PostMapping("/update/{uuid:.+}")
     @ResponseStatus(value = HttpStatus.OK)
-    public FileUploadResponse updateFile(@RequestParam MultipartFile file, @PathVariable String uuid) throws IOException {
+    public FileUploadedDto updateFile(@RequestParam MultipartFile file, @PathVariable String uuid) throws IOException {
         return fileService.updateFile(file, uuid);
     }
 

@@ -12,10 +12,10 @@ import com.dazito.oauthexample.service.FileService;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.request.DeleteAccountDto;
-import com.dazito.oauthexample.service.dto.request.DtoForEditingPersonalData;
+import com.dazito.oauthexample.service.dto.request.EditPersonalDataDto;
 import com.dazito.oauthexample.service.dto.request.OrganizationDto;
-import com.dazito.oauthexample.service.dto.response.EmailNameDto;
-import com.dazito.oauthexample.service.dto.response.PasswordDto;
+import com.dazito.oauthexample.service.dto.response.EditedEmailNameDto;
+import com.dazito.oauthexample.service.dto.response.EditedPasswordDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
@@ -53,7 +53,7 @@ public class UserServicesImpl implements UserService {
 
     // Change user password
     @Override
-    public PasswordDto editPassword(Long id, String newPassword, String rawOldPassword) {
+    public EditedPasswordDto editPassword(Long id, String newPassword, String rawOldPassword) {
         AccountEntity foundedUser = findByIdAccountRepo(id);
         if (!checkStringOnNull(newPassword)) return null;
         if (!checkStringOnNull(rawOldPassword)) return null;
@@ -82,7 +82,7 @@ public class UserServicesImpl implements UserService {
 
     // Change user email and name, documentation on it in UserService
     @Override
-    public EmailNameDto editPersonData(Long id, DtoForEditingPersonalData personalData) {
+    public EditedEmailNameDto editPersonData(Long id, EditPersonalDataDto personalData) {
 
         String newName;
         String newEmail;
@@ -120,7 +120,7 @@ public class UserServicesImpl implements UserService {
 
     // Create a new user
     @Override
-    public EmailNameDto createUser(AccountDto accountDto) {
+    public EditedEmailNameDto createUser(AccountDto accountDto) {
 
         AccountEntity currentUser = getCurrentUser();
         String email = accountDto.getEmail();
@@ -192,7 +192,7 @@ public class UserServicesImpl implements UserService {
     }
 
     @Override
-    public PasswordDto ifMatchesTrueSetPasswordAndReturn(boolean matches, String encodedPassword, AccountEntity accountToBeEdited) {
+    public EditedPasswordDto ifMatchesTrueSetPasswordAndReturn(boolean matches, String encodedPassword, AccountEntity accountToBeEdited) {
         if (matches) {
             setAndSaveEncodedPassword(encodedPassword, accountToBeEdited);
             return responsePassword(accountToBeEdited.getPassword());
@@ -217,10 +217,10 @@ public class UserServicesImpl implements UserService {
     }
 
     @Override
-    public PasswordDto responsePassword(String newPassword) {
-        PasswordDto passwordDto = new PasswordDto();
-        passwordDto.setPassword(newPassword);
-        return passwordDto;
+    public EditedPasswordDto responsePassword(String newPassword) {
+        EditedPasswordDto editedPasswordDto = new EditedPasswordDto();
+        editedPasswordDto.setPassword(newPassword);
+        return editedPasswordDto;
     }
 
     @Override
@@ -312,11 +312,11 @@ public class UserServicesImpl implements UserService {
     }
 
     @Override
-    public EmailNameDto responseDto(AccountEntity accountEntity) {
-        EmailNameDto emailNameDto = new EmailNameDto();
-        emailNameDto.setUsername(accountEntity.getUsername());
-        emailNameDto.setEmail(accountEntity.getEmail());
-        return emailNameDto;
+    public EditedEmailNameDto responseDto(AccountEntity accountEntity) {
+        EditedEmailNameDto editedEmailNameDto = new EditedEmailNameDto();
+        editedEmailNameDto.setUsername(accountEntity.getUsername());
+        editedEmailNameDto.setEmail(accountEntity.getEmail());
+        return editedEmailNameDto;
     }
 
     public Long getCountStorageWithOwnerNullAndNotNullOrganization(){

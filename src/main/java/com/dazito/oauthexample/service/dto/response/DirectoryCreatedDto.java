@@ -7,10 +7,9 @@ import java.io.Serializable;
 
 @Getter
 @Setter
-public class DirectoryCreated implements Serializable {
+public class DirectoryCreatedDto implements Serializable {
 
     private final static long serialVersionUID = 236152523;
 
     private Long parentId;
-    private String name;
 }

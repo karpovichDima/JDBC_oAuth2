@@ -3,7 +3,6 @@ package com.dazito.oauthexample.service.impl;
 import com.dazito.oauthexample.dao.StorageRepository;
 import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.model.Directory;
-import com.dazito.oauthexample.model.Organization;
 import com.dazito.oauthexample.model.StorageElement;
 import com.dazito.oauthexample.model.type.SomeType;
 import com.dazito.oauthexample.model.type.UserRole;
@@ -11,8 +10,7 @@ import com.dazito.oauthexample.service.DirectoryService;
 import com.dazito.oauthexample.service.FileService;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
-import com.dazito.oauthexample.service.dto.response.DirectoryCreated;
-import org.checkerframework.checker.units.qual.A;
+import com.dazito.oauthexample.service.dto.response.DirectoryCreatedDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +31,7 @@ public class DirectoryServiceImpl implements DirectoryService {
 
     // create new Directory by parent id and name
     @Override
-    public DirectoryCreated createDirectory(DirectoryDto directoryDto) {
+    public DirectoryCreatedDto createDirectory(DirectoryDto directoryDto) {
         AccountEntity currentUser = userServices.getCurrentUser();
         String name = directoryDto.getNewName();
         Long parent_id = directoryDto.getNewParentId();
@@ -71,21 +69,20 @@ public class DirectoryServiceImpl implements DirectoryService {
 
 
     @Override
-    public DirectoryCreated responseDirectoryCreated(Directory directory) {
+    public DirectoryCreatedDto responseDirectoryCreated(Directory directory) {
         String nameDir = directory.getName();
         StorageElement parentDir = directory.getParentId();
         Long idDir = parentDir.getId();
 
-        DirectoryCreated directoryResponseDto = new DirectoryCreated();
+        DirectoryCreatedDto directoryResponseDto = new DirectoryCreatedDto();
 
-        directoryResponseDto.setName(nameDir);
         directoryResponseDto.setParentId(idDir);
 
         return directoryResponseDto;
     }
 
     @Override
-    public DirectoryCreated updateDirectory(DirectoryDto directoryDto) {
+    public DirectoryCreatedDto updateDirectory(DirectoryDto directoryDto) {
         AccountEntity currentUser = userServices.getCurrentUser();
         Long id = directoryDto.getId();
         Long parent = directoryDto.getNewParentId();

@@ -4,11 +4,9 @@ import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.model.Organization;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.request.DeleteAccountDto;
-import com.dazito.oauthexample.service.dto.request.DtoForEditingPersonalData;
-import com.dazito.oauthexample.service.dto.request.OrganizationDto;
-import com.dazito.oauthexample.service.dto.response.EmailNameDto;
-import com.dazito.oauthexample.service.dto.response.PasswordDto;
-import org.springframework.stereotype.Service;
+import com.dazito.oauthexample.service.dto.request.EditPersonalDataDto;
+import com.dazito.oauthexample.service.dto.response.EditedEmailNameDto;
+import com.dazito.oauthexample.service.dto.response.EditedPasswordDto;
 
 import java.util.Optional;
 
@@ -19,23 +17,23 @@ public interface UserService {
      * @param id is id user, whose password we edit
      * @param newPassword is new password
      * @param rawOldPassword is current password, unencrypted
-     * @return PasswordDto is successful password change response
+     * @return EditedPasswordDto is successful password change response
      */
-    PasswordDto editPassword(Long id, String newPassword, String rawOldPassword);
+    EditedPasswordDto editPassword(Long id, String newPassword, String rawOldPassword);
 
     /**
      * edit name/email of the current user
      * @param personalData is case of the different properties user
-     * @return EmailNameDto is successful edit of the edit
+     * @return EditedEmailNameDto is successful edit of the edit
      */
-    EmailNameDto editPersonData(Long id, DtoForEditingPersonalData personalData);
+    EditedEmailNameDto editPersonData(Long id, EditPersonalDataDto personalData);
 
     /**
      * We pass the user to understand whether he is in our database or not
      * @param accountDto is userDto which we will find in DB
-     * @return EmailNameDto is successful search result user
+     * @return EditedEmailNameDto is successful search result user
      */
-    EmailNameDto createUser(AccountDto accountDto);
+    EditedEmailNameDto createUser(AccountDto accountDto);
 
     /**
      * delete user from DB, by id or DeleteAccountDto
@@ -43,7 +41,7 @@ public interface UserService {
      */
     void deleteUser(Long id, DeleteAccountDto accountDto);
 
-    PasswordDto ifMatchesTrueSetPasswordAndReturn(boolean matches, String encodedPassword, AccountEntity accountToBeEdited);
+    EditedPasswordDto ifMatchesTrueSetPasswordAndReturn(boolean matches, String encodedPassword, AccountEntity accountToBeEdited);
 
     void setAndSaveEncodedPassword(String encodedPassword, AccountEntity accountToBeEdited);
 
@@ -51,7 +49,7 @@ public interface UserService {
 
     boolean checkMatches(String rawOldPassword, String passwordCurrentUser);
 
-    PasswordDto responsePassword(String newPassword);
+    EditedPasswordDto responsePassword(String newPassword);
 
     AccountEntity accountEditedSetEmailAndName(String newEmail, String newName, AccountEntity accountToBeEdited);
 
@@ -114,7 +112,7 @@ public interface UserService {
 
     Organization findOrganizationByName(String organizationName);
 
-    EmailNameDto responseDto(AccountEntity accountEntity);
+    EditedEmailNameDto responseDto(AccountEntity accountEntity);
 
 
 

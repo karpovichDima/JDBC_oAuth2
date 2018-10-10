@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 @Setter
 @Getter
-public class StorageDtoFile extends StorageDto implements Serializable {
+public class FileStorageDto extends StorageDto implements Serializable {
 
     private final static long serialVersionUID = 60902145;
 

@@ -1,10 +1,8 @@
 package com.dazito.oauthexample.service;
 
 import com.dazito.oauthexample.model.*;
-import com.dazito.oauthexample.service.dto.request.DirectoryDto;
 import com.dazito.oauthexample.service.dto.request.FileUpdateDto;
-import com.dazito.oauthexample.service.dto.response.DirectoryCreated;
-import com.dazito.oauthexample.service.dto.response.FileUploadResponse;
+import com.dazito.oauthexample.service.dto.response.FileUploadedDto;
 import com.dazito.oauthexample.service.dto.response.StorageDto;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +20,7 @@ public interface FileService{
      * upload multipart file
      * @param file which we want to upload on the server
      */
-    FileUploadResponse upload(MultipartFile file, Long parent_id) throws IOException;
+    FileUploadedDto upload(MultipartFile file, Long parent_id) throws IOException;
 
     /**
      * download multipart file
@@ -53,15 +51,15 @@ public interface FileService{
     /**
      * generate uuid and convert to string
      * @param fileEntity
-     * @return FileUploadResponse is a response object, which indicates that the file was successfully uploaded
+     * @return FileUploadedDto is a response object, which indicates that the file was successfully uploaded
      */
-    FileUploadResponse responseFileUploaded(FileEntity fileEntity);
+    FileUploadedDto responseFileUploaded(FileEntity fileEntity);
 
     /**
      * generate uuid and convert to string
      * @param currentUser
      * @param uuid
-     * @return FileUploadResponse is a response object, which indicates that the file was successfully uploaded
+     * @return FileUploadedDto is a response object, which indicates that the file was successfully uploaded
      */
     Path setFilePathDependingOnTheUserRole(AccountEntity currentUser, String uuid);
 
@@ -113,9 +111,9 @@ public interface FileService{
     void setSizeForParents(Long size, StorageDto storageDtoParent);
 
 
-    FileUploadResponse editFile(FileUpdateDto fileUpdateDto);
+    FileUploadedDto editFile(FileUpdateDto fileUpdateDto);
 
-    FileUploadResponse updateFile(MultipartFile file, String uuid) throws IOException;
+    FileUploadedDto updateFile(MultipartFile file, String uuid) throws IOException;
 
     boolean checkPermissionsOnStorageChanges(AccountEntity currentUser, AccountEntity owner, StorageElement foundFile);
 
