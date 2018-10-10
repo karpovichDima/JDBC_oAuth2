@@ -18,16 +18,11 @@ import javax.annotation.Resource;
 @Service
 public class AccountUserDetailsService implements UserDetailsService {
 
+    @Autowired
     private AccountRepository accountRepository;
 
     @Resource(name = "conversionService")
     ConversionService conversionService;
-
-
-    @Autowired
-    public AccountUserDetailsService(AccountRepository accountRepository) {
-        this.accountRepository = accountRepository;
-    }
 
     @Override
     public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {

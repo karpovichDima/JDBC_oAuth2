@@ -7,7 +7,10 @@ import com.dazito.oauthexample.model.Content;
 import com.dazito.oauthexample.model.Organization;
 import com.dazito.oauthexample.model.StorageElement;
 import com.dazito.oauthexample.model.type.UserRole;
-import com.dazito.oauthexample.service.*;
+import com.dazito.oauthexample.service.ContentService;
+import com.dazito.oauthexample.service.StorageService;
+import com.dazito.oauthexample.service.UserService;
+import com.dazito.oauthexample.service.UtilService;
 import com.dazito.oauthexample.service.dto.request.ContentUpdateDto;
 import com.dazito.oauthexample.service.dto.response.ContentUpdatedDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,20 +31,17 @@ public class ContentServiceImpl implements ContentService {
     @Resource(name = "conversionService")
     ConversionService conversionService;
 
-    private final UserService userService;
-    private final StorageRepository storageRepository;
-    private final ContentRepository contentRepository;
-    private final UtilService utilService;
-    private final StorageService storageService;
-
     @Autowired
-    public ContentServiceImpl(ContentRepository contentRepository, DirectoryService directoryService, FileService fileService, UserService userService, StorageRepository storageRepository, UtilService utilService, StorageService storageService) {
-        this.contentRepository = contentRepository;
-        this.userService = userService;
-        this.storageRepository = storageRepository;
-        this.utilService = utilService;
-        this.storageService = storageService;
-    }
+    private UserService userService;
+    @Autowired
+    private StorageRepository storageRepository;
+    @Autowired
+    private ContentRepository contentRepository;
+    @Autowired
+    private UtilService utilService;
+    @Autowired
+    private StorageService storageService;
+
 
     // create root for all directories and files(for Admins) or for one User
     @Override

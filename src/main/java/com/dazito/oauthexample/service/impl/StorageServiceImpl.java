@@ -29,20 +29,12 @@ public class StorageServiceImpl implements StorageService {
     @Resource(name = "conversionService")
     ConversionService conversionService;
 
-    private final UserService userService;
-    private final FileService fileService;
-    private final UserService userServices;
-    private final StorageRepository storageRepository;
-    private final UtilService utilService;
-
     @Autowired
-    public StorageServiceImpl(UserService userService, FileService fileService, UserService userServices, StorageRepository storageRepository, UtilService utilService) {
-        this.userService = userService;
-        this.fileService = fileService;
-        this.userServices = userServices;
-        this.storageRepository = storageRepository;
-        this.utilService = utilService;
-    }
+    private UserService userService;
+    @Autowired
+    private StorageRepository storageRepository;
+    @Autowired
+    private UtilService utilService;
 
     @Override
     public StorageUpdatedDto editData(StorageUpdateDto storageUpdateDto) {

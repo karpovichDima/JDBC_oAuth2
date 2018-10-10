@@ -28,4 +28,6 @@ public interface UtilService{
      * @return new File directory
      */
     File createSinglePath(String path);
+
+    File createMultiplyPath(String path);
 }

@@ -2,7 +2,10 @@ package com.dazito.oauthexample.service.impl;
 
 import com.dazito.oauthexample.dao.DirectoryRepository;
 import com.dazito.oauthexample.dao.StorageRepository;
-import com.dazito.oauthexample.model.*;
+import com.dazito.oauthexample.model.AccountEntity;
+import com.dazito.oauthexample.model.Directory;
+import com.dazito.oauthexample.model.Organization;
+import com.dazito.oauthexample.model.StorageElement;
 import com.dazito.oauthexample.model.type.SomeType;
 import com.dazito.oauthexample.model.type.UserRole;
 import com.dazito.oauthexample.service.*;
@@ -18,22 +21,19 @@ import java.util.Optional;
 @Service
 public class DirectoryServiceImpl implements DirectoryService {
 
-    private final UserService userServices;
-    private final StorageRepository storageRepository;
-    private final ContentService contentService;
-    private final StorageService storageService;
-    private final UtilService utilService;
-    private final DirectoryRepository directoryRepository;
-
     @Autowired
-    public DirectoryServiceImpl(StorageRepository storageRepository, FileService fileService, UserService userServices, ContentService contentService, StorageService storageService, UtilService utilService, DirectoryRepository directoryRepository) {
-        this.storageRepository = storageRepository;
-        this.userServices = userServices;
-        this.contentService = contentService;
-        this.storageService = storageService;
-        this.utilService = utilService;
-        this.directoryRepository = directoryRepository;
-    }
+    private UserService userServices;
+    @Autowired
+    private StorageRepository storageRepository;
+    @Autowired
+    private ContentService contentService;
+    @Autowired
+    private StorageService storageService;
+    @Autowired
+    private UtilService utilService;
+    @Autowired
+    private DirectoryRepository directoryRepository;
+
 
     // create new Directory by parent id and name
     @Override
@@ -64,7 +64,7 @@ public class DirectoryServiceImpl implements DirectoryService {
 
         if (role.equals(UserRole.USER) && !foundParentElement.getType().equals(SomeType.CONTENT)) {
             AccountEntity owner = foundParentElement.getOwner();
-            if (!owner.getEmail().equals(currentUser.getEmail()))return null;
+            if (!owner.getEmail().equals(currentUser.getEmail())) return null;
         }
 
         directory.setOwner(currentUser);
@@ -73,7 +73,7 @@ public class DirectoryServiceImpl implements DirectoryService {
 
         return responseDirectoryCreated(directory);
     }
-    
+
     @Override
     public DirectoryCreatedDto responseDirectoryCreated(Directory directory) {
         String nameDir = directory.getName();
@@ -96,7 +96,7 @@ public class DirectoryServiceImpl implements DirectoryService {
         Organization organization = currentUser.getOrganization();
 
         StorageElement foundDirectory = storageService.findById(id);
-        if(foundDirectory == null) return null;
+        if (foundDirectory == null) return null;
         AccountEntity owner = foundDirectory.getOwner();
         Organization organizationDirectory = foundDirectory.getOrganization();
         StorageElement parentDirectory = storageService.findById(parent);
@@ -145,12 +145,10 @@ public class DirectoryServiceImpl implements DirectoryService {
         }
     }
 
-    private Directory findById(Long id){
+    private Directory findById(Long id) {
         Optional<Directory> foundDirectory = directoryRepository.findById(id);
         return foundDirectory.orElse(null);
     }
-
-
 
 
 }

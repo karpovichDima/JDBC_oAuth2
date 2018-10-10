@@ -15,12 +15,8 @@ import java.util.Objects;
 @Service
 public class UtilServiceImpl implements UtilService {
 
-    private final UserService userService;
-
     @Autowired
-    public UtilServiceImpl(UserService userService) {
-        this.userService = userService;
-    }
+    private UserService userService;
 
     @Override
     public boolean matchesOrganizations(Organization organizationUser, Organization organizationStorage) {
@@ -83,4 +79,6 @@ public class UtilServiceImpl implements UtilService {
         }
         return rootPath2;
     }
+
+
 }

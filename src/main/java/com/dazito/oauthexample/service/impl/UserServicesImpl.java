@@ -8,6 +8,7 @@ import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.model.Content;
 import com.dazito.oauthexample.model.Organization;
 import com.dazito.oauthexample.model.type.UserRole;
+import com.dazito.oauthexample.service.ContentService;
 import com.dazito.oauthexample.service.FileService;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
@@ -35,21 +36,17 @@ public class UserServicesImpl implements UserService {
     String contentName;
     @Resource(name = "conversionService")
     ConversionService conversionService;
-    @Autowired
-    StorageRepository storageRepository;
-
-    private final FileService fileService;
-    private final AccountRepository accountRepository;
-    private final OrganizationRepo organizationRepo;
-    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServicesImpl(AccountRepository accountRepository, OrganizationRepo organizationRepo, PasswordEncoder passwordEncoder, FileService fileService) {
-        this.accountRepository = accountRepository;
-        this.organizationRepo = organizationRepo;
-        this.passwordEncoder = passwordEncoder;
-        this.fileService = fileService;
-    }
+    private AccountRepository accountRepository;
+    @Autowired
+    private OrganizationRepo organizationRepo;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private StorageRepository storageRepository;
+    @Autowired
+    private ContentService contentService;
 
     // Change user password
     @Override
@@ -151,7 +148,7 @@ public class UserServicesImpl implements UserService {
         Content rootContent = null;
 
         if (getCountStorageWithOwnerNullAndNotNullOrganization() < 1 || role.equals(UserRole.USER)) {
-            rootContent = fileService.createContent(newUser);
+            rootContent = contentService.createContent(newUser);
         }
 
         newUser.setContent(rootContent);
@@ -246,8 +243,6 @@ public class UserServicesImpl implements UserService {
     public boolean isOptionalNotNull(Optional val) {
         return val.isPresent();
     }
-
-
 
 
     @Override

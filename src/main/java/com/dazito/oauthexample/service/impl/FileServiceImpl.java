@@ -35,20 +35,15 @@ public class FileServiceImpl implements FileService {
     @Resource(name = "userService")
     UserService userServices;
 
-    private final StorageService storageService;
-    private final StorageRepository storageRepository;
-    private final FileRepository fileRepository;
-    private final UtilService utilService;
-    private final ContentService contentService;
-
     @Autowired
-    public FileServiceImpl(StorageRepository storageRepository, FileRepository fileRepository, StorageService storageService, UtilService utilService, ContentService contentService) {
-        this.storageRepository = storageRepository;
-        this.fileRepository = fileRepository;
-        this.storageService = storageService;
-        this.utilService = utilService;
-        this.contentService = contentService;
-    }
+    private StorageRepository storageRepository;
+    @Autowired
+    private FileRepository fileRepository;
+    @Autowired
+    private UtilService utilService;
+    @Autowired
+    private ContentService contentService;
+
 
     // upload multipart file on the server
     @Override
