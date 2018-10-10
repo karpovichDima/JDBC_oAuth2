@@ -5,6 +5,7 @@ import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.request.DeleteAccountDto;
 import com.dazito.oauthexample.service.dto.request.EditPersonalDataDto;
+import com.dazito.oauthexample.service.dto.response.ContentUpdatedDto;
 import com.dazito.oauthexample.service.dto.response.EditedEmailNameDto;
 import com.dazito.oauthexample.service.dto.response.EditedPasswordDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,9 +52,9 @@ public class CurrentUserController {
     }
 
     @DeleteMapping("/")
-    @ResponseStatus(value = HttpStatus.OK)
-    public void deleteUser(@RequestBody DeleteAccountDto accountDto){
+    public ResponseEntity deleteUser(@RequestBody DeleteAccountDto accountDto){
         userService.deleteUser(null, accountDto);
+        return ResponseEntity.ok().build();
     }
 
 }

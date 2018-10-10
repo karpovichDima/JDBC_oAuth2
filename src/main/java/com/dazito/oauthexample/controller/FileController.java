@@ -34,27 +34,26 @@ public class FileController {
 
 
     @PostMapping("/{parentId}")
-    @ResponseStatus(value = HttpStatus.OK)
-    public FileUploadedDto upload(@RequestParam MultipartFile file, @PathVariable Long parentId) throws IOException {
-        return fileService.upload(file, parentId);
+    public ResponseEntity<FileUploadedDto> upload(@RequestParam MultipartFile file, @PathVariable Long parentId) throws IOException {
+        FileUploadedDto upload = fileService.upload(file, parentId);
+        return ResponseEntity.ok(upload);
     }
 
     @GetMapping("/{uuid:.+}")
-    @ResponseStatus(value = HttpStatus.OK)
     public ResponseEntity<Resource> download(@PathVariable String uuid) throws IOException {
         return fileService.download(uuid);
     }
 
     @PostMapping("/update/{uuid:.+}")
-    @ResponseStatus(value = HttpStatus.OK)
-    public FileUploadedDto update(@RequestParam MultipartFile file, @PathVariable String uuid) throws IOException {
-        return fileService.updateFile(file, uuid);
+    public ResponseEntity<FileUploadedDto> update(@RequestParam MultipartFile file, @PathVariable String uuid) throws IOException {
+        FileUploadedDto fileUploadedDto = fileService.updateFile(file, uuid);
+        return ResponseEntity.ok(fileUploadedDto);
     }
 
     @DeleteMapping("/{uuid}")
-    @ResponseStatus(value = HttpStatus.OK)
-    public void delete(@PathVariable String uuid) throws IOException {
+    public ResponseEntity delete(@PathVariable String uuid) throws IOException {
         fileService.delete(uuid);
+        return ResponseEntity.ok().build();
     }
 
     @Bean

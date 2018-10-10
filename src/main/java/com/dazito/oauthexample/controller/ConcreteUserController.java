@@ -26,9 +26,10 @@ public class ConcreteUserController {
 
     // get user by id
     @GetMapping()
-    public AccountDto getAccountCurrentUser(@PathVariable Long id) {
+    public ResponseEntity<AccountDto> getAccountCurrentUser(@PathVariable Long id) {
         AccountEntity foundedUser = userService.findByIdAccountRepo(id);
-        return userService.addToAccountDtoOrganization(foundedUser);
+        AccountDto accountDto = userService.addToAccountDtoOrganization(foundedUser);
+        return ResponseEntity.ok(accountDto);
     }
 
     // edit email and name of the current user
@@ -54,21 +55,8 @@ public class ConcreteUserController {
 
     // delete user by email from accountDto
     @DeleteMapping("/")
-    @ResponseStatus(value = HttpStatus.OK)
-    public void deleteUser(@PathVariable Long id){
+    public ResponseEntity deleteUser(@PathVariable Long id){
         userService.deleteUser(id, null);
+        return ResponseEntity.ok().build();
     }
-
-    // get id of the user by id
-    private Long findOutIdUser(){
-        return ((UserDetailsConfig)(SecurityContextHolder.getContext().getAuthentication().getPrincipal())).getUser().getId();
-    }
-
-
-    /*@PostMapping("/")
-    public ResponseEntity<EditedEmailNameDto> createUser(@RequestParam MultipartFile FileEntity){
-        EditedEmailNameDto newUser = userService.createUser(accountDto);
-        return ResponseEntity.ok(newUser);
-    }*/
-
 }

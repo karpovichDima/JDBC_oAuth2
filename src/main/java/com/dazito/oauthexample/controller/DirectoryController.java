@@ -7,6 +7,7 @@ import com.dazito.oauthexample.service.dto.request.DirectoryDto;
 import com.dazito.oauthexample.service.dto.response.DirectoryCreatedDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,20 +22,20 @@ public class DirectoryController {
     }
 
     @PostMapping("/")
-    @ResponseStatus(value = HttpStatus.OK)
-    public DirectoryCreatedDto create(@RequestBody DirectoryDto directoryDto) {
-        return directoryService.createDirectory(directoryDto);
+    public ResponseEntity<DirectoryCreatedDto> create(@RequestBody DirectoryDto directoryDto) {
+        DirectoryCreatedDto directory = directoryService.createDirectory(directoryDto);
+        return ResponseEntity.ok(directory);
     }
 
     @PatchMapping("/update")
-    @ResponseStatus(value = HttpStatus.OK)
-    public DirectoryCreatedDto update(@RequestBody DirectoryDto directoryDto) {
-        return directoryService.updateDirectory(directoryDto);
+    public ResponseEntity<DirectoryCreatedDto> update(@RequestBody DirectoryDto directoryDto) {
+        DirectoryCreatedDto directoryCreatedDto = directoryService.updateDirectory(directoryDto);
+        return ResponseEntity.ok(directoryCreatedDto);
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(value = HttpStatus.OK)
-    public void delete(@PathVariable Long id){
+    public ResponseEntity delete(@PathVariable Long id){
         directoryService.delete(id);
+        return ResponseEntity.ok().build();
     }
 }

@@ -6,6 +6,7 @@ import com.dazito.oauthexample.service.dto.response.StorageDto;
 import com.dazito.oauthexample.service.dto.response.StorageUpdatedDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -22,14 +23,15 @@ public class StorageController {
     }
 
     @PatchMapping("/")
-    @ResponseStatus(value = HttpStatus.OK)
-    public StorageUpdatedDto update(@RequestBody StorageUpdateDto storageUpdateDto) throws IOException {
-        return storageService.editData(storageUpdateDto);
+    public ResponseEntity<StorageUpdatedDto> update(@RequestBody StorageUpdateDto storageUpdateDto) throws IOException {
+        StorageUpdatedDto storageUpdatedDto = storageService.editData(storageUpdateDto);
+        return ResponseEntity.ok(storageUpdatedDto);
     }
 
     @GetMapping("/chierarchy/{id:.+}")
-    @ResponseStatus(value = HttpStatus.OK)
-    public StorageDto createHierarchy(@PathVariable Long id) throws IOException {
-        return storageService.createHierarchy(id);
+    public ResponseEntity<StorageDto> createHierarchy(@PathVariable Long id) throws IOException {
+        StorageDto hierarchy = storageService.createHierarchy(id);
+        return ResponseEntity.ok(hierarchy);
+
     }
 }
