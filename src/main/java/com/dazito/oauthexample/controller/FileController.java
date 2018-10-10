@@ -33,43 +33,29 @@ public class FileController {
     }
 
 
-    @PostMapping("/upload/{parentId}")
+    @PostMapping("/{parentId}")
     @ResponseStatus(value = HttpStatus.OK)
     public FileUploadedDto upload(@RequestParam MultipartFile file, @PathVariable Long parentId) throws IOException {
         return fileService.upload(file, parentId);
     }
 
-    @GetMapping("/download/{uuid:.+}")
+    @GetMapping("/{uuid:.+}")
     @ResponseStatus(value = HttpStatus.OK)
     public ResponseEntity<Resource> download(@PathVariable String uuid) throws IOException {
         return fileService.download(uuid);
     }
 
-    @GetMapping("/chierarchy/{id:.+}")
-    @ResponseStatus(value = HttpStatus.OK)
-    public StorageDto createHierarchy(@PathVariable Long id) throws IOException {
-        return fileService.createHierarchy(id);
-    }
-
-    @PatchMapping("/update")
-    @ResponseStatus(value = HttpStatus.OK)
-    public FileUploadedDto updateFile(@RequestBody FileUpdateDto fileUpdateDto) throws IOException {
-        return fileService.editFile(fileUpdateDto);
-    }
-
     @PostMapping("/update/{uuid:.+}")
     @ResponseStatus(value = HttpStatus.OK)
-    public FileUploadedDto updateFile(@RequestParam MultipartFile file, @PathVariable String uuid) throws IOException {
+    public FileUploadedDto update(@RequestParam MultipartFile file, @PathVariable String uuid) throws IOException {
         return fileService.updateFile(file, uuid);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{uuid}")
     @ResponseStatus(value = HttpStatus.OK)
-    public void deleteFiles(@PathVariable Long id){
-        fileService.deleteStorage(id);
+    public void delete(@PathVariable String uuid) throws IOException {
+        fileService.delete(uuid);
     }
-
-
 
     @Bean
     public MultipartConfigElement multipartConfigElement() {

@@ -15,4 +15,6 @@ public interface DirectoryService {
     DirectoryCreatedDto responseDirectoryCreated(Directory directory);
 
     DirectoryCreatedDto updateDirectory(DirectoryDto directoryDto);
+
+    void delete(Long id);
 }

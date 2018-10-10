@@ -1,39 +1,75 @@
 package com.dazito.oauthexample.service.impl;
 
+import com.dazito.oauthexample.dao.ContentRepository;
 import com.dazito.oauthexample.dao.StorageRepository;
 import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.model.Content;
 import com.dazito.oauthexample.model.Organization;
 import com.dazito.oauthexample.model.StorageElement;
-import com.dazito.oauthexample.service.ContentService;
-import com.dazito.oauthexample.service.DirectoryService;
-import com.dazito.oauthexample.service.FileService;
-import com.dazito.oauthexample.service.UserService;
+import com.dazito.oauthexample.model.type.UserRole;
+import com.dazito.oauthexample.service.*;
 import com.dazito.oauthexample.service.dto.request.ContentUpdateDto;
 import com.dazito.oauthexample.service.dto.response.ContentUpdatedDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.io.File;
+import java.nio.file.Path;
+import java.util.Optional;
 
 @Service
 public class ContentServiceImpl implements ContentService {
 
-    @Autowired
-    FileService fileService;
-
-    @Autowired
-    UserService userService;
-
-    @Autowired
-    StorageRepository storageRepository;
-
-    @Autowired
-    DirectoryService directoryService;
-
+    @Value("${root.path}")
+    Path root;
     @Resource(name = "conversionService")
     ConversionService conversionService;
+
+    private final UserService userService;
+    private final StorageRepository storageRepository;
+    private final ContentRepository contentRepository;
+    private final UtilService utilService;
+    private final StorageService storageService;
+
+    @Autowired
+    public ContentServiceImpl(ContentRepository contentRepository, DirectoryService directoryService, FileService fileService, UserService userService, StorageRepository storageRepository, UtilService utilService, StorageService storageService) {
+        this.contentRepository = contentRepository;
+        this.userService = userService;
+        this.storageRepository = storageRepository;
+        this.utilService = utilService;
+        this.storageService = storageService;
+    }
+
+    // create root for all directories and files(for Admins) or for one User
+    @Override
+    public Content createContent(AccountEntity newUser) {
+
+        UserRole role = newUser.getRole();
+        String nameNewFolder = newUser.getEmail();
+        Organization organization = newUser.getOrganization();
+
+        Content content = new Content();
+
+        switch (role) {
+            case USER:
+                content.setName("Content " + newUser.getEmail());
+                utilService.createSinglePath(root + File.separator + nameNewFolder);
+                content.setRoot(root + File.separator + nameNewFolder);
+                break;
+            case ADMIN:
+                content.setName("CONTENT_" + organization.getOrganizationName());
+                content.setRoot(root.toString());
+                break;
+        }
+        content.setParentId(null);
+        content.setSize(0L);
+        content.setOrganization(organization);
+
+        return content;
+    }
 
     @Override
     public ContentUpdatedDto updateContent(ContentUpdateDto contentDto) {
@@ -43,7 +79,7 @@ public class ContentServiceImpl implements ContentService {
         String name = contentDto.getNewName();
         String root = contentDto.getNewRoot();
 
-        StorageElement foundContent = fileService.findByIdInStorageRepo(id);
+        StorageElement foundContent = storageService.findById(id);
         if (foundContent == null) return null;
         Content content = (Content) foundContent;
 
@@ -70,21 +106,36 @@ public class ContentServiceImpl implements ContentService {
         if (!checkedOnTheAdmin) return false;
         Organization organizationUser = currentUser.getOrganization();
         Organization organizationContent = foundContent.getOrganization();
-
-        boolean checkedMatchesOrganization = fileService.matchesOrganizations(organizationUser, organizationContent);
-        if (!checkedMatchesOrganization) return false;
-        return true;
+        return utilService.matchesOrganizations(organizationUser, organizationContent);
     }
 
     @Override
     public void deleteContent(Long id) {
         AccountEntity currentUser = userService.getCurrentUser();
-        StorageElement foundStorage = fileService.findByIdInStorageRepo(id);
+        StorageElement foundStorage = storageService.findById(id);
 
         boolean canChange = filePermissionsCheck(currentUser, foundStorage);
         if (!canChange) return;
 
         storageRepository.delete(id);
+    }
+
+    @Override
+    public Content findById(Long id) {
+        Optional<Content> foundContent = contentRepository.findById(id);
+        return foundContent.orElse(null);
+    }
+
+    @Override
+    public Content findByName(String name) {
+        Optional<Content> foundContent = contentRepository.findByName(name);
+        return foundContent.orElse(null);
+    }
+
+    @Override
+    public Content findContentForAdmin(String organizationName) {
+        Optional<Content> foundOptional = contentRepository.findContentByOwnerIsNullAndOrganization(organizationName);
+        return foundOptional.orElse(null);
     }
 
 }

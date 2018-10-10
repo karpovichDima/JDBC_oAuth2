@@ -9,7 +9,7 @@ import java.util.Random;
 
 @Getter
 @Setter
-public class DtoForEditingPersonalData implements Serializable{
+public class EditPersonalDataDto implements Serializable{
 
     private final static long serialVersionUID = 286930429;
 

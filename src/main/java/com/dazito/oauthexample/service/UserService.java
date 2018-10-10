@@ -41,15 +41,15 @@ public interface UserService {
      */
     void deleteUser(Long id, DeleteAccountDto accountDto);
 
-    EditedPasswordDto ifMatchesTrueSetPasswordAndReturn(boolean matches, String encodedPassword, AccountEntity accountToBeEdited);
+    EditedPasswordDto savePassword(boolean matches, String encodedPassword, AccountEntity accountToBeEdited);
 
-    void setAndSaveEncodedPassword(String encodedPassword, AccountEntity accountToBeEdited);
+    void saveEncodedPassword(String encodedPassword, AccountEntity accountToBeEdited);
 
     String passwordEncode(String newPassword);
 
     boolean checkMatches(String rawOldPassword, String passwordCurrentUser);
 
-    EditedPasswordDto responsePassword(String newPassword);
+    EditedPasswordDto convertToResponsePassword(String newPassword);
 
     AccountEntity accountEditedSetEmailAndName(String newEmail, String newName, AccountEntity accountToBeEdited);
 
@@ -60,14 +60,14 @@ public interface UserService {
      */
     AccountEntity findUserByEmail(String email);
 
-    boolean checkStringOnNull(String val);
+    boolean isEmpty(String val);
 
     /**
      * check optional on null
      * @param val is optinal, which we want to check on null
      * @return true = if not null, false = null
      */
-    boolean checkOptionalOnNull(Optional val);
+    boolean isOptionalNotNull(Optional val);
 
     /**
      * find user

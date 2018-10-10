@@ -2,6 +2,7 @@ package com.dazito.oauthexample.controller;
 
 import com.dazito.oauthexample.service.DirectoryService;
 import com.dazito.oauthexample.service.FileService;
+import com.dazito.oauthexample.service.StorageService;
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
 import com.dazito.oauthexample.service.dto.response.DirectoryCreatedDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,30 +16,25 @@ public class DirectoryController {
     private final DirectoryService directoryService;
 
     @Autowired
-    FileService fileService;
-
-    @Autowired
     public DirectoryController(DirectoryService directoryService) {
         this.directoryService = directoryService;
     }
 
     @PostMapping("/")
     @ResponseStatus(value = HttpStatus.OK)
-    public DirectoryCreatedDto createDirectory(@RequestBody DirectoryDto directoryDto) {
+    public DirectoryCreatedDto create(@RequestBody DirectoryDto directoryDto) {
         return directoryService.createDirectory(directoryDto);
     }
 
     @PatchMapping("/update")
     @ResponseStatus(value = HttpStatus.OK)
-    public DirectoryCreatedDto updateDirectory(@RequestBody DirectoryDto directoryDto) {
+    public DirectoryCreatedDto update(@RequestBody DirectoryDto directoryDto) {
         return directoryService.updateDirectory(directoryDto);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(value = HttpStatus.OK)
-    public void deleteDirectory(@PathVariable Long id){
-        fileService.deleteStorage(id);
+    public void delete(@PathVariable Long id){
+        directoryService.delete(id);
     }
-
-
 }

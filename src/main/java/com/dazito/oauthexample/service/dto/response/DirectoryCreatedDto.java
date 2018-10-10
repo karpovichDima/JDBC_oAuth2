@@ -12,4 +12,5 @@ public class DirectoryCreatedDto implements Serializable {
     private final static long serialVersionUID = 236152523;
 
     private Long parentId;
+    private String name;
 }

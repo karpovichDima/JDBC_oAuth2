@@ -1,7 +1,6 @@
 package com.dazito.oauthexample.service;
 
 import com.dazito.oauthexample.model.*;
-import com.dazito.oauthexample.service.dto.request.FileUpdateDto;
 import com.dazito.oauthexample.service.dto.response.FileUploadedDto;
 import com.dazito.oauthexample.service.dto.response.StorageDto;
 import org.springframework.core.io.Resource;
@@ -29,19 +28,12 @@ public interface FileService{
     ResponseEntity<Resource> download(String uuid) throws IOException;
 
     /**
-     * create root point for all user directories
-     * @param newUser the user for which we will create the root point
-     * @return Content is root point object
-     */
-    Content createContent(AccountEntity newUser);
-
-    /**
      * look for the Storage Element in different ways depending on the parameter passed
      * @param parentId this is the parent element by which we will search for the storage element
      * @param organization this is the organization by which we will search for the storage element
      * @return StorageElement is found object
      */
-    StorageElement findStorageElementDependingOnTheParent(Long parentId, Organization organization);
+    StorageElement findContentDependingOnTheParent(Long parentId, Organization organization);
     /**
      * generate uuid and convert to string
      * @return String uuid
@@ -53,7 +45,7 @@ public interface FileService{
      * @param fileEntity
      * @return FileUploadedDto is a response object, which indicates that the file was successfully uploaded
      */
-    FileUploadedDto responseFileUploaded(FileEntity fileEntity);
+    FileUploadedDto buildFileUploadedDto(FileEntity fileEntity);
 
     /**
      * generate uuid and convert to string
@@ -63,61 +55,15 @@ public interface FileService{
      */
     Path setFilePathDependingOnTheUserRole(AccountEntity currentUser, String uuid);
 
-    /**
-     * create single directory by path
-     * @param path of the which we will create directory
-     * @return new File directory
-     */
-    File createSinglePath(String path);
+    FileEntity findById(Long id);
 
-    /**
-     * create hierarchy object
-     * @param id of the object from which we will begin the hierarchy
-     * @return new object of the hierarchy
-     */
-    StorageDto buildStorageDto(Long id, StorageDto storageDtoParent);
-    /**
-     * the method that starts the creation of the hierarchy
-     * is needed in order to process the object after recursion
-     * @param id of the object from which we will begin the hierarchy
-     * @return new object of the hierarchy
-     */
-    StorageDto createHierarchy(Long id);
+    FileEntity findByName(String name);
 
-
-    StorageElement findByIdInStorageRepo(Long id);
-
-    StorageElement findByNameInStorageRepo(String name);
-
-    FileEntity findByUUIDInFileRepo(String uuid);
-
-    StorageElement getStorageIfOptionalNotNull(Optional<StorageElement> storageOptional);
+    FileEntity findByUUID(String uuid);
 
     FileEntity getFileIfOptionalNotNull(Optional<FileEntity> fileOptional);
 
-    List<StorageElement> getChildListElement(StorageElement storageElement);
-
-    /**
-     * check matches if of the current user and if ot the file owner
-     * @param idCurrent is id of the current user
-     * @param ownerId is id ot the file owner
-     * @return true = if emailCurrent == ownerEmail
-     */
-    boolean matchesOwner(Long idCurrent, Long ownerId);
-
-
-    File createMultiplyPath(String path);
-
-    void setSizeForParents(Long size, StorageDto storageDtoParent);
-
-
-    FileUploadedDto editFile(FileUpdateDto fileUpdateDto);
-
     FileUploadedDto updateFile(MultipartFile file, String uuid) throws IOException;
 
-    boolean checkPermissionsOnStorageChanges(AccountEntity currentUser, AccountEntity owner, StorageElement foundFile);
-
-    boolean matchesOrganizations(Organization organizationUser, Organization organizationFile);
-
-    void deleteStorage(Long id);
+    void delete(String id) throws IOException;
 }

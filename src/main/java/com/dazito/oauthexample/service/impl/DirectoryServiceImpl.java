@@ -1,33 +1,39 @@
 package com.dazito.oauthexample.service.impl;
 
+import com.dazito.oauthexample.dao.DirectoryRepository;
 import com.dazito.oauthexample.dao.StorageRepository;
-import com.dazito.oauthexample.model.AccountEntity;
-import com.dazito.oauthexample.model.Directory;
-import com.dazito.oauthexample.model.StorageElement;
+import com.dazito.oauthexample.model.*;
 import com.dazito.oauthexample.model.type.SomeType;
 import com.dazito.oauthexample.model.type.UserRole;
-import com.dazito.oauthexample.service.DirectoryService;
-import com.dazito.oauthexample.service.FileService;
-import com.dazito.oauthexample.service.UserService;
+import com.dazito.oauthexample.service.*;
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
 import com.dazito.oauthexample.service.dto.response.DirectoryCreatedDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 @Service
 public class DirectoryServiceImpl implements DirectoryService {
 
     private final UserService userServices;
-    private final FileService fileService;
     private final StorageRepository storageRepository;
+    private final ContentService contentService;
+    private final StorageService storageService;
+    private final UtilService utilService;
+    private final DirectoryRepository directoryRepository;
 
     @Autowired
-    public DirectoryServiceImpl(StorageRepository storageRepository, FileService fileService, UserService userServices) {
+    public DirectoryServiceImpl(StorageRepository storageRepository, FileService fileService, UserService userServices, ContentService contentService, StorageService storageService, UtilService utilService, DirectoryRepository directoryRepository) {
         this.storageRepository = storageRepository;
-        this.fileService = fileService;
         this.userServices = userServices;
+        this.contentService = contentService;
+        this.storageService = storageService;
+        this.utilService = utilService;
+        this.directoryRepository = directoryRepository;
     }
-
 
     // create new Directory by parent id and name
     @Override
@@ -35,6 +41,7 @@ public class DirectoryServiceImpl implements DirectoryService {
         AccountEntity currentUser = userServices.getCurrentUser();
         String name = directoryDto.getNewName();
         Long parent_id = directoryDto.getNewParentId();
+        String organizationName = currentUser.getOrganization().getOrganizationName();
 
         UserRole role = currentUser.getRole();
 
@@ -46,9 +53,9 @@ public class DirectoryServiceImpl implements DirectoryService {
         directory.setOrganization(currentUser.getOrganization());
 
         if (parent_id == 0) {
-            foundParentElement = fileService.findByNameInStorageRepo("CONTENT");
+            foundParentElement = contentService.findContentForAdmin(organizationName);
         } else {
-            foundParentElement = fileService.findByIdInStorageRepo(parent_id);
+            foundParentElement = storageService.findById(parent_id);
             SomeType type = foundParentElement.getType();
             if (type.equals(SomeType.FILE)) return null;
         }
@@ -66,8 +73,7 @@ public class DirectoryServiceImpl implements DirectoryService {
 
         return responseDirectoryCreated(directory);
     }
-
-
+    
     @Override
     public DirectoryCreatedDto responseDirectoryCreated(Directory directory) {
         String nameDir = directory.getName();
@@ -77,7 +83,7 @@ public class DirectoryServiceImpl implements DirectoryService {
         DirectoryCreatedDto directoryResponseDto = new DirectoryCreatedDto();
 
         directoryResponseDto.setParentId(idDir);
-
+        directoryResponseDto.setName(nameDir);
         return directoryResponseDto;
     }
 
@@ -87,14 +93,18 @@ public class DirectoryServiceImpl implements DirectoryService {
         Long id = directoryDto.getId();
         Long parent = directoryDto.getNewParentId();
         String name = directoryDto.getNewName();
+        Organization organization = currentUser.getOrganization();
 
-        StorageElement foundDirectory = fileService.findByIdInStorageRepo(id);
+        StorageElement foundDirectory = storageService.findById(id);
         if(foundDirectory == null) return null;
         AccountEntity owner = foundDirectory.getOwner();
-        StorageElement parentDirectory = fileService.findByIdInStorageRepo(parent);
+        Organization organizationDirectory = foundDirectory.getOrganization();
+        StorageElement parentDirectory = storageService.findById(parent);
 
-        boolean canChange = fileService.checkPermissionsOnStorageChanges(currentUser, owner, foundDirectory);
-        if (!canChange) return null;
+        boolean isRight = utilService.isPermissionsAdminOrUserIsOwner(currentUser, owner, foundDirectory);
+        if (!isRight) return null;
+        boolean isMatch = utilService.matchesOrganizations(organization, organizationDirectory);
+        if (!isMatch) return null;
 
         foundDirectory.setParentId(parentDirectory);
         foundDirectory.setName(name);
@@ -102,6 +112,42 @@ public class DirectoryServiceImpl implements DirectoryService {
         storageRepository.saveAndFlush(foundDirectory);
 
         return responseDirectoryCreated((Directory) foundDirectory);
+    }
+
+    @Override
+    public void delete(Long id) {
+        AccountEntity currentUser = userServices.getCurrentUser();
+        StorageElement foundStorage = findById(id);
+        AccountEntity owner = foundStorage.getOwner();
+        SomeType type = foundStorage.getType();
+
+        if (type.equals(SomeType.FILE)) return;
+
+        boolean canChange = utilService.isPermissionsAdminOrUserIsOwner(currentUser, owner, foundStorage);
+        if (!canChange) return;
+        canChange = utilService.checkPermissionsOnChangeByOrganization(currentUser, foundStorage);
+        if (!canChange) return;
+
+        List<StorageElement> childChild = new ArrayList<>();
+
+        List<StorageElement> listChildren = storageRepository.findByParentId(foundStorage);
+        childChild.add(foundStorage);
+        deleteChildFiles(childChild, listChildren);
+        storageRepository.delete(childChild);
+    }
+
+    private void deleteChildFiles(List<StorageElement> childChild, List<StorageElement> listChildren) {
+        for (StorageElement element : listChildren) {
+            childChild.add(element);
+            List<StorageElement> listChildrenElement = storageRepository.findByParentId(element);
+            List<StorageElement> byParentId = storageRepository.findByParentId(element);
+            if (byParentId.size() != 0) deleteChildFiles(childChild, listChildren);
+        }
+    }
+
+    private Directory findById(Long id){
+        Optional<Directory> foundDirectory = directoryRepository.findById(id);
+        return foundDirectory.orElse(null);
     }
 
 

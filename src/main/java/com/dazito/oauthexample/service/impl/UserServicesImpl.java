@@ -55,8 +55,8 @@ public class UserServicesImpl implements UserService {
     @Override
     public EditedPasswordDto editPassword(Long id, String newPassword, String rawOldPassword) {
         AccountEntity foundedUser = findByIdAccountRepo(id);
-        if (!checkStringOnNull(newPassword)) return null;
-        if (!checkStringOnNull(rawOldPassword)) return null;
+        if (!isEmpty(newPassword)) return null;
+        if (!isEmpty(rawOldPassword)) return null;
 
         AccountEntity currentUser = getCurrentUser();
         String passwordCurrentUser = currentUser.getPassword();
@@ -67,7 +67,7 @@ public class UserServicesImpl implements UserService {
         if (id == null) {
             accountToBeEdited = currentUser;
             matches = checkMatches(rawOldPassword, passwordCurrentUser);
-            return ifMatchesTrueSetPasswordAndReturn(matches, encodedPassword, accountToBeEdited);
+            return savePassword(matches, encodedPassword, accountToBeEdited);
         }
 
         if (!adminRightsCheck(getCurrentUser())) return null; // current user is not Admin;
@@ -77,7 +77,7 @@ public class UserServicesImpl implements UserService {
 
         accountToBeEdited = getCurrentUser();
         matches = checkMatches(rawOldPassword, passwordCurrentUser);
-        return ifMatchesTrueSetPasswordAndReturn(matches, encodedPassword, accountToBeEdited);
+        return savePassword(matches, encodedPassword, accountToBeEdited);
     }
 
     // Change user email and name, documentation on it in UserService
@@ -90,13 +90,13 @@ public class UserServicesImpl implements UserService {
         AccountEntity currentUser = getCurrentUser();
 
         newEmail = personalData.getNewEmail();
-        boolean checkedEmailOnNull = checkStringOnNull(newEmail);
+        boolean checkedEmailOnNull = isEmpty(newEmail);
         if (!checkedEmailOnNull) newEmail = currentUser.getEmail();
 
         if (findUserByEmail(newEmail) != null) return null; // user with such email exist;
 
         newName = personalData.getNewName();
-        boolean checkedNameOnNull = checkStringOnNull(newName);
+        boolean checkedNameOnNull = isEmpty(newName);
         if (!checkedNameOnNull) newName = currentUser.getUsername();
 
         AccountEntity accountWithNewEmail;
@@ -192,16 +192,16 @@ public class UserServicesImpl implements UserService {
     }
 
     @Override
-    public EditedPasswordDto ifMatchesTrueSetPasswordAndReturn(boolean matches, String encodedPassword, AccountEntity accountToBeEdited) {
+    public EditedPasswordDto savePassword(boolean matches, String encodedPassword, AccountEntity accountToBeEdited) {
         if (matches) {
-            setAndSaveEncodedPassword(encodedPassword, accountToBeEdited);
-            return responsePassword(accountToBeEdited.getPassword());
+            saveEncodedPassword(encodedPassword, accountToBeEdited);
+            return convertToResponsePassword(accountToBeEdited.getPassword());
         }
         return null;
     }
 
     @Override
-    public void setAndSaveEncodedPassword(String encodedPassword, AccountEntity accountToBeEdited) {
+    public void saveEncodedPassword(String encodedPassword, AccountEntity accountToBeEdited) {
         accountToBeEdited.setPassword(encodedPassword);
         accountRepository.saveAndFlush(accountToBeEdited);
     }
@@ -217,7 +217,7 @@ public class UserServicesImpl implements UserService {
     }
 
     @Override
-    public EditedPasswordDto responsePassword(String newPassword) {
+    public EditedPasswordDto convertToResponsePassword(String newPassword) {
         EditedPasswordDto editedPasswordDto = new EditedPasswordDto();
         editedPasswordDto.setPassword(newPassword);
         return editedPasswordDto;
@@ -233,25 +233,28 @@ public class UserServicesImpl implements UserService {
     @Override
     public AccountEntity findUserByEmail(String email) {
         Optional<AccountEntity> foundedUser = accountRepository.findUserByEmail(email);
-        if (checkOptionalOnNull(foundedUser)) return foundedUser.get();
+        if (isOptionalNotNull(foundedUser)) return foundedUser.get();
         return null;
     }
 
     @Override
-    public boolean checkStringOnNull(String val) {
+    public boolean isEmpty(String val) {
         return val != null && !val.equals("");
     }
 
     @Override
-    public boolean checkOptionalOnNull(Optional val) {
+    public boolean isOptionalNotNull(Optional val) {
         return val.isPresent();
     }
+
+
+
 
     @Override
     public AccountEntity findByIdAccountRepo(Long id) {
         if (id == null) return null;
         Optional<AccountEntity> foundByIdOptional = accountRepository.findById(id);
-        boolean checkedOnNull = checkOptionalOnNull(foundByIdOptional);
+        boolean checkedOnNull = isOptionalNotNull(foundByIdOptional);
         if (checkedOnNull) return foundByIdOptional.get();
         return null;
     }
@@ -307,7 +310,7 @@ public class UserServicesImpl implements UserService {
     @Override
     public Organization findOrganizationByName(String organizationName) {
         Optional<Organization> foundedOrganization = organizationRepo.findByOrganizationName(organizationName);
-        if (checkOptionalOnNull(foundedOrganization)) return foundedOrganization.get();
+        if (isOptionalNotNull(foundedOrganization)) return foundedOrganization.get();
         return null;
     }
 
