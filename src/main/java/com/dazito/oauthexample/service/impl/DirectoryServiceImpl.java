@@ -60,7 +60,7 @@ public class DirectoryServiceImpl implements DirectoryService {
             if (type.equals(SomeType.FILE)) return null;
         }
 
-        directory.setParentId(foundParentElement);
+        directory.setParent(foundParentElement);
 
         if (role.equals(UserRole.USER) && !foundParentElement.getType().equals(SomeType.CONTENT)) {
             AccountEntity owner = foundParentElement.getOwner();
@@ -77,7 +77,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     @Override
     public DirectoryCreatedDto responseDirectoryCreated(Directory directory) {
         String nameDir = directory.getName();
-        StorageElement parentDir = directory.getParentId();
+        StorageElement parentDir = directory.getParent();
         Long idDir = parentDir.getId();
 
         DirectoryCreatedDto directoryResponseDto = new DirectoryCreatedDto();
@@ -106,7 +106,7 @@ public class DirectoryServiceImpl implements DirectoryService {
         boolean isMatch = utilService.matchesOrganizations(organization, organizationDirectory);
         if (!isMatch) return null;
 
-        foundDirectory.setParentId(parentDirectory);
+        foundDirectory.setParent(parentDirectory);
         foundDirectory.setName(name);
 
         storageRepository.saveAndFlush(foundDirectory);
@@ -130,7 +130,7 @@ public class DirectoryServiceImpl implements DirectoryService {
 
         List<StorageElement> childChild = new ArrayList<>();
 
-        List<StorageElement> listChildren = storageRepository.findByParentId(foundStorage);
+        List<StorageElement> listChildren = storageRepository.findByParent(foundStorage);
         childChild.add(foundStorage);
         deleteChildFiles(childChild, listChildren);
         storageRepository.delete(childChild);
@@ -139,8 +139,8 @@ public class DirectoryServiceImpl implements DirectoryService {
     private void deleteChildFiles(List<StorageElement> childChild, List<StorageElement> listChildren) {
         for (StorageElement element : listChildren) {
             childChild.add(element);
-            List<StorageElement> listChildrenElement = storageRepository.findByParentId(element);
-            List<StorageElement> byParentId = storageRepository.findByParentId(element);
+            List<StorageElement> listChildrenElement = storageRepository.findByParent(element);
+            List<StorageElement> byParentId = storageRepository.findByParent(element);
             if (byParentId.size() != 0) deleteChildFiles(childChild, listChildren);
         }
     }

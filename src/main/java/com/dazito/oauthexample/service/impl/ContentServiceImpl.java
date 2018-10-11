@@ -64,7 +64,7 @@ public class ContentServiceImpl implements ContentService {
                 content.setRoot(root.toString());
                 break;
         }
-        content.setParentId(null);
+        content.setParent(null);
         content.setSize(0L);
         content.setOrganization(organization);
 

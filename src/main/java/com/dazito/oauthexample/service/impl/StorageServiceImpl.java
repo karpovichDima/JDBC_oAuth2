@@ -57,7 +57,7 @@ public class StorageServiceImpl implements StorageService {
         if (!canChange) return null;
 
         foundStorageElement.setName(newName);
-        foundStorageElement.setParentId(parent);
+        foundStorageElement.setParent(parent);
 
         storageRepository.saveAndFlush(foundStorageElement);
 
@@ -149,6 +149,6 @@ public class StorageServiceImpl implements StorageService {
 
     @Override
     public List<StorageElement> getChildListElement(StorageElement storageElement) {
-        return storageRepository.findByParentId(storageElement);
+        return storageRepository.findByParent(storageElement);
     }
 }

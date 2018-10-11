@@ -82,7 +82,7 @@ public class FileServiceImpl implements FileService {
 
         Content foundContent = findContentDependingOnTheParent(parentId, organization);
 
-        fileEntity.setParentId(foundContent);
+        fileEntity.setParent(foundContent);
 
         storageRepository.saveAndFlush(fileEntity);
 
@@ -120,7 +120,7 @@ public class FileServiceImpl implements FileService {
         AccountEntity currentUser = userServices.getCurrentUser();
         FileEntity foundFile = findByUUID(uuid);
         if (foundFile == null) return null;
-        Long parentId = foundFile.getParentId().getId();
+        Long parentId = foundFile.getParent().getId();
         AccountEntity owner = foundFile.getOwner();
         Organization organization = currentUser.getOrganization();
 
@@ -159,7 +159,7 @@ public class FileServiceImpl implements FileService {
 
         StorageElement foundStorageElement = findContentDependingOnTheParent(parentId, organization);
 
-        fileEntity.setParentId(foundStorageElement);
+        fileEntity.setParent(foundStorageElement);
 
         storageRepository.saveAndFlush(fileEntity);
 
