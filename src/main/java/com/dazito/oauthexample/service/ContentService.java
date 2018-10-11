@@ -5,6 +5,7 @@ import com.dazito.oauthexample.model.Content;
 import com.dazito.oauthexample.model.StorageElement;
 import com.dazito.oauthexample.service.dto.request.ContentUpdateDto;
 import com.dazito.oauthexample.service.dto.response.ContentUpdatedDto;
+import com.dazito.oauthexample.service.dto.response.DirectoryDeletedDto;
 
 public interface ContentService {
 
@@ -26,4 +27,7 @@ public interface ContentService {
     Content findByName(String name);
 
     Content findContentForAdmin(String organizationName);
+
+    void delete(Long id);
+
 }

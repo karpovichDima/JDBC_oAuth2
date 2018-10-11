@@ -6,21 +6,23 @@ import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.model.Content;
 import com.dazito.oauthexample.model.Organization;
 import com.dazito.oauthexample.model.StorageElement;
+import com.dazito.oauthexample.model.type.SomeType;
 import com.dazito.oauthexample.model.type.UserRole;
-import com.dazito.oauthexample.service.ContentService;
-import com.dazito.oauthexample.service.StorageService;
-import com.dazito.oauthexample.service.UserService;
-import com.dazito.oauthexample.service.UtilService;
+import com.dazito.oauthexample.service.*;
 import com.dazito.oauthexample.service.dto.request.ContentUpdateDto;
 import com.dazito.oauthexample.service.dto.response.ContentUpdatedDto;
+import com.dazito.oauthexample.service.dto.response.DirectoryDeletedDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.io.File;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -41,6 +43,8 @@ public class ContentServiceImpl implements ContentService {
     private UtilService utilService;
     @Autowired
     private StorageService storageService;
+    @Autowired
+    private DirectoryService directoryService;
 
 
     // create root for all directories and files(for Admins) or for one User
@@ -138,4 +142,28 @@ public class ContentServiceImpl implements ContentService {
         return foundOptional.orElse(null);
     }
 
+    @Transactional
+    @Override
+    public void delete(Long id) {
+        AccountEntity currentUser = userService.getCurrentUser();
+        StorageElement foundStorage = findById(id);
+        AccountEntity owner = foundStorage.getOwner();
+        SomeType type = foundStorage.getType();
+
+        if (type.equals(SomeType.FILE)) return;
+
+        boolean canChange = utilService.isPermissionsAdminOrUserIsOwner(currentUser, owner, foundStorage);
+        if (!canChange) return;
+        canChange = utilService.checkPermissionsOnChangeByOrganization(currentUser, foundStorage);
+        if (!canChange) return;
+
+        List<StorageElement> listChildToDelete = new ArrayList<>();
+
+        List<StorageElement> listChildrenFoundStorage = foundStorage.getChildren();
+        listChildToDelete.add(foundStorage);
+        listChildToDelete.addAll(listChildrenFoundStorage);
+
+        directoryService.deleteChildFiles(listChildToDelete, listChildrenFoundStorage);
+        storageRepository.delete(listChildToDelete);
+    }
 }

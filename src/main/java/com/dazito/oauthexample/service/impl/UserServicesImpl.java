@@ -161,6 +161,7 @@ public class UserServicesImpl implements UserService {
     public AccountDto deleteUser(Long id, DeleteAccountDto accountDto) {
         String email;
         String password;
+        Long idContent;
         AccountEntity currentUser = getCurrentUser();
         if (id == null) {
             email = accountDto.getEmail();
@@ -175,6 +176,9 @@ public class UserServicesImpl implements UserService {
 
             AccountEntity account = findUserByEmail(email);
             accountRepository.delete(account);
+
+            idContent = account.getContent().getId();
+            contentService.delete(idContent);
         }
 
         if (!adminRightsCheck(getCurrentUser())) return null;
@@ -184,6 +188,8 @@ public class UserServicesImpl implements UserService {
         if (organizationMatch(organizationName, currentUser)) return null;
 
         accountRepository.delete(foundedUser);
+        idContent = foundedUser.getContent().getId();
+        contentService.delete(idContent);
 
         AccountDto accountDtoResponse = new AccountDto();
         accountDtoResponse.setEmail(accountDto.getEmail());

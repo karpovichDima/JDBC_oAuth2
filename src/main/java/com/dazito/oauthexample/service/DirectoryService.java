@@ -1,9 +1,12 @@
 package com.dazito.oauthexample.service;
 
 import com.dazito.oauthexample.model.Directory;
+import com.dazito.oauthexample.model.StorageElement;
 import com.dazito.oauthexample.service.dto.response.DirectoryDeletedDto;
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
 import com.dazito.oauthexample.service.dto.response.DirectoryCreatedDto;
+
+import java.util.List;
 
 public interface DirectoryService {
     /**
@@ -18,4 +21,6 @@ public interface DirectoryService {
     DirectoryCreatedDto updateDirectory(DirectoryDto directoryDto);
 
     DirectoryDeletedDto delete(Long id);
+
+    void deleteChildFiles(List<StorageElement> listChildToDelete, List<StorageElement> listChildrenFoundStorage);
 }

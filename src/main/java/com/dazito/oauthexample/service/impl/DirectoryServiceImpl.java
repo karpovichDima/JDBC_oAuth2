@@ -149,7 +149,8 @@ public class DirectoryServiceImpl implements DirectoryService {
         return directoryDeletedDto;
     }
 
-    private void deleteChildFiles(List<StorageElement> listChildToDelete, List<StorageElement> listChildrenFoundStorage) {
+    @Override
+    public void deleteChildFiles(List<StorageElement> listChildToDelete, List<StorageElement> listChildrenFoundStorage) {
         List<StorageElement> childrenElement;
         for (StorageElement element : listChildrenFoundStorage) {
             childrenElement = element.getChildren();
