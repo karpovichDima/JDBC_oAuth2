@@ -97,41 +97,35 @@ public class StorageServiceImpl implements StorageService {
         storageDto.setParent(storageDtoParent);
         storageDto.setSize(sizeFileParent);
 
-        if (typeElement.equals(SomeType.FILE)) return storageDto;
-
+        if (typeElement == SomeType.FILE) return storageDto;
 
         List<StorageElement> elementChildren = getChildListElement(storageElement);
 
         List<StorageDto> listChildrenDirectories = new ArrayList<>();
         List<StorageDto> listChildrenFiles = new ArrayList<>();
 
-
         long sizeElementFile = 0;
-        long parentSize;
-        long currentStorageDtoSize;
         SomeType type = null;
 
         for (StorageElement element : elementChildren) {
             type = element.getType();
             long elementId = element.getId();
-            if (type.equals(SomeType.DIRECTORY))
-                listChildrenDirectories.add(buildStorageDto(elementId, storageDto, sizeElementFile));
-            if (type.equals(SomeType.FILE)) {
-                sizeElementFile = element.getSize();
-                parentSize = storageDtoParent.getSize() + sizeElementFile;
-                storageDtoParent.setSize(parentSize);
-                currentStorageDtoSize = storageDto.getSize();
-                currentStorageDtoSize = currentStorageDtoSize + sizeElementFile;
-                storageDto.setSize(currentStorageDtoSize);
 
-                listChildrenFiles.add(buildStorageDto(elementId, storageDto, sizeElementFile));
+            switch (type) {
+                case DIRECTORY:
+                    listChildrenDirectories.add(buildStorageDto(elementId, storageDto, sizeElementFile));
+                    break;
+                case FILE:
+                    sizeElementFile = element.getSize();
+                    storageDtoParent.setSize(storageDtoParent.getSize() + sizeElementFile);
+                    storageDto.setSize(storageDto.getSize() + sizeElementFile);
+
+                    listChildrenFiles.add(buildStorageDto(elementId, storageDto, sizeElementFile));
+                    break;
             }
         }
-        if (storageDtoParent != null && !type.equals(SomeType.FILE)) {
-            currentStorageDtoSize = storageDto.getSize();
-            parentSize = storageDtoParent.getSize();
-            parentSize = parentSize + currentStorageDtoSize;
-            storageDtoParent.setSize(parentSize);
+        if (storageDtoParent != null && type == SomeType.DIRECTORY){
+            storageDtoParent.setSize(storageDto.getSize() + storageDtoParent.getSize());
         }
 
         DirectoryStorageDto directoryStorageDtoDirectory = (DirectoryStorageDto) storageDto;

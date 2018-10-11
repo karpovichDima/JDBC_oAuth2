@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 
 @Getter
 @Setter
@@ -44,4 +45,7 @@ public abstract class StorageElement{
     @JoinColumn(name="organization_id")
     @JsonIgnore
     private Organization organization;
+
+//    @OneToMany(targetEntity = StorageElement.class, mappedBy = "parent")
+//    private List<StorageElement> children;
 }
