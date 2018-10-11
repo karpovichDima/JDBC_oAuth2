@@ -9,12 +9,14 @@ import com.dazito.oauthexample.model.StorageElement;
 import com.dazito.oauthexample.model.type.SomeType;
 import com.dazito.oauthexample.model.type.UserRole;
 import com.dazito.oauthexample.service.*;
-import com.dazito.oauthexample.service.dto.response.DirectoryDeletedDto;
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
 import com.dazito.oauthexample.service.dto.response.DirectoryCreatedDto;
+import com.dazito.oauthexample.service.dto.response.DirectoryDeletedDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.swing.event.TreeModelEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -115,6 +117,7 @@ public class DirectoryServiceImpl implements DirectoryService {
         return responseDirectoryCreated((Directory) foundDirectory);
     }
 
+    @Transactional
     @Override
     public DirectoryDeletedDto delete(Long id) {
         AccountEntity currentUser = userServices.getCurrentUser();
@@ -129,12 +132,14 @@ public class DirectoryServiceImpl implements DirectoryService {
         canChange = utilService.checkPermissionsOnChangeByOrganization(currentUser, foundStorage);
         if (!canChange) return null;
 
-        List<StorageElement> childChild = new ArrayList<>();
+        List<StorageElement> listChildToDelete = new ArrayList<>();
 
-        List<StorageElement> listChildren = storageRepository.findByParent(foundStorage);
-        childChild.add(foundStorage);
-        deleteChildFiles(childChild, listChildren);
-        storageRepository.delete(childChild);
+        List<StorageElement> listChildrenFoundStorage = foundStorage.getChildren();
+        listChildToDelete.add(foundStorage);
+        listChildToDelete.addAll(listChildrenFoundStorage);
+
+        deleteChildFiles(listChildToDelete, listChildrenFoundStorage);
+        storageRepository.delete(listChildToDelete);
 
         DirectoryDeletedDto directoryDeletedDto = new DirectoryDeletedDto();
         directoryDeletedDto.setId(id);
@@ -144,12 +149,14 @@ public class DirectoryServiceImpl implements DirectoryService {
         return directoryDeletedDto;
     }
 
-    private void deleteChildFiles(List<StorageElement> childChild, List<StorageElement> listChildren) {
-        for (StorageElement element : listChildren) {
-            childChild.add(element);
-            List<StorageElement> listChildrenElement = storageRepository.findByParent(element);
-            List<StorageElement> byParentId = storageRepository.findByParent(element);
-            if (byParentId.size() != 0) deleteChildFiles(childChild, listChildren);
+    private void deleteChildFiles(List<StorageElement> listChildToDelete, List<StorageElement> listChildrenFoundStorage) {
+        List<StorageElement> childrenElement;
+        for (StorageElement element : listChildrenFoundStorage) {
+            childrenElement = element.getChildren();
+            if (childrenElement.size() != 0) {
+                listChildToDelete.addAll(childrenElement);
+                deleteChildFiles(listChildToDelete, childrenElement);
+            }
         }
     }
 

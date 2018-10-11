@@ -46,6 +46,7 @@ public abstract class StorageElement{
     @JsonIgnore
     private Organization organization;
 
-//    @OneToMany(targetEntity = StorageElement.class, mappedBy = "parent")
-//    private List<StorageElement> children;
+    @OneToMany(targetEntity = StorageElement.class, mappedBy = "parent")
+    @JsonIgnore
+    private List<StorageElement> children;
 }
