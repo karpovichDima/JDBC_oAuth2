@@ -1,16 +1,14 @@
 package com.dazito.oauthexample.service;
 
 import com.dazito.oauthexample.model.*;
+import com.dazito.oauthexample.service.dto.response.FileDeletedDto;
 import com.dazito.oauthexample.service.dto.response.FileUploadedDto;
-import com.dazito.oauthexample.service.dto.response.StorageDto;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Optional;
 
 public interface FileService{
@@ -65,5 +63,5 @@ public interface FileService{
 
     FileUploadedDto updateFile(MultipartFile file, String uuid) throws IOException;
 
-    void delete(String id) throws IOException;
+    FileDeletedDto delete(String id) throws IOException;
 }

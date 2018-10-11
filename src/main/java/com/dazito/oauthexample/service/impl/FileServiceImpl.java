@@ -6,6 +6,7 @@ import com.dazito.oauthexample.model.*;
 import com.dazito.oauthexample.model.type.SomeType;
 import com.dazito.oauthexample.model.type.UserRole;
 import com.dazito.oauthexample.service.*;
+import com.dazito.oauthexample.service.dto.response.FileDeletedDto;
 import com.dazito.oauthexample.service.dto.response.FileUploadedDto;
 import liquibase.util.file.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -167,7 +168,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public void delete(String uuid) throws IOException {
+    public FileDeletedDto delete(String uuid) throws IOException {
         AccountEntity currentUser = userServices.getCurrentUser();
         StorageElement foundStorage = findByUUID(uuid);
         AccountEntity owner = foundStorage.getOwner();
@@ -175,11 +176,11 @@ public class FileServiceImpl implements FileService {
         UserRole role = currentUser.getRole();
 
         boolean canChange = utilService.isPermissionsAdminOrUserIsOwner(currentUser, owner, foundStorage);
-        if (!canChange) return;
+        if (!canChange) return null;
         canChange = utilService.checkPermissionsOnChangeByOrganization(currentUser,foundStorage);
-        if (!canChange) return;
+        if (!canChange) return null;
 
-        if (!type.equals(SomeType.FILE)) return;
+        if (!type.equals(SomeType.FILE)) return null;
         storageRepository.delete(foundStorage);
 
         Path rootContent;
@@ -190,6 +191,14 @@ public class FileServiceImpl implements FileService {
         }
         Path pathFile = Paths.get(rootContent + File.separator + uuid);
         Files.delete(pathFile);
+
+        FileDeletedDto fileDeletedResponseDto = new FileDeletedDto();
+        fileDeletedResponseDto.setUuid(uuid);
+        fileDeletedResponseDto.setId(foundStorage.getId());
+        fileDeletedResponseDto.setName(foundStorage.getName());
+        fileDeletedResponseDto.setParentId(foundStorage.getParent().getId());
+
+        return fileDeletedResponseDto;
     }
 
     @Override

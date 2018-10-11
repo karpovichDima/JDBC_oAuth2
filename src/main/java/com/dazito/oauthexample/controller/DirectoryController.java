@@ -1,12 +1,10 @@
 package com.dazito.oauthexample.controller;
 
 import com.dazito.oauthexample.service.DirectoryService;
-import com.dazito.oauthexample.service.FileService;
-import com.dazito.oauthexample.service.StorageService;
+import com.dazito.oauthexample.service.dto.response.DirectoryDeletedDto;
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
 import com.dazito.oauthexample.service.dto.response.DirectoryCreatedDto;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,8 +32,8 @@ public class DirectoryController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity delete(@PathVariable Long id){
-        directoryService.delete(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<DirectoryDeletedDto> delete(@PathVariable Long id){
+        DirectoryDeletedDto deleted = directoryService.delete(id);
+        return ResponseEntity.ok(deleted);
     }
 }

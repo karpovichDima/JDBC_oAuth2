@@ -9,6 +9,7 @@ import com.dazito.oauthexample.model.StorageElement;
 import com.dazito.oauthexample.model.type.SomeType;
 import com.dazito.oauthexample.model.type.UserRole;
 import com.dazito.oauthexample.service.*;
+import com.dazito.oauthexample.service.dto.response.DirectoryDeletedDto;
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
 import com.dazito.oauthexample.service.dto.response.DirectoryCreatedDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,18 +116,18 @@ public class DirectoryServiceImpl implements DirectoryService {
     }
 
     @Override
-    public void delete(Long id) {
+    public DirectoryDeletedDto delete(Long id) {
         AccountEntity currentUser = userServices.getCurrentUser();
         StorageElement foundStorage = findById(id);
         AccountEntity owner = foundStorage.getOwner();
         SomeType type = foundStorage.getType();
 
-        if (type.equals(SomeType.FILE)) return;
+        if (type.equals(SomeType.FILE)) return null;
 
         boolean canChange = utilService.isPermissionsAdminOrUserIsOwner(currentUser, owner, foundStorage);
-        if (!canChange) return;
+        if (!canChange) return null;
         canChange = utilService.checkPermissionsOnChangeByOrganization(currentUser, foundStorage);
-        if (!canChange) return;
+        if (!canChange) return null;
 
         List<StorageElement> childChild = new ArrayList<>();
 
@@ -134,6 +135,13 @@ public class DirectoryServiceImpl implements DirectoryService {
         childChild.add(foundStorage);
         deleteChildFiles(childChild, listChildren);
         storageRepository.delete(childChild);
+
+        DirectoryDeletedDto directoryDeletedDto = new DirectoryDeletedDto();
+        directoryDeletedDto.setId(id);
+        directoryDeletedDto.setName(foundStorage.getName());
+        directoryDeletedDto.setParentId(foundStorage.getParent().getId());
+
+        return directoryDeletedDto;
     }
 
     private void deleteChildFiles(List<StorageElement> childChild, List<StorageElement> listChildren) {

@@ -32,6 +32,5 @@ public class StorageController {
     public ResponseEntity<StorageDto> createHierarchy(@PathVariable Long id) throws IOException {
         StorageDto hierarchy = storageService.createHierarchy(id);
         return ResponseEntity.ok(hierarchy);
-
     }
 }

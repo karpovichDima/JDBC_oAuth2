@@ -55,8 +55,8 @@ public class ConcreteUserController {
 
     // delete user by email from accountDto
     @DeleteMapping("/")
-    public ResponseEntity deleteUser(@PathVariable Long id){
-        userService.deleteUser(id, null);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<AccountDto> deleteUser(@PathVariable Long id){
+        AccountDto accountDto = userService.deleteUser(id, null);
+        return ResponseEntity.ok(accountDto);
     }
 }

@@ -9,7 +9,6 @@ import com.dazito.oauthexample.model.Content;
 import com.dazito.oauthexample.model.Organization;
 import com.dazito.oauthexample.model.type.UserRole;
 import com.dazito.oauthexample.service.ContentService;
-import com.dazito.oauthexample.service.FileService;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.request.DeleteAccountDto;
@@ -159,7 +158,7 @@ public class UserServicesImpl implements UserService {
 
     // Delete user by id or current user
     @Override
-    public void deleteUser(Long id, DeleteAccountDto accountDto) {
+    public AccountDto deleteUser(Long id, DeleteAccountDto accountDto) {
         String email;
         String password;
         AccountEntity currentUser = getCurrentUser();
@@ -168,24 +167,27 @@ public class UserServicesImpl implements UserService {
             password = accountDto.getRawPassword();
 
             boolean checkEmail = getCurrentUser().getEmail().equals(email);
-            if (!checkEmail) return; // email not matches
+            if (!checkEmail) return null;
 
             String encodedPassword = getCurrentUser().getPassword();
             boolean checkPassword = passwordEncoder.matches(password, encodedPassword);
-            if (!checkPassword) return; // password not matches
+            if (!checkPassword) return null;
 
             AccountEntity account = findUserByEmail(email);
             accountRepository.delete(account);
         }
 
-        if (!adminRightsCheck(getCurrentUser())) return; // current user is not Admin;
+        if (!adminRightsCheck(getCurrentUser())) return null;
 
         AccountEntity foundedUser = findByIdAccountRepo(id);
         String organizationName = getOrganizationNameByUser(foundedUser);
-        if (organizationMatch(organizationName, currentUser))
-            return; // organization current user and user from account dto is not match
+        if (organizationMatch(organizationName, currentUser)) return null;
 
         accountRepository.delete(foundedUser);
+
+        AccountDto accountDtoResponse = new AccountDto();
+        accountDtoResponse.setEmail(accountDto.getEmail());
+        return accountDtoResponse;
     }
 
     @Override

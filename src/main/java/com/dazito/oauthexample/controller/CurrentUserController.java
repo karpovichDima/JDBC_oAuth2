@@ -52,9 +52,9 @@ public class CurrentUserController {
     }
 
     @DeleteMapping("/")
-    public ResponseEntity deleteUser(@RequestBody DeleteAccountDto accountDto){
-        userService.deleteUser(null, accountDto);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<AccountDto> deleteUser(@RequestBody DeleteAccountDto accountDto){
+        AccountDto result = userService.deleteUser(null, accountDto);
+        return ResponseEntity.ok(result);
     }
 
 }

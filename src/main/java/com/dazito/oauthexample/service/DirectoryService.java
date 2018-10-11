@@ -1,6 +1,7 @@
 package com.dazito.oauthexample.service;
 
 import com.dazito.oauthexample.model.Directory;
+import com.dazito.oauthexample.service.dto.response.DirectoryDeletedDto;
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
 import com.dazito.oauthexample.service.dto.response.DirectoryCreatedDto;
 
@@ -16,5 +17,5 @@ public interface DirectoryService {
 
     DirectoryCreatedDto updateDirectory(DirectoryDto directoryDto);
 
-    void delete(Long id);
+    DirectoryDeletedDto delete(Long id);
 }

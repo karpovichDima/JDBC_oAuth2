@@ -2,6 +2,7 @@ package com.dazito.oauthexample.controller;
 
 import com.dazito.oauthexample.service.FileService;
 import com.dazito.oauthexample.service.dto.request.FileUpdateDto;
+import com.dazito.oauthexample.service.dto.response.FileDeletedDto;
 import com.dazito.oauthexample.service.dto.response.FileUploadedDto;
 import com.dazito.oauthexample.service.dto.response.StorageDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,9 +52,9 @@ public class FileController {
     }
 
     @DeleteMapping("/{uuid}")
-    public ResponseEntity delete(@PathVariable String uuid) throws IOException {
-        fileService.delete(uuid);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<FileDeletedDto> delete(@PathVariable String uuid) throws IOException {
+        FileDeletedDto deleted = fileService.delete(uuid);
+        return ResponseEntity.ok(deleted);
     }
 
     @Bean

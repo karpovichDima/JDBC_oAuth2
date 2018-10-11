@@ -39,7 +39,7 @@ public interface UserService {
      * delete user from DB, by id or DeleteAccountDto
      * @param accountDto is entity which we will find in DB and after that, delete
      */
-    void deleteUser(Long id, DeleteAccountDto accountDto);
+    AccountDto deleteUser(Long id, DeleteAccountDto accountDto);
 
     EditedPasswordDto savePassword(boolean matches, String encodedPassword, AccountEntity accountToBeEdited);
 
