@@ -1,6 +1,5 @@
 package com.dazito.oauthexample.controller;
 
-import com.dazito.oauthexample.config.oauth.UserDetailsConfig;
 import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
@@ -8,9 +7,8 @@ import com.dazito.oauthexample.service.dto.request.EditPersonalDataDto;
 import com.dazito.oauthexample.service.dto.response.EditedEmailNameDto;
 import com.dazito.oauthexample.service.dto.response.EditedPasswordDto;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -44,13 +42,6 @@ public class ConcreteUserController {
     public ResponseEntity<EditedPasswordDto> editPassword(@PathVariable Long id, @RequestBody EditPersonalDataDto editPersonalDataDto) {
         EditedPasswordDto editedPasswordDto = userService.editPassword(id, editPersonalDataDto.getNewPassword(), editPersonalDataDto.getRawOldPassword());
         return ResponseEntity.ok(editedPasswordDto);
-    }
-
-    // create new user from accountDto
-    @PostMapping("/")
-    public ResponseEntity<EditedEmailNameDto> createUser(@RequestBody AccountDto accountDto){
-        EditedEmailNameDto newUser = userService.createUser(accountDto);
-        return ResponseEntity.ok(newUser);
     }
 
     // delete user by email from accountDto

@@ -44,13 +44,6 @@ public class CurrentUserController {
         return ResponseEntity.ok(editedPasswordDto);
     }
 
-    // create new user from accountDto
-    @PostMapping("/")
-    public ResponseEntity<EditedEmailNameDto> createUser(@RequestBody AccountDto accountDto){
-        EditedEmailNameDto newUser = userService.createUser(accountDto);
-        return ResponseEntity.ok(newUser);
-    }
-
     @DeleteMapping("/")
     public ResponseEntity<AccountDto> deleteUser(@RequestBody DeleteAccountDto accountDto){
         AccountDto result = userService.deleteUser(null, accountDto);
