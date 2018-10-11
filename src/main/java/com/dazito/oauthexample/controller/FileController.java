@@ -1,9 +1,9 @@
 package com.dazito.oauthexample.controller;
 
 import com.dazito.oauthexample.service.FileService;
-import com.dazito.oauthexample.service.dto.request.DirectoryDto;
-import com.dazito.oauthexample.service.dto.response.DirectoryCreated;
-import com.dazito.oauthexample.service.dto.response.FileUploadResponse;
+import com.dazito.oauthexample.service.dto.request.FileUpdateDto;
+import com.dazito.oauthexample.service.dto.response.FileDeletedDto;
+import com.dazito.oauthexample.service.dto.response.FileUploadedDto;
 import com.dazito.oauthexample.service.dto.response.StorageDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,28 +34,27 @@ public class FileController {
     }
 
 
-    @PostMapping("/upload/{parentId}")
-    @ResponseStatus(value = HttpStatus.OK)
-    public FileUploadResponse upload(@RequestParam MultipartFile file, @PathVariable Long parentId) throws IOException {
-        return fileService.upload(file, parentId);
+    @PostMapping("/{parentId}")
+    public ResponseEntity<FileUploadedDto> upload(@RequestParam MultipartFile file, @PathVariable Long parentId) throws IOException {
+        FileUploadedDto upload = fileService.upload(file, parentId);
+        return ResponseEntity.ok(upload);
     }
 
-    @GetMapping("/download/{uuid:.+}")
-    @ResponseStatus(value = HttpStatus.OK)
+    @GetMapping("/{uuid:.+}")
     public ResponseEntity<Resource> download(@PathVariable String uuid) throws IOException {
         return fileService.download(uuid);
     }
 
-    @PostMapping("/dir")
-    @ResponseStatus(value = HttpStatus.OK)
-    public DirectoryCreated createDirectory(@RequestBody DirectoryDto directoryDto) {
-        return fileService.createDirectory(directoryDto);
+    @PostMapping("/update/{uuid:.+}")
+    public ResponseEntity<FileUploadedDto> update(@RequestParam MultipartFile file, @PathVariable String uuid) throws IOException {
+        FileUploadedDto fileUploadedDto = fileService.updateFile(file, uuid);
+        return ResponseEntity.ok(fileUploadedDto);
     }
 
-    @GetMapping("/chierarchy/{id:.+}")
-    @ResponseStatus(value = HttpStatus.OK)
-    public StorageDto createHierarchy(@PathVariable Long id) throws IOException {
-        return fileService.buildStorageDto(id);
+    @DeleteMapping("/{uuid}")
+    public ResponseEntity<FileDeletedDto> delete(@PathVariable String uuid) throws IOException {
+        FileDeletedDto deleted = fileService.delete(uuid);
+        return ResponseEntity.ok(deleted);
     }
 
     @Bean

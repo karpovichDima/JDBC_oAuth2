@@ -9,7 +9,7 @@ import java.util.Random;
 
 @Setter
 @Getter
-public class PasswordDto implements Serializable {
+public class EditedPasswordDto implements Serializable {
 
     private final static long serialVersionUID = 653407663;
     @NotNull

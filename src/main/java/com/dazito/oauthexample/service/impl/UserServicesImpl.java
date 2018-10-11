@@ -3,18 +3,19 @@ package com.dazito.oauthexample.service.impl;
 import com.dazito.oauthexample.config.oauth.UserDetailsConfig;
 import com.dazito.oauthexample.dao.AccountRepository;
 import com.dazito.oauthexample.dao.OrganizationRepo;
+import com.dazito.oauthexample.dao.StorageRepository;
 import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.model.Content;
 import com.dazito.oauthexample.model.Organization;
 import com.dazito.oauthexample.model.type.UserRole;
-import com.dazito.oauthexample.service.FileService;
+import com.dazito.oauthexample.service.ContentService;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.request.DeleteAccountDto;
-import com.dazito.oauthexample.service.dto.request.DtoForEditingPersonalData;
+import com.dazito.oauthexample.service.dto.request.EditPersonalDataDto;
 import com.dazito.oauthexample.service.dto.request.OrganizationDto;
-import com.dazito.oauthexample.service.dto.response.EmailNameDto;
-import com.dazito.oauthexample.service.dto.response.PasswordDto;
+import com.dazito.oauthexample.service.dto.response.EditedEmailNameDto;
+import com.dazito.oauthexample.service.dto.response.EditedPasswordDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
@@ -35,25 +36,23 @@ public class UserServicesImpl implements UserService {
     @Resource(name = "conversionService")
     ConversionService conversionService;
 
-    private final FileService fileService;
-    private final AccountRepository accountRepository;
-    private final OrganizationRepo organizationRepo;
-    private final PasswordEncoder passwordEncoder;
-
     @Autowired
-    public UserServicesImpl(AccountRepository accountRepository, OrganizationRepo organizationRepo, PasswordEncoder passwordEncoder, FileService fileService) {
-        this.accountRepository = accountRepository;
-        this.organizationRepo = organizationRepo;
-        this.passwordEncoder = passwordEncoder;
-        this.fileService = fileService;
-    }
+    private AccountRepository accountRepository;
+    @Autowired
+    private OrganizationRepo organizationRepo;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private StorageRepository storageRepository;
+    @Autowired
+    private ContentService contentService;
 
     // Change user password
     @Override
-    public PasswordDto editPassword(Long id, String newPassword, String rawOldPassword) {
+    public EditedPasswordDto editPassword(Long id, String newPassword, String rawOldPassword) {
         AccountEntity foundedUser = findByIdAccountRepo(id);
-        if (!checkStringOnNull(newPassword)) return null;
-        if (!checkStringOnNull(rawOldPassword)) return null;
+        if (!isEmpty(newPassword)) return null;
+        if (!isEmpty(rawOldPassword)) return null;
 
         AccountEntity currentUser = getCurrentUser();
         String passwordCurrentUser = currentUser.getPassword();
@@ -64,7 +63,7 @@ public class UserServicesImpl implements UserService {
         if (id == null) {
             accountToBeEdited = currentUser;
             matches = checkMatches(rawOldPassword, passwordCurrentUser);
-            return ifMatchesTrueSetPasswordAndReturn(matches, encodedPassword, accountToBeEdited);
+            return savePassword(matches, encodedPassword, accountToBeEdited);
         }
 
         if (!adminRightsCheck(getCurrentUser())) return null; // current user is not Admin;
@@ -74,12 +73,12 @@ public class UserServicesImpl implements UserService {
 
         accountToBeEdited = getCurrentUser();
         matches = checkMatches(rawOldPassword, passwordCurrentUser);
-        return ifMatchesTrueSetPasswordAndReturn(matches, encodedPassword, accountToBeEdited);
+        return savePassword(matches, encodedPassword, accountToBeEdited);
     }
 
     // Change user email and name, documentation on it in UserService
     @Override
-    public EmailNameDto editPersonData(Long id, DtoForEditingPersonalData personalData) {
+    public EditedEmailNameDto editPersonData(Long id, EditPersonalDataDto personalData) {
 
         String newName;
         String newEmail;
@@ -87,13 +86,13 @@ public class UserServicesImpl implements UserService {
         AccountEntity currentUser = getCurrentUser();
 
         newEmail = personalData.getNewEmail();
-        boolean checkedEmailOnNull = checkStringOnNull(newEmail);
+        boolean checkedEmailOnNull = isEmpty(newEmail);
         if (!checkedEmailOnNull) newEmail = currentUser.getEmail();
 
         if (findUserByEmail(newEmail) != null) return null; // user with such email exist;
 
         newName = personalData.getNewName();
-        boolean checkedNameOnNull = checkStringOnNull(newName);
+        boolean checkedNameOnNull = isEmpty(newName);
         if (!checkedNameOnNull) newName = currentUser.getUsername();
 
         AccountEntity accountWithNewEmail;
@@ -117,7 +116,7 @@ public class UserServicesImpl implements UserService {
 
     // Create a new user
     @Override
-    public EmailNameDto createUser(AccountDto accountDto) {
+    public EditedEmailNameDto createUser(AccountDto accountDto) {
 
         AccountEntity currentUser = getCurrentUser();
         String email = accountDto.getEmail();
@@ -137,16 +136,18 @@ public class UserServicesImpl implements UserService {
 
         String encodedPassword = passwordEncode(password);
 
+        Organization organization = findOrganizationByName(organizationName);
+
         newUser.setPassword(encodedPassword);
         newUser.setUsername(userName);
         newUser.setIsActivated(isActivated);
         newUser.setRole(role);
-        newUser.setOrganization(findOrganizationByName(organizationName));
+        newUser.setOrganization(organization);
 
         Content rootContent = null;
 
-        if (getCountUsersWithContent() < 1 || role.equals(UserRole.USER)) {
-            rootContent = fileService.createContent(newUser);
+        if (getCountStorageWithOwnerNullAndNotNullOrganization() < 1 || role.equals(UserRole.USER)) {
+            rootContent = contentService.createContent(newUser);
         }
 
         newUser.setContent(rootContent);
@@ -157,7 +158,7 @@ public class UserServicesImpl implements UserService {
 
     // Delete user by id or current user
     @Override
-    public void deleteUser(Long id, DeleteAccountDto accountDto) {
+    public AccountDto deleteUser(Long id, DeleteAccountDto accountDto) {
         String email;
         String password;
         AccountEntity currentUser = getCurrentUser();
@@ -166,37 +167,40 @@ public class UserServicesImpl implements UserService {
             password = accountDto.getRawPassword();
 
             boolean checkEmail = getCurrentUser().getEmail().equals(email);
-            if (!checkEmail) return; // email not matches
+            if (!checkEmail) return null;
 
             String encodedPassword = getCurrentUser().getPassword();
             boolean checkPassword = passwordEncoder.matches(password, encodedPassword);
-            if (!checkPassword) return; // password not matches
+            if (!checkPassword) return null;
 
             AccountEntity account = findUserByEmail(email);
             accountRepository.delete(account);
         }
 
-        if (!adminRightsCheck(getCurrentUser())) return; // current user is not Admin;
+        if (!adminRightsCheck(getCurrentUser())) return null;
 
         AccountEntity foundedUser = findByIdAccountRepo(id);
         String organizationName = getOrganizationNameByUser(foundedUser);
-        if (organizationMatch(organizationName, currentUser))
-            return; // organization current user and user from account dto is not match
+        if (organizationMatch(organizationName, currentUser)) return null;
 
         accountRepository.delete(foundedUser);
+
+        AccountDto accountDtoResponse = new AccountDto();
+        accountDtoResponse.setEmail(accountDto.getEmail());
+        return accountDtoResponse;
     }
 
     @Override
-    public PasswordDto ifMatchesTrueSetPasswordAndReturn(boolean matches, String encodedPassword, AccountEntity accountToBeEdited) {
+    public EditedPasswordDto savePassword(boolean matches, String encodedPassword, AccountEntity accountToBeEdited) {
         if (matches) {
-            setAndSaveEncodedPassword(encodedPassword, accountToBeEdited);
-            return responsePassword(accountToBeEdited.getPassword());
+            saveEncodedPassword(encodedPassword, accountToBeEdited);
+            return convertToResponsePassword(accountToBeEdited.getPassword());
         }
         return null;
     }
 
     @Override
-    public void setAndSaveEncodedPassword(String encodedPassword, AccountEntity accountToBeEdited) {
+    public void saveEncodedPassword(String encodedPassword, AccountEntity accountToBeEdited) {
         accountToBeEdited.setPassword(encodedPassword);
         accountRepository.saveAndFlush(accountToBeEdited);
     }
@@ -212,10 +216,10 @@ public class UserServicesImpl implements UserService {
     }
 
     @Override
-    public PasswordDto responsePassword(String newPassword) {
-        PasswordDto passwordDto = new PasswordDto();
-        passwordDto.setPassword(newPassword);
-        return passwordDto;
+    public EditedPasswordDto convertToResponsePassword(String newPassword) {
+        EditedPasswordDto editedPasswordDto = new EditedPasswordDto();
+        editedPasswordDto.setPassword(newPassword);
+        return editedPasswordDto;
     }
 
     @Override
@@ -228,25 +232,26 @@ public class UserServicesImpl implements UserService {
     @Override
     public AccountEntity findUserByEmail(String email) {
         Optional<AccountEntity> foundedUser = accountRepository.findUserByEmail(email);
-        if (checkOptionalOnNull(foundedUser)) return foundedUser.get();
+        if (isOptionalNotNull(foundedUser)) return foundedUser.get();
         return null;
     }
 
     @Override
-    public boolean checkStringOnNull(String val) {
+    public boolean isEmpty(String val) {
         return val != null && !val.equals("");
     }
 
     @Override
-    public boolean checkOptionalOnNull(Optional val) {
+    public boolean isOptionalNotNull(Optional val) {
         return val.isPresent();
     }
+
 
     @Override
     public AccountEntity findByIdAccountRepo(Long id) {
         if (id == null) return null;
         Optional<AccountEntity> foundByIdOptional = accountRepository.findById(id);
-        boolean checkedOnNull = checkOptionalOnNull(foundByIdOptional);
+        boolean checkedOnNull = isOptionalNotNull(foundByIdOptional);
         if (checkedOnNull) return foundByIdOptional.get();
         return null;
     }
@@ -302,21 +307,20 @@ public class UserServicesImpl implements UserService {
     @Override
     public Organization findOrganizationByName(String organizationName) {
         Optional<Organization> foundedOrganization = organizationRepo.findByOrganizationName(organizationName);
-        if (checkOptionalOnNull(foundedOrganization)) return foundedOrganization.get();
+        if (isOptionalNotNull(foundedOrganization)) return foundedOrganization.get();
         return null;
     }
 
     @Override
-    public EmailNameDto responseDto(AccountEntity accountEntity) {
-        EmailNameDto emailNameDto = new EmailNameDto();
-        emailNameDto.setUsername(accountEntity.getUsername());
-        emailNameDto.setEmail(accountEntity.getEmail());
-        return emailNameDto;
+    public EditedEmailNameDto responseDto(AccountEntity accountEntity) {
+        EditedEmailNameDto editedEmailNameDto = new EditedEmailNameDto();
+        editedEmailNameDto.setUsername(accountEntity.getUsername());
+        editedEmailNameDto.setEmail(accountEntity.getEmail());
+        return editedEmailNameDto;
     }
 
-    @Override
-    public Long getCountUsersWithContent(){
-        return accountRepository.countAccountEntitiesByRoleAndContentIsNotNull(UserRole.ADMIN);
+    public Long getCountStorageWithOwnerNullAndNotNullOrganization(){
+        return storageRepository.countStorageElementByOwnerIsNullAndOrganizationIsNotNull();
     }
 
 }

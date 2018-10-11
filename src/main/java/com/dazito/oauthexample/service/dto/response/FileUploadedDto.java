@@ -9,7 +9,7 @@ import java.io.Serializable;
 @Setter
 @Getter
 @NoArgsConstructor
-public class FileUploadResponse implements Serializable {
+public class FileUploadedDto implements Serializable {
 
     private final static long serialVersionUID = 57764567;
 

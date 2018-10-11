@@ -8,7 +8,7 @@ import java.util.Random;
 
 @Getter
 @Setter
-public class EmailNameDto implements Serializable{
+public class EditedEmailNameDto implements Serializable{
 
     private final static long serialVersionUID = 484661590;
     private String email;

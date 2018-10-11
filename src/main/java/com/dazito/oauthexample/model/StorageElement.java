@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 
 @Getter
 @Setter
@@ -26,7 +27,7 @@ public abstract class StorageElement{
 
     @OneToOne
     @JoinColumn(name="parent_id")
-    private StorageElement parentId;
+    private StorageElement parent;
 
     @Enumerated(value = EnumType.STRING)
     @Column(updatable = false, insertable = false)
@@ -37,5 +38,15 @@ public abstract class StorageElement{
     @JsonIgnore
     private AccountEntity owner;
 
+    @Column
+    private Long size;
 
+    @ManyToOne(targetEntity = Organization.class)
+    @JoinColumn(name="organization_id")
+    @JsonIgnore
+    private Organization organization;
+
+    @OneToMany(targetEntity = StorageElement.class, mappedBy = "parent")
+    @JsonIgnore
+    private List<StorageElement> children;
 }
