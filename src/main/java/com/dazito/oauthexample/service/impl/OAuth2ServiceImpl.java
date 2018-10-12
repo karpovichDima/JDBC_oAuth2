@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.ClientDetails;
-import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.ClientRegistrationService;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
@@ -23,31 +22,28 @@ public class OAuth2ServiceImpl implements OAuth2Service {
 
     @Autowired
     ApplicationContext applicationContext;
-//    @Resource
     ClientRegistrationService clientDetailsService;
     @Resource
     TokenStore tokenStore;
 
 
     public void deleteToken(AccountEntity account) {
-        method(account);
-//        defaultTokenServices.revokeToken(principal.toString());
-    }
-
-    public void method(AccountEntity user) {
+        getAllBeans();
         clientDetailsService = applicationContext.getBean(ClientRegistrationService.class);
-//        List<ClientDetails> clientDetails =
-
-
-
         (this.clientDetailsService).listClientDetails().stream()
                 .map(ClientDetails::getClientId)
-                .map(client -> tokenStore.findTokensByClientIdAndUserName(client, user.getEmail()))
+                .map(client -> tokenStore.findTokensByClientIdAndUserName(client, account.getEmail()))
                 .flatMap(Collection::stream)
                 .map(OAuth2AccessToken::getValue)
                 .forEach(tokenServices::revokeToken);
-
     }
 
-
+    void getAllBeans() {
+        System.out.println("//////////////////////////////////////////////////////////");
+        String[] beanNames = applicationContext.getBeanDefinitionNames();
+        for (String beanName : beanNames) {
+            System.out.println(beanName + " : " + applicationContext.getBean(beanName).getClass().toString());
+        }
+        System.out.println("//////////////////////////////////////////////////////////");
+    }
 }
