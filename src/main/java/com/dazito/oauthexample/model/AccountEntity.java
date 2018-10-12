@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.security.Principal;
 import java.util.List;
 
 @Entity
@@ -45,6 +46,7 @@ public class AccountEntity{
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="content")
     private Content content;
+
 
     AccountEntity(String username, String password){
         this.username = username;

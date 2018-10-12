@@ -4,7 +4,6 @@ import com.dazito.oauthexample.service.ContentService;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.response.ChangedActivateDto;
-import com.dazito.oauthexample.service.dto.response.DirectoryDeletedDto;
 import com.dazito.oauthexample.service.dto.response.EditedEmailNameDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +20,7 @@ public class UserController {
     @Autowired
     ContentService contentService;
 
+    
     // create new user from accountDto
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping("/")

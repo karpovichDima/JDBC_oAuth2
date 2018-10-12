@@ -30,7 +30,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private DataSource dataSource;
-    // don't creating constructor for autowiring
 //    @Autowired
 //    private PasswordEncoder bCryptPasswordEncoder;
 

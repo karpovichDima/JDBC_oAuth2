@@ -10,6 +10,7 @@ import com.dazito.oauthexample.model.Organization;
 import com.dazito.oauthexample.model.StorageElement;
 import com.dazito.oauthexample.model.type.UserRole;
 import com.dazito.oauthexample.service.ContentService;
+import com.dazito.oauthexample.service.OAuth2Service;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.request.DeleteAccountDto;
@@ -50,6 +51,8 @@ public class UserServicesImpl implements UserService {
     private StorageRepository storageRepository;
     @Autowired
     private ContentService contentService;
+    @Autowired
+    private OAuth2Service oAuth2Service;
 
     // Change user password
     @Override
@@ -345,11 +348,15 @@ public class UserServicesImpl implements UserService {
         account.setIsActivated(isActivated);
         accountRepository.saveAndFlush(account);
 
+        if (isActivated == false) oAuth2Service.deleteToken(account);
+
         ChangedActivateDto changedActivateDto = new ChangedActivateDto();
         changedActivateDto.setId(id);
         changedActivateDto.setIsActivated(isActivated);
         return changedActivateDto;
     }
+
+
 
     public Long getCountStorageWithOwnerNullAndNotNullOrganization(){
         return storageRepository.countStorageElementByOwnerIsNullAndOrganizationIsNotNull();
