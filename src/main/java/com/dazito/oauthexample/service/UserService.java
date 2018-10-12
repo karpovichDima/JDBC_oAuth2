@@ -5,6 +5,7 @@ import com.dazito.oauthexample.model.Organization;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.request.DeleteAccountDto;
 import com.dazito.oauthexample.service.dto.request.EditPersonalDataDto;
+import com.dazito.oauthexample.service.dto.response.ChangedActivateDto;
 import com.dazito.oauthexample.service.dto.response.EditedEmailNameDto;
 import com.dazito.oauthexample.service.dto.response.EditedPasswordDto;
 
@@ -114,6 +115,7 @@ public interface UserService {
 
     EditedEmailNameDto responseDto(AccountEntity accountEntity);
 
+    ChangedActivateDto editActivate(AccountDto accountDto);
 
 
 

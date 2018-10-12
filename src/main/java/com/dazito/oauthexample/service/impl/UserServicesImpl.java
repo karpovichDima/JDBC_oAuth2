@@ -15,6 +15,7 @@ import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.request.DeleteAccountDto;
 import com.dazito.oauthexample.service.dto.request.EditPersonalDataDto;
 import com.dazito.oauthexample.service.dto.request.OrganizationDto;
+import com.dazito.oauthexample.service.dto.response.ChangedActivateDto;
 import com.dazito.oauthexample.service.dto.response.EditedEmailNameDto;
 import com.dazito.oauthexample.service.dto.response.EditedPasswordDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -326,6 +327,28 @@ public class UserServicesImpl implements UserService {
         editedEmailNameDto.setUsername(accountEntity.getUsername());
         editedEmailNameDto.setEmail(accountEntity.getEmail());
         return editedEmailNameDto;
+    }
+
+    @Override
+    public ChangedActivateDto editActivate(AccountDto accountDto) {
+        AccountEntity currentUser = getCurrentUser();
+        String organizationName = currentUser.getOrganization().getOrganizationName();
+
+        Boolean isActivated = accountDto.getIsActivated();
+        Long id = accountDto.getId();
+
+        if (!adminRightsCheck(currentUser)) return null; // current user is not Admin;
+
+        AccountEntity account = findByIdAccountRepo(id);
+        if (!organizationMatch(organizationName, account)) return null; // organization current user and user from account dto is not match
+
+        account.setIsActivated(isActivated);
+        accountRepository.saveAndFlush(account);
+
+        ChangedActivateDto changedActivateDto = new ChangedActivateDto();
+        changedActivateDto.setId(id);
+        changedActivateDto.setIsActivated(isActivated);
+        return changedActivateDto;
     }
 
     public Long getCountStorageWithOwnerNullAndNotNullOrganization(){

@@ -3,6 +3,7 @@ package com.dazito.oauthexample.controller;
 import com.dazito.oauthexample.service.ContentService;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
+import com.dazito.oauthexample.service.dto.response.ChangedActivateDto;
 import com.dazito.oauthexample.service.dto.response.DirectoryDeletedDto;
 import com.dazito.oauthexample.service.dto.response.EditedEmailNameDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,5 +27,12 @@ public class UserController {
     public ResponseEntity<EditedEmailNameDto> createUser(@RequestBody AccountDto accountDto){
         EditedEmailNameDto newUser = userService.createUser(accountDto);
         return ResponseEntity.ok(newUser);
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PatchMapping("/activated")
+    public ResponseEntity<ChangedActivateDto> editActivate(@RequestBody AccountDto accountDto) {
+        ChangedActivateDto changedActivateDto = userService.editActivate(accountDto);
+        return ResponseEntity.ok(changedActivateDto);
     }
 }
