@@ -20,12 +20,19 @@ public class UserController {
     @Autowired
     ContentService contentService;
 
-    
+
     // create new user from accountDto
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping("/")
     public ResponseEntity<EditedEmailNameDto> createUser(@RequestBody AccountDto accountDto){
-        EditedEmailNameDto newUser = userService.createUser(accountDto);
+        EditedEmailNameDto newUser = userService.createUser(accountDto, true);
+        return ResponseEntity.ok(newUser);
+    }
+
+    // create new user from accountDto without password
+    @PostMapping("/registration")
+    public ResponseEntity<EditedEmailNameDto> registration(@RequestBody AccountDto accountDto){
+        EditedEmailNameDto newUser = userService.createUser(accountDto, false);
         return ResponseEntity.ok(newUser);
     }
 

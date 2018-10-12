@@ -45,7 +45,4 @@ public class OAuth2ServiceImpl implements OAuth2Service {
         }
         System.out.println("//////////////////////////////////////////////////////////");
     }
-
-
-
 }

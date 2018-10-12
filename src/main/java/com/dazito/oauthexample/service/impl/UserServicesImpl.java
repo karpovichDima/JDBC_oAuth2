@@ -123,17 +123,22 @@ public class UserServicesImpl implements UserService {
 
     // Create a new user
     @Override
-    public EditedEmailNameDto createUser(AccountDto accountDto) {
-
+    public EditedEmailNameDto createUser(AccountDto accountDto, boolean createPassword) {
         AccountEntity currentUser = getCurrentUser();
         String email = accountDto.getEmail();
         String organizationName = accountDto.getOrganizationName();
 
+        String password;
+        String encodedPassword = null;
+
         if (findUserByEmail(email) != null) return null; // user with such email exist;
-        if (!adminRightsCheck(currentUser)) return null; // current user is not Admin;
+        if (createPassword)if (!adminRightsCheck(currentUser)) return null; // current user is not Admin, if create user with password
         if (!organizationMatch(organizationName, currentUser)) return null; // organization current user and user from account dto is not match
 
-        String password = accountDto.getPassword();
+        if (createPassword){
+            password = accountDto.getPassword();
+            encodedPassword = passwordEncode(password);
+        }
         String userName = accountDto.getUsername();
         boolean isActivated = accountDto.getIsActivated();
         UserRole role = accountDto.getRole();
@@ -141,11 +146,9 @@ public class UserServicesImpl implements UserService {
         AccountEntity newUser = new AccountEntity();
         newUser.setEmail(email);
 
-        String encodedPassword = passwordEncode(password);
-
         Organization organization = findOrganizationByName(organizationName);
 
-        newUser.setPassword(encodedPassword);
+        if (createPassword) newUser.setPassword(encodedPassword);
         newUser.setUsername(userName);
         newUser.setIsActivated(isActivated);
         newUser.setRole(role);
@@ -162,6 +165,8 @@ public class UserServicesImpl implements UserService {
 
         return responseDto(newUser);
     }
+
+
 
     // Delete user by id or current user
     @Transactional

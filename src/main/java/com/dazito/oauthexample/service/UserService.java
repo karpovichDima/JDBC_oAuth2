@@ -34,7 +34,7 @@ public interface UserService {
      * @param accountDto is userDto which we will find in DB
      * @return EditedEmailNameDto is successful search result user
      */
-    EditedEmailNameDto createUser(AccountDto accountDto);
+    EditedEmailNameDto createUser(AccountDto accountDto, boolean createPassword);
 
     /**
      * delete user from DB, by id or DeleteAccountDto
