@@ -26,7 +26,6 @@ public class OAuth2ServiceImpl implements OAuth2Service {
     @Resource
     TokenStore tokenStore;
 
-
     public void deleteToken(AccountEntity account) {
         getAllBeans();
         clientDetailsService = applicationContext.getBean(ClientRegistrationService.class);
@@ -38,12 +37,15 @@ public class OAuth2ServiceImpl implements OAuth2Service {
                 .forEach(tokenServices::revokeToken);
     }
 
-    void getAllBeans() {
-        System.out.println("//////////////////////////////////////////////////////////");
+    private void getAllBeans() {
+        System.out.println("///////////////////LIST BEANS////////////////////////");
         String[] beanNames = applicationContext.getBeanDefinitionNames();
         for (String beanName : beanNames) {
-            System.out.println(beanName + " : " + applicationContext.getBean(beanName).getClass().toString());
+            System.out.println(beanName + " : " + applicationContext.getBean(beanName)+"");
         }
         System.out.println("//////////////////////////////////////////////////////////");
     }
+
+
+
 }
