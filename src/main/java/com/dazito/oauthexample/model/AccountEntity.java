@@ -42,7 +42,7 @@ public class AccountEntity{
     @OneToMany
     private List<FileEntity> files;
 
-    @OneToOne(cascade = CascadeType.DETACH)
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="content")
     private Content content;
 

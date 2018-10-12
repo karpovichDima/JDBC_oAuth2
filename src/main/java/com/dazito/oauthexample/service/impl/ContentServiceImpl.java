@@ -142,28 +142,12 @@ public class ContentServiceImpl implements ContentService {
         return foundOptional.orElse(null);
     }
 
-    @Transactional
     @Override
-    public void delete(Long id) {
-        AccountEntity currentUser = userService.getCurrentUser();
-        StorageElement foundStorage = findById(id);
-        AccountEntity owner = foundStorage.getOwner();
-        SomeType type = foundStorage.getType();
-
-        if (type.equals(SomeType.FILE)) return;
-
-        boolean canChange = utilService.isPermissionsAdminOrUserIsOwner(currentUser, owner, foundStorage);
-        if (!canChange) return;
-        canChange = utilService.checkPermissionsOnChangeByOrganization(currentUser, foundStorage);
-        if (!canChange) return;
-
+    public void delete(List<StorageElement> children) {
+        if(children.size() == 0) return;
         List<StorageElement> listChildToDelete = new ArrayList<>();
-
-        List<StorageElement> listChildrenFoundStorage = foundStorage.getChildren();
-        listChildToDelete.add(foundStorage);
-        listChildToDelete.addAll(listChildrenFoundStorage);
-
-        directoryService.deleteChildFiles(listChildToDelete, listChildrenFoundStorage);
+        listChildToDelete.addAll(children);
+        directoryService.deleteChildFiles(listChildToDelete, children);
         storageRepository.delete(listChildToDelete);
     }
 }

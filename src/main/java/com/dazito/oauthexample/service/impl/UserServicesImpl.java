@@ -7,6 +7,7 @@ import com.dazito.oauthexample.dao.StorageRepository;
 import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.model.Content;
 import com.dazito.oauthexample.model.Organization;
+import com.dazito.oauthexample.model.StorageElement;
 import com.dazito.oauthexample.model.type.UserRole;
 import com.dazito.oauthexample.service.ContentService;
 import com.dazito.oauthexample.service.UserService;
@@ -22,8 +23,10 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.List;
 import java.util.Optional;
 
 @Service(value = "userService")
@@ -157,6 +160,7 @@ public class UserServicesImpl implements UserService {
     }
 
     // Delete user by id or current user
+    @Transactional
     @Override
     public AccountDto deleteUser(Long id, DeleteAccountDto accountDto) {
         String email;
@@ -174,25 +178,24 @@ public class UserServicesImpl implements UserService {
             boolean checkPassword = passwordEncoder.matches(password, encodedPassword);
             if (!checkPassword) return null;
 
+            List<StorageElement> children = currentUser.getContent().getChildren();
             AccountEntity account = findUserByEmail(email);
             accountRepository.delete(account);
-
-            idContent = account.getContent().getId();
-            contentService.delete(idContent);
+            if (account.getRole().equals(UserRole.USER)) contentService.delete(children);
         }
 
         if (!adminRightsCheck(getCurrentUser())) return null;
 
         AccountEntity foundedUser = findByIdAccountRepo(id);
         String organizationName = getOrganizationNameByUser(foundedUser);
-        if (organizationMatch(organizationName, currentUser)) return null;
+        if (!organizationMatch(organizationName, currentUser)) return null;
 
+        List<StorageElement> children = foundedUser.getContent().getChildren();
+        UserRole role = foundedUser.getRole();
         accountRepository.delete(foundedUser);
-        idContent = foundedUser.getContent().getId();
-        contentService.delete(idContent);
+        if (role.equals(UserRole.USER)) contentService.delete(children);
 
         AccountDto accountDtoResponse = new AccountDto();
-        accountDtoResponse.setEmail(accountDto.getEmail());
         return accountDtoResponse;
     }
 

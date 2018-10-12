@@ -7,6 +7,8 @@ import com.dazito.oauthexample.service.dto.request.ContentUpdateDto;
 import com.dazito.oauthexample.service.dto.response.ContentUpdatedDto;
 import com.dazito.oauthexample.service.dto.response.DirectoryDeletedDto;
 
+import java.util.List;
+
 public interface ContentService {
 
     /**
@@ -28,6 +30,6 @@ public interface ContentService {
 
     Content findContentForAdmin(String organizationName);
 
-    void delete(Long id);
+    void delete(List<StorageElement> children);
 
 }
