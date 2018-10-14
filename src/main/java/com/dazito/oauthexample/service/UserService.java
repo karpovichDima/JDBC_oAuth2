@@ -9,6 +9,7 @@ import com.dazito.oauthexample.service.dto.response.ChangedActivateDto;
 import com.dazito.oauthexample.service.dto.response.EditedEmailNameDto;
 import com.dazito.oauthexample.service.dto.response.EditedPasswordDto;
 
+import javax.xml.bind.ValidationException;
 import java.util.Optional;
 
 public interface UserService {
@@ -34,7 +35,7 @@ public interface UserService {
      * @param accountDto is userDto which we will find in DB
      * @return EditedEmailNameDto is successful search result user
      */
-    EditedEmailNameDto createUser(AccountDto accountDto, boolean createPassword);
+    EditedEmailNameDto createUser(AccountDto accountDto, boolean createPassword) throws ValidationException;
 
     /**
      * delete user from DB, by id or DeleteAccountDto

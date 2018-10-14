@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import javax.xml.bind.ValidationException;
 import java.util.List;
 import java.util.Optional;
 
@@ -123,7 +124,7 @@ public class UserServicesImpl implements UserService {
 
     // Create a new user
     @Override
-    public EditedEmailNameDto createUser(AccountDto accountDto, boolean createPassword) {
+    public EditedEmailNameDto createUser(AccountDto accountDto, boolean createPassword) throws ValidationException {
         AccountEntity currentUser = getCurrentUser();
         String email = accountDto.getEmail();
         String organizationName = accountDto.getOrganizationName();
@@ -162,6 +163,8 @@ public class UserServicesImpl implements UserService {
 
         newUser.setContent(rootContent);
         accountRepository.saveAndFlush(newUser);
+
+        if (createPassword) oAuth2Service.sendEmail(newUser);
 
         return responseDto(newUser);
     }
@@ -353,7 +356,9 @@ public class UserServicesImpl implements UserService {
         account.setIsActivated(isActivated);
         accountRepository.saveAndFlush(account);
 
-        if (isActivated == false) oAuth2Service.deleteToken(account);
+        if (!isActivated) {
+            oAuth2Service.deleteToken(account);
+        }
 
         ChangedActivateDto changedActivateDto = new ChangedActivateDto();
         changedActivateDto.setId(id);

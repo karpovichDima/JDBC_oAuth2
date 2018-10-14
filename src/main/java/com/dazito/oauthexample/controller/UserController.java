@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.xml.bind.ValidationException;
+
 @RestController
 @RequestMapping(path = "/users")
 public class UserController {
@@ -24,22 +26,10 @@ public class UserController {
     // create new user from accountDto
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping("/")
-    public ResponseEntity<EditedEmailNameDto> createUser(@RequestBody AccountDto accountDto){
+    public ResponseEntity<EditedEmailNameDto> createUser(@RequestBody AccountDto accountDto) throws ValidationException {
         EditedEmailNameDto newUser = userService.createUser(accountDto, true);
         return ResponseEntity.ok(newUser);
     }
 
-    // create new user from accountDto without password
-    @PostMapping("/registration")
-    public ResponseEntity<EditedEmailNameDto> registration(@RequestBody AccountDto accountDto){
-        EditedEmailNameDto newUser = userService.createUser(accountDto, false);
-        return ResponseEntity.ok(newUser);
-    }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    @PatchMapping("/activated")
-    public ResponseEntity<ChangedActivateDto> editActivate(@RequestBody AccountDto accountDto) {
-        ChangedActivateDto changedActivateDto = userService.editActivate(accountDto);
-        return ResponseEntity.ok(changedActivateDto);
-    }
 }
