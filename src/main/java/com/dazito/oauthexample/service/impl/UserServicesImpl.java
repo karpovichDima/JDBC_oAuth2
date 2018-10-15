@@ -27,8 +27,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.xml.bind.ValidationException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service(value = "userService")
 public class UserServicesImpl implements UserService {
@@ -165,6 +170,16 @@ public class UserServicesImpl implements UserService {
         }
 
         newUser.setContent(rootContent);
+
+        UUID uuid = UUID.randomUUID();
+
+        Date date = new Date();
+        LocalDateTime utc = LocalDateTime.from(date.toInstant().atZone(ZoneId.of("UTC"))).plusDays(1);
+        Timestamp timestamp = Timestamp.valueOf(utc);
+
+        newUser.setUuid(uuid + "");
+        newUser.setTokenEndDate(timestamp);
+
         accountRepository.saveAndFlush(newUser);
 
         mailService.emailPreparation(newUser);
@@ -175,14 +190,22 @@ public class UserServicesImpl implements UserService {
 
     @Override
     public void messageReply(SetPasswordDto setPasswordDto) {
-        String email = setPasswordDto.getEmail();
+        String uuid = setPasswordDto.getUuid();
         String password = setPasswordDto.getPassword();
-        String repeatedPassword = setPasswordDto.getRepeatedPassword();
 
-        AccountEntity foundUser = findUserByEmail(email);
+        AccountEntity foundUser = findUserByUuid(uuid);
         if (foundUser == null) return;
 
-        if (!password.equals(repeatedPassword)) return;
+        Date date = new Date();
+        LocalDateTime utc = LocalDateTime.from(date.toInstant().atZone(ZoneId.of("UTC")));
+        Timestamp timestamp = Timestamp.valueOf(utc);
+        long timeResponse = timestamp.getTime();
+
+        Timestamp tokenEndDate = foundUser.getTokenEndDate();
+        long timeFromDB = tokenEndDate.getTime();
+
+        if (timeResponse > timeFromDB) return;
+
         String encodedPassword = passwordEncode(password);
 
         foundUser.setPassword(encodedPassword);
@@ -274,6 +297,13 @@ public class UserServicesImpl implements UserService {
     public AccountEntity findUserByEmail(String email) {
         Optional<AccountEntity> foundedUser = accountRepository.findUserByEmail(email);
         if (isOptionalNotNull(foundedUser)) return foundedUser.get();
+        return null;
+    }
+
+    @Override
+    public AccountEntity findUserByUuid(String uuid) {
+        Optional<AccountEntity> foundUser = accountRepository.findUserByUuid(uuid);
+        if (isOptionalNotNull(foundUser)) return foundUser.get();
         return null;
     }
 

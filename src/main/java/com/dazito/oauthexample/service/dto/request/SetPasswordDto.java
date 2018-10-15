@@ -1,6 +1,5 @@
 package com.dazito.oauthexample.service.dto.request;
 
-import com.dazito.oauthexample.model.type.UserRole;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,7 +11,6 @@ public class SetPasswordDto  implements Serializable {
 
     private final static long serialVersionUID = 752897265;
 
-    private String email;
+    private String uuid;
     private String password;
-    private String repeatedPassword;
 }

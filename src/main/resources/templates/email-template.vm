@@ -5,6 +5,7 @@
 <body>
 <p>Dear ${firstName} ${lastName},</p>
 <p>Please set a new password for your account.<b>Template!!!</b></p>
+<p>Click here to set password: <b>${reference}</b></p>
 <p>Thanks</p>
 <p>${signature}</p>
 <p>${location}</p>

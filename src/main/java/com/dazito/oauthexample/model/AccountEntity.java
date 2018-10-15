@@ -8,6 +8,9 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.security.Principal;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -47,6 +50,11 @@ public class AccountEntity{
     @JoinColumn(name="content")
     private Content content;
 
+    @Column(name = "uuid", length = 128)
+    private String uuid;
+
+    @Column(name = "token_end_date", length = 128)
+    private Timestamp tokenEndDate;
 
     AccountEntity(String username, String password){
         this.username = username;

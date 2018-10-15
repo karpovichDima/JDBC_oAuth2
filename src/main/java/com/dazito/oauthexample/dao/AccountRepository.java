@@ -16,11 +16,13 @@ public interface AccountRepository extends JpaRepository<AccountEntity, Long> {
     Optional<AccountEntity> findByUsername(String username);
     Collection<AccountEntity> findByRole(String role);
     Optional<AccountEntity> findUserByEmail(String email);
+    Optional<AccountEntity> findUserByUuid(String uuid);
 
     // никогда не удалять это запрос
     Optional<AccountEntity> findOneByRoleAndContentIsNotNull(UserRole role);
 
     Long countAccountEntitiesByRoleAndContentIsNotNullAndOrganization_OrganizationName(UserRole role,
                                                                                          String organizationName);
+
 
 }
