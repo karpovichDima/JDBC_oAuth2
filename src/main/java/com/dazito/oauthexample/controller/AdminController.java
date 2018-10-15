@@ -1,8 +1,5 @@
 package com.dazito.oauthexample.controller;
 
-import com.dazito.oauthexample.service.ContentService;
-import com.dazito.oauthexample.service.MailService;
-import com.dazito.oauthexample.service.OAuth2Service;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.response.ChangedActivateDto;
@@ -19,15 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminController {
     @Autowired
     UserService userService;
-
-    @Autowired
-    ContentService contentService;
-
-    @Autowired
-    OAuth2Service oAuth2Service;
-
-    @Autowired
-    MailService mailService;
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PatchMapping("/activated")

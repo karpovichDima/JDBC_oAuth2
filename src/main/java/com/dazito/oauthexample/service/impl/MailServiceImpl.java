@@ -37,7 +37,7 @@ public class MailServiceImpl implements MailService {
     public void emailPreparation(AccountEntity accountEntity) throws ValidationException {
 
         Mail mail = new Mail();
-        mail.setMailFrom("testdekar3d@gmail.com");
+        mail.setMailFrom(emailAdmin);
         mail.setMailTo(accountEntity.getEmail());
         mail.setMailSubject("Set a password for your account");
 
