@@ -27,7 +27,7 @@ public class UserController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping("/")
     public ResponseEntity<EditedEmailNameDto> createUser(@RequestBody AccountDto accountDto) throws ValidationException {
-        EditedEmailNameDto newUser = userService.createUser(accountDto, true);
+        EditedEmailNameDto newUser = userService.createUser(accountDto);
         return ResponseEntity.ok(newUser);
     }
 

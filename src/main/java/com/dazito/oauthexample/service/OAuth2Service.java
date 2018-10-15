@@ -8,7 +8,5 @@ public interface OAuth2Service {
 
     void deleteToken(AccountEntity account);
 
-    void sendEmail(AccountEntity accountEntity) throws ValidationException;
-
     void messageReply(String uuid, String email);
 }

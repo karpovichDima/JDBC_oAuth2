@@ -10,6 +10,7 @@ import com.dazito.oauthexample.model.Organization;
 import com.dazito.oauthexample.model.StorageElement;
 import com.dazito.oauthexample.model.type.UserRole;
 import com.dazito.oauthexample.service.ContentService;
+import com.dazito.oauthexample.service.MailService;
 import com.dazito.oauthexample.service.OAuth2Service;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
@@ -54,6 +55,8 @@ public class UserServicesImpl implements UserService {
     private ContentService contentService;
     @Autowired
     private OAuth2Service oAuth2Service;
+    @Autowired
+    MailService mailService;
 
     // Change user password
     @Override
@@ -77,7 +80,8 @@ public class UserServicesImpl implements UserService {
         if (!adminRightsCheck(getCurrentUser())) return null; // current user is not Admin;
 
         String organizationName = getOrganizationNameByUser(foundedUser);
-        if (organizationMatch(organizationName, currentUser)) return null; // organization current user and user from account dto is not match
+        if (organizationMatch(organizationName, currentUser))
+            return null; // organization current user and user from account dto is not match
 
         accountToBeEdited = getCurrentUser();
         matches = checkMatches(rawOldPassword, passwordCurrentUser);
@@ -115,7 +119,8 @@ public class UserServicesImpl implements UserService {
         AccountEntity foundedAccount = findByIdAccountRepo(id);
         String organizationName = getOrganizationNameByUser(foundedAccount);
 
-        if (!organizationMatch(organizationName, currentUser)) return null; // organization current user and user from account dto is not match
+        if (!organizationMatch(organizationName, currentUser))
+            return null; // organization current user and user from account dto is not match
 
         accountWithNewEmail = accountEditedSetEmailAndName(newEmail, newName, currentUser);
         accountRepository.saveAndFlush(accountWithNewEmail);
@@ -124,7 +129,7 @@ public class UserServicesImpl implements UserService {
 
     // Create a new user
     @Override
-    public EditedEmailNameDto createUser(AccountDto accountDto, boolean createPassword) throws ValidationException {
+    public EditedEmailNameDto createUser(AccountDto accountDto) throws ValidationException {
         AccountEntity currentUser = getCurrentUser();
         String email = accountDto.getEmail();
         String organizationName = accountDto.getOrganizationName();
@@ -133,13 +138,14 @@ public class UserServicesImpl implements UserService {
         String encodedPassword = null;
 
         if (findUserByEmail(email) != null) return null; // user with such email exist;
-        if (createPassword)if (!adminRightsCheck(currentUser)) return null; // current user is not Admin, if create user with password
-        if (!organizationMatch(organizationName, currentUser)) return null; // organization current user and user from account dto is not match
-
-        if (createPassword){
+        if (currentUser != null) {
+            if (!adminRightsCheck(currentUser)) return null; // current user is not Admin, if create user with password
+            if (!organizationMatch(organizationName, currentUser))
+                return null; // organization current user and user from account dto is not match
             password = accountDto.getPassword();
             encodedPassword = passwordEncode(password);
         }
+
         String userName = accountDto.getUsername();
         boolean isActivated = accountDto.getIsActivated();
         UserRole role = accountDto.getRole();
@@ -149,7 +155,7 @@ public class UserServicesImpl implements UserService {
 
         Organization organization = findOrganizationByName(organizationName);
 
-        if (createPassword) newUser.setPassword(encodedPassword);
+        if (currentUser != null) newUser.setPassword(encodedPassword);
         newUser.setUsername(userName);
         newUser.setIsActivated(isActivated);
         newUser.setRole(role);
@@ -164,11 +170,10 @@ public class UserServicesImpl implements UserService {
         newUser.setContent(rootContent);
         accountRepository.saveAndFlush(newUser);
 
-        if (createPassword) oAuth2Service.sendEmail(newUser);
+        mailService.emailPreparation(newUser);
 
         return responseDto(newUser);
     }
-
 
 
     // Delete user by id or current user
@@ -296,9 +301,15 @@ public class UserServicesImpl implements UserService {
 
     @Override
     public AccountEntity getCurrentUser() {
+        Object anonymous = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (anonymous.equals("anonymousUser")) {
+            return null;
+        }
         Long id = ((UserDetailsConfig) (SecurityContextHolder.getContext().getAuthentication().getPrincipal())).getUser().getId();
         Optional<AccountEntity> optionalById = accountRepository.findById(id);
         return optionalById.orElse(null);
+
+
     }
 
     @Override
@@ -351,7 +362,8 @@ public class UserServicesImpl implements UserService {
         if (!adminRightsCheck(currentUser)) return null; // current user is not Admin;
 
         AccountEntity account = findByIdAccountRepo(id);
-        if (!organizationMatch(organizationName, account)) return null; // organization current user and user from account dto is not match
+        if (!organizationMatch(organizationName, account))
+            return null; // organization current user and user from account dto is not match
 
         account.setIsActivated(isActivated);
         accountRepository.saveAndFlush(account);
@@ -367,8 +379,7 @@ public class UserServicesImpl implements UserService {
     }
 
 
-
-    public Long getCountStorageWithOwnerNullAndNotNullOrganization(){
+    public Long getCountStorageWithOwnerNullAndNotNullOrganization() {
         return storageRepository.countStorageElementByOwnerIsNullAndOrganizationIsNotNull();
     }
 
