@@ -1,5 +1,6 @@
 package com.dazito.oauthexample.controller;
 
+import com.dazito.oauthexample.service.MailService;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.request.SetPasswordDto;
@@ -20,6 +21,9 @@ public class RegistrationController {
     @Autowired
     UserService userService;
 
+    @Autowired
+    MailService mailService;
+
     // create new user from accountDto without password
     @PostMapping("/")
     public ResponseEntity<EditedEmailNameDto> registration(@RequestBody AccountDto accountDto) throws ValidationException {
@@ -27,9 +31,21 @@ public class RegistrationController {
         return ResponseEntity.ok(newUser);
     }
 
-    @PostMapping("/response")
-    public ResponseEntity<SetPasswordDto> messageArrived(@RequestBody SetPasswordDto setPasswordDto) {
+    @PostMapping("/password/create")
+    public ResponseEntity<SetPasswordDto> setNewPasswordAfterCreateUser(@RequestBody SetPasswordDto setPasswordDto) {
         userService.messageReply(setPasswordDto);
+        return ResponseEntity.ok(setPasswordDto);
+    }
+
+    @PostMapping("/password/recovery")
+    public ResponseEntity<SetPasswordDto> setNewPasswordAfterForgot(@RequestBody SetPasswordDto setPasswordDto) {
+        userService.forgotPassword(setPasswordDto);
+        return ResponseEntity.ok(setPasswordDto);
+    }
+
+    @PostMapping("/password/forgot")
+    public ResponseEntity<SetPasswordDto> sendEmailForgotPassword(@RequestBody SetPasswordDto setPasswordDto) throws ValidationException {
+        mailService.emailPreparation(setPasswordDto.getEmail());
         return ResponseEntity.ok(setPasswordDto);
     }
 

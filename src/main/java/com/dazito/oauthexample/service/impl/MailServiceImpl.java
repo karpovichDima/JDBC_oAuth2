@@ -3,6 +3,7 @@ package com.dazito.oauthexample.service.impl;
 import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.model.Mail;
 import com.dazito.oauthexample.service.MailService;
+import com.dazito.oauthexample.service.UserService;
 import org.apache.velocity.app.VelocityEngine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +28,9 @@ public class MailServiceImpl implements MailService {
     @Autowired
     VelocityEngine velocityEngine;
 
+    @Autowired
+    UserService userService;
+
     @Value("${email.admin}")
     String emailAdmin;
 
@@ -47,6 +51,29 @@ public class MailServiceImpl implements MailService {
         model.put("reference", reference);
         mail.setModel(model);
 
+        sendEmail(mail);
+    }
+
+    @Override
+    public void emailPreparation(String email) throws ValidationException {
+        AccountEntity foundUser = userService.findUserByEmail(email);
+        String uuid = foundUser.getUuid();
+        String username = foundUser.getUsername();
+
+        Mail mail = new Mail();
+        mail.setMailFrom(emailAdmin);
+        mail.setMailTo(email);
+        mail.setMailSubject("Forgot password");
+
+        String reference = "referenceToFormForSetPassword/" + uuid;
+
+        Map<String, Object> model = new HashMap<String, Object>();
+        model.put("firstName", username);
+        model.put("lastName", "");
+        model.put("location", "Belarus");
+        model.put("signature", "");
+        model.put("reference", reference);
+        mail.setModel(model);
 
         sendEmail(mail);
     }

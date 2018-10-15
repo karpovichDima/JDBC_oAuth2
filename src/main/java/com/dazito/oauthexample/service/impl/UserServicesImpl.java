@@ -213,6 +213,14 @@ public class UserServicesImpl implements UserService {
         accountRepository.saveAndFlush(foundUser);
     }
 
+    public void forgotPassword(SetPasswordDto setPasswordDto) {
+        AccountEntity foundUser = findUserByUuid(setPasswordDto.getUuid());
+        if (foundUser == null) return;
+        String encodedPassword = passwordEncode(setPasswordDto.getPassword());
+        foundUser.setPassword(encodedPassword);
+        accountRepository.saveAndFlush(foundUser);
+    }
+
 
     // Delete user by id or current user
     @Transactional
@@ -316,7 +324,6 @@ public class UserServicesImpl implements UserService {
     public boolean isOptionalNotNull(Optional val) {
         return val.isPresent();
     }
-
 
     @Override
     public AccountEntity findByIdAccountRepo(Long id) {

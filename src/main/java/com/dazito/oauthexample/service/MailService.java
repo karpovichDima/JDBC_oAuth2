@@ -12,6 +12,9 @@ public interface MailService {
 
     void emailPreparation(AccountEntity accountEntity) throws ValidationException;
 
+    void emailPreparation(String email) throws ValidationException;
+
+
 }
 
 
