@@ -61,7 +61,7 @@ public class RegistrationController {
     public void test(@PathVariable String id){
 
         Mail mail = new Mail();
-        mail.setMailFrom("gameminichannel@gmail.com");
+        mail.setMailFrom("testsenderqwer@gmail.com");
         mail.setMailTo("destinationdekar3d@gmail.com");
         mail.setMailSubject("Spring 4 - Email with velocity template");
 

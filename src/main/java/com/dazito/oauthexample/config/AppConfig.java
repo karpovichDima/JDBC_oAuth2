@@ -47,7 +47,7 @@ public class AppConfig {
 
         mailSender.setHost("smtp.gmail.com");
         mailSender.setPort(587);
-        mailSender.setUsername("gameminichannel");
+        mailSender.setUsername("testsenderqwer");
         mailSender.setPassword("Karpovich9");
 
         Properties javaMailProperties = new Properties();
