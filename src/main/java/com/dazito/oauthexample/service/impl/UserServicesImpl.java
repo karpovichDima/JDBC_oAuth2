@@ -13,10 +13,7 @@ import com.dazito.oauthexample.service.ContentService;
 import com.dazito.oauthexample.service.MailService;
 import com.dazito.oauthexample.service.OAuth2Service;
 import com.dazito.oauthexample.service.UserService;
-import com.dazito.oauthexample.service.dto.request.AccountDto;
-import com.dazito.oauthexample.service.dto.request.DeleteAccountDto;
-import com.dazito.oauthexample.service.dto.request.EditPersonalDataDto;
-import com.dazito.oauthexample.service.dto.request.OrganizationDto;
+import com.dazito.oauthexample.service.dto.request.*;
 import com.dazito.oauthexample.service.dto.response.ChangedActivateDto;
 import com.dazito.oauthexample.service.dto.response.EditedEmailNameDto;
 import com.dazito.oauthexample.service.dto.response.EditedPasswordDto;
@@ -173,6 +170,24 @@ public class UserServicesImpl implements UserService {
         mailService.emailPreparation(newUser);
 
         return responseDto(newUser);
+    }
+
+
+    @Override
+    public void messageReply(SetPasswordDto setPasswordDto) {
+        String email = setPasswordDto.getEmail();
+        String password = setPasswordDto.getPassword();
+        String repeatedPassword = setPasswordDto.getRepeatedPassword();
+
+        AccountEntity foundUser = findUserByEmail(email);
+        if (foundUser == null) return;
+
+        if (!password.equals(repeatedPassword)) return;
+        String encodedPassword = passwordEncode(password);
+
+        foundUser.setPassword(encodedPassword);
+
+        accountRepository.saveAndFlush(foundUser);
     }
 
 

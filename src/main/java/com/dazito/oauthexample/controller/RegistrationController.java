@@ -5,6 +5,8 @@ import com.dazito.oauthexample.service.MailService;
 import com.dazito.oauthexample.service.OAuth2Service;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
+import com.dazito.oauthexample.service.dto.request.DirectoryDto;
+import com.dazito.oauthexample.service.dto.request.SetPasswordDto;
 import com.dazito.oauthexample.service.dto.response.EditedEmailNameDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -36,10 +38,10 @@ public class RegistrationController {
         return ResponseEntity.ok(newUser);
     }
 
-    @PostMapping("/{uuid}/{id}")
-    public ResponseEntity<String> messageArrived(@PathVariable String uuid, @PathVariable String id) throws IOException {
-        oAuth2Service.messageReply(uuid, id);
-        return ResponseEntity.ok(uuid);
+    @PostMapping("/response")
+    public ResponseEntity<SetPasswordDto> messageArrived(@RequestBody SetPasswordDto setPasswordDto) {
+        mailService.messageReply(setPasswordDto);
+        return ResponseEntity.ok(setPasswordDto);
     }
 
 }

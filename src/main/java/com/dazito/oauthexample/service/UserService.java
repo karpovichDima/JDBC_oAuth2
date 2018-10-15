@@ -5,6 +5,7 @@ import com.dazito.oauthexample.model.Organization;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.request.DeleteAccountDto;
 import com.dazito.oauthexample.service.dto.request.EditPersonalDataDto;
+import com.dazito.oauthexample.service.dto.request.SetPasswordDto;
 import com.dazito.oauthexample.service.dto.response.ChangedActivateDto;
 import com.dazito.oauthexample.service.dto.response.EditedEmailNameDto;
 import com.dazito.oauthexample.service.dto.response.EditedPasswordDto;
@@ -42,6 +43,8 @@ public interface UserService {
      * @param accountDto is entity which we will find in DB and after that, delete
      */
     AccountDto deleteUser(Long id, DeleteAccountDto accountDto);
+
+    void messageReply(SetPasswordDto setPasswordDto);
 
     EditedPasswordDto savePassword(boolean matches, String encodedPassword, AccountEntity accountToBeEdited);
 
