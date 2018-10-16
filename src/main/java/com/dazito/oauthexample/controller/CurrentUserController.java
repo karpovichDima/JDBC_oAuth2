@@ -52,11 +52,6 @@ public class CurrentUserController {
         return ResponseEntity.ok(result);
     }
 
-
-
-
-
-
     @PostMapping("/recovery")
     public ResponseEntity<SetPasswordDto> setNewPasswordAfterForgot(@RequestBody SetPasswordDto setPasswordDto) {
         userService.forgotPassword(setPasswordDto);

@@ -150,8 +150,6 @@ public class UserServicesImpl implements UserService {
         }
         adminRightsCheck(currentUser);
         isMatchesOrganization(organizationName, currentUser);
-        String password = accountDto.getPassword();
-        String encodedPassword = passwordEncode(password);
 
         String userName = accountDto.getUsername();
         boolean isActivated = accountDto.getIsActivated();
@@ -159,7 +157,6 @@ public class UserServicesImpl implements UserService {
         AccountEntity newUser = new AccountEntity();
         newUser.setEmail(email);
         Organization organization = findOrganizationByName(organizationName);
-        if (currentUser != null) newUser.setPassword(encodedPassword);
         newUser.setUsername(userName);
         newUser.setIsActivated(isActivated);
         newUser.setRole(role);
@@ -208,7 +205,6 @@ public class UserServicesImpl implements UserService {
 
     public void forgotPassword(SetPasswordDto setPasswordDto) {
         AccountEntity foundUser = findUserByUuid(setPasswordDto.getUuid());
-        if (foundUser == null) return;
         String encodedPassword = passwordEncode(setPasswordDto.getPassword());
         foundUser.setPassword(encodedPassword);
         accountRepository.saveAndFlush(foundUser);
