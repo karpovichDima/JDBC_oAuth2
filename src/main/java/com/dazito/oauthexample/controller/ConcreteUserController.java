@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.xml.bind.ValidationException;
 
 @RestController
-@RequestMapping(path = "/users/{id}")
+@RequestMapping(path = "/users")
 public class ConcreteUserController {
 
     private final UserService userService;
@@ -34,21 +34,21 @@ public class ConcreteUserController {
     }
 
     // edit email and name of the current user
-    @PatchMapping("/")
+    @PatchMapping("/{id}")
     public ResponseEntity<EditedEmailNameDto> editEmail(@PathVariable Long id, @RequestBody EditPersonalDataDto editPersonalDataDto) {
         EditedEmailNameDto editEmail = userService.editPersonData(id, editPersonalDataDto);
         return ResponseEntity.ok(editEmail);
     }
 
     // edit password of the user by id
-    @PatchMapping("/password")
+    @PatchMapping("/password/{id}")
     public ResponseEntity<EditedPasswordDto> editPassword(@PathVariable Long id, @RequestBody EditPersonalDataDto editPersonalDataDto) {
         EditedPasswordDto editedPasswordDto = userService.editPassword(id, editPersonalDataDto.getNewPassword(), editPersonalDataDto.getRawOldPassword());
         return ResponseEntity.ok(editedPasswordDto);
     }
 
     // delete user by email from accountDto
-    @DeleteMapping("/")
+    @DeleteMapping("/{id}")
     public ResponseEntity<AccountDto> deleteUser(@PathVariable Long id){
         AccountDto accountDto = userService.deleteUser(id, null);
         return ResponseEntity.ok(accountDto);
