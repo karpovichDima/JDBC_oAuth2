@@ -17,6 +17,7 @@ import com.dazito.oauthexample.service.dto.request.*;
 import com.dazito.oauthexample.service.dto.response.ChangedActivateDto;
 import com.dazito.oauthexample.service.dto.response.EditedEmailNameDto;
 import com.dazito.oauthexample.service.dto.response.EditedPasswordDto;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
@@ -24,16 +25,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import javax.annotation.Resource;
 import javax.xml.bind.ValidationException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service(value = "userService")
 public class UserServicesImpl implements UserService {
@@ -326,12 +325,10 @@ public class UserServicesImpl implements UserService {
     }
 
     @Override
-    public AccountEntity findByIdAccountRepo(Long id) {
-        if (id == null) return null;
+//    @ExceptionHandler(NoSuchElementException.class)
+    public AccountEntity findByIdAccountRepo(@NonNull Long id) throws NoSuchElementException {
         Optional<AccountEntity> foundByIdOptional = accountRepository.findById(id);
-        boolean checkedOnNull = isOptionalNotNull(foundByIdOptional);
-        if (checkedOnNull) return foundByIdOptional.get();
-        return null;
+        return foundByIdOptional.get();
     }
 
     @Override
