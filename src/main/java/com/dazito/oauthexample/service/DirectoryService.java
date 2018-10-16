@@ -8,6 +8,7 @@ import com.dazito.oauthexample.service.dto.response.DirectoryCreatedDto;
 import com.dazito.oauthexample.utils.exception.CurrentUserIsNotAdminException;
 import com.dazito.oauthexample.utils.exception.EmailIsNotMatchesException;
 import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuchException;
+import com.dazito.oauthexample.utils.exception.TypeMismatchException;
 
 import java.util.List;
 
@@ -17,7 +18,7 @@ public interface DirectoryService {
      * @param directoryDto is the object from which we take the folder name and the parent element
      * @return DirectoryCreatedDto is a response object, which indicates that the directory was successfully created
      */
-    DirectoryCreatedDto createDirectory(DirectoryDto directoryDto) throws EmailIsNotMatchesException;
+    DirectoryCreatedDto createDirectory(DirectoryDto directoryDto) throws EmailIsNotMatchesException, TypeMismatchException;
 
     DirectoryCreatedDto responseDirectoryCreated(Directory directory);
 

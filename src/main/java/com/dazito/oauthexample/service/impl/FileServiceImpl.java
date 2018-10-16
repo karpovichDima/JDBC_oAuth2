@@ -9,7 +9,11 @@ import com.dazito.oauthexample.service.*;
 import com.dazito.oauthexample.service.dto.response.FileDeletedDto;
 import com.dazito.oauthexample.service.dto.response.FileUploadedDto;
 import com.dazito.oauthexample.utils.exception.CurrentUserIsNotAdminException;
+import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuchException;
+import com.dazito.oauthexample.utils.exception.PathNotExistException;
+import com.dazito.oauthexample.utils.exception.TypeMismatchException;
 import liquibase.util.file.FilenameUtils;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
@@ -49,9 +53,7 @@ public class FileServiceImpl implements FileService {
 
     // upload multipart file on the server
     @Override
-    public FileUploadedDto upload(MultipartFile file, Long parentId) throws IOException {
-        if (file == null) return null;
-
+    public FileUploadedDto upload(@NonNull MultipartFile file, Long parentId) throws IOException, PathNotExistException {
         String originalFilename = file.getOriginalFilename();
 
         AccountEntity currentUser = userServices.getCurrentUser();
@@ -62,18 +64,14 @@ public class FileServiceImpl implements FileService {
 
         rootPath = this.root;
         if (role == UserRole.USER) rootPath = Paths.get(rootReference);
-        if (!Files.exists(rootPath)) return null;
-
+        if (!Files.exists(rootPath)) throw new PathNotExistException("The path does not exist or has an error.");
         String extension = FilenameUtils.getExtension(originalFilename);
         String name = FilenameUtils.getBaseName(originalFilename);
-
         String uuidString = generateStringUuid();
-
         String pathNewFile = rootPath + File.separator + uuidString;
         file.transferTo(new File(pathNewFile));
 
         Long size = file.getSize();
-
         FileEntity fileEntity = new FileEntity();
         fileEntity.setName(name);
         fileEntity.setUuid(uuidString);
@@ -83,17 +81,14 @@ public class FileServiceImpl implements FileService {
         fileEntity.setOrganization(currentUser.getOrganization());
 
         Content foundContent = findContentDependingOnTheParent(parentId, organization);
-
         fileEntity.setParent(foundContent);
-
         storageRepository.saveAndFlush(fileEntity);
-
         return buildFileUploadedDto(fileEntity);
     }
 
     // download file by uuid and response
     @Override
-    public ResponseEntity<org.springframework.core.io.Resource> download(String uuid) throws IOException, CurrentUserIsNotAdminException {
+    public ResponseEntity<org.springframework.core.io.Resource> download(String uuid) throws IOException, CurrentUserIsNotAdminException, PathNotExistException {
 
         AccountEntity currentUser = userServices.getCurrentUser();
         Long idCurrent = currentUser.getId();
@@ -105,48 +100,38 @@ public class FileServiceImpl implements FileService {
         if (!utilService.matchesOwner(idCurrent, ownerId)) {
             userServices.adminRightsCheck(currentUser);
         }
-
         Path filePath = setFilePathDependingOnTheUserRole(currentUser, uuid);
-
-        if (!Files.exists(filePath)) return null;
-
+        if (!Files.exists(filePath)) throw new PathNotExistException("The path does not exist or has an error.");
         ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(filePath));
-
         return ResponseEntity.ok().body(resource);
     }
 
     @Override
-    public FileUploadedDto updateFile(MultipartFile file, String uuid) throws IOException {
-        if (file == null)return null;
-
+    public FileUploadedDto updateFile(@NonNull MultipartFile file, String uuid) throws IOException, CurrentUserIsNotAdminException, OrganizationIsNotMuchException, PathNotExistException {
         AccountEntity currentUser = userServices.getCurrentUser();
         FileEntity foundFile = findByUUID(uuid);
-        if (foundFile == null) return null;
         Long parentId = foundFile.getParent().getId();
         AccountEntity owner = foundFile.getOwner();
         Organization organization = currentUser.getOrganization();
 
         boolean canChange = utilService.isPermissionsAdminOrUserIsOwner(currentUser, owner, foundFile);
-        if (!canChange) return null;
-        canChange = utilService.checkPermissionsOnChangeByOrganization(currentUser,foundFile);
-        if (!canChange) return null;
+        if (!canChange) throw new CurrentUserIsNotAdminException("You are not allowed to change");
+        String organizationNameCurrentUser = currentUser.getOrganization().getOrganizationName();
+        String organizationNameFound = foundFile.getOrganization().getOrganizationName();
+        utilService.isMatchesOrganization(organizationNameCurrentUser,organizationNameFound);
 
         UserRole role = currentUser.getRole();
         String rootReference = currentUser.getContent().getRoot();
         Path rootPath;
-
         rootPath = this.root;
         if (role == UserRole.USER) rootPath = Paths.get(rootReference);
-        if (!Files.exists(rootPath)) return null;
+        if (!Files.exists(rootPath)) throw new PathNotExistException("The path does not exist or has an error.");
 
         String originalFilename = file.getOriginalFilename();
         String extension = FilenameUtils.getExtension(originalFilename);
-
         String name = foundFile.getName();
-
         String pathNewFile = rootPath + File.separator + uuid;
         file.transferTo(new File(pathNewFile));
-
         Long size = file.getSize();
 
         FileEntity fileEntity = new FileEntity();
@@ -156,20 +141,16 @@ public class FileServiceImpl implements FileService {
         fileEntity.setSize(size);
         fileEntity.setExtension(extension);
         fileEntity.setOrganization(currentUser.getOrganization());
-
         storageRepository.delete(foundFile);
-
         StorageElement foundStorageElement = findContentDependingOnTheParent(parentId, organization);
-
         fileEntity.setParent(foundStorageElement);
-
         storageRepository.saveAndFlush(fileEntity);
 
         return buildFileUploadedDto(fileEntity);
     }
 
     @Override
-    public FileDeletedDto delete(String uuid) throws IOException {
+    public FileDeletedDto delete(String uuid) throws IOException, CurrentUserIsNotAdminException, OrganizationIsNotMuchException, TypeMismatchException {
         AccountEntity currentUser = userServices.getCurrentUser();
         StorageElement foundStorage = findByUUID(uuid);
         AccountEntity owner = foundStorage.getOwner();
@@ -177,11 +158,13 @@ public class FileServiceImpl implements FileService {
         UserRole role = currentUser.getRole();
 
         boolean canChange = utilService.isPermissionsAdminOrUserIsOwner(currentUser, owner, foundStorage);
-        if (!canChange) return null;
-        canChange = utilService.checkPermissionsOnChangeByOrganization(currentUser,foundStorage);
-        if (!canChange) return null;
+        if (!canChange) throw new CurrentUserIsNotAdminException("You are not allowed to change.");
+        String organizationNameCurrentUser = currentUser.getOrganization().getOrganizationName();
+        String organizationNameFound = foundStorage.getOrganization().getOrganizationName();
+        utilService.isMatchesOrganization(organizationNameCurrentUser,organizationNameFound);
 
-        if (!type.equals(SomeType.FILE)) return null;
+        if (!type.equals(SomeType.FILE))
+            throw new TypeMismatchException("A different type of object was expected.");
         storageRepository.delete(foundStorage);
 
         Path rootContent;
@@ -253,15 +236,13 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public FileEntity findByUUID(String uuid) {
-        Optional<FileEntity> storageOptional = fileRepository.findByUuid(uuid);
-        return getFileIfOptionalNotNull(storageOptional);
+    public FileEntity findByUUID(String uuid) throws NoSuchElementException {
+        return fileRepository.findByUuid(uuid).get();
     }
 
     @Override
-    public FileEntity findById(Long id) {
-        Optional<FileEntity> fileOptional = fileRepository.findById(id);
-        return getFileIfOptionalNotNull(fileOptional);
+    public FileEntity findById(Long id) throws NoSuchElementException{
+        return fileRepository.findById(id).get();
     }
 
     @Override

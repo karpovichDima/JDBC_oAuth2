@@ -4,6 +4,9 @@ import com.dazito.oauthexample.model.*;
 import com.dazito.oauthexample.service.dto.response.FileDeletedDto;
 import com.dazito.oauthexample.service.dto.response.FileUploadedDto;
 import com.dazito.oauthexample.utils.exception.CurrentUserIsNotAdminException;
+import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuchException;
+import com.dazito.oauthexample.utils.exception.PathNotExistException;
+import com.dazito.oauthexample.utils.exception.TypeMismatchException;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,13 +21,13 @@ public interface FileService{
      * upload multipart file
      * @param file which we want to upload on the server
      */
-    FileUploadedDto upload(MultipartFile file, Long parent_id) throws IOException;
+    FileUploadedDto upload(MultipartFile file, Long parent_id) throws IOException, PathNotExistException;
 
     /**
      * download multipart file
      * @param uuid is uuid of the file which we want to download on the client
      */
-    ResponseEntity<Resource> download(String uuid) throws IOException, CurrentUserIsNotAdminException;
+    ResponseEntity<Resource> download(String uuid) throws IOException, CurrentUserIsNotAdminException, PathNotExistException;
 
     /**
      * look for the Storage Element in different ways depending on the parameter passed
@@ -62,7 +65,7 @@ public interface FileService{
 
     FileEntity getFileIfOptionalNotNull(Optional<FileEntity> fileOptional);
 
-    FileUploadedDto updateFile(MultipartFile file, String uuid) throws IOException;
+    FileUploadedDto updateFile(MultipartFile file, String uuid) throws IOException, CurrentUserIsNotAdminException, OrganizationIsNotMuchException, PathNotExistException;
 
-    FileDeletedDto delete(String id) throws IOException;
+    FileDeletedDto delete(String id) throws IOException, CurrentUserIsNotAdminException, OrganizationIsNotMuchException, TypeMismatchException;
 }

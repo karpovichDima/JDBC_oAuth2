@@ -15,6 +15,7 @@ import com.dazito.oauthexample.service.dto.response.DirectoryDeletedDto;
 import com.dazito.oauthexample.utils.exception.CurrentUserIsNotAdminException;
 import com.dazito.oauthexample.utils.exception.EmailIsNotMatchesException;
 import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuchException;
+import com.dazito.oauthexample.utils.exception.TypeMismatchException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +44,7 @@ public class DirectoryServiceImpl implements DirectoryService {
 
     // create new Directory by parent id and name
     @Override
-    public DirectoryCreatedDto createDirectory(DirectoryDto directoryDto) throws EmailIsNotMatchesException {
+    public DirectoryCreatedDto createDirectory(DirectoryDto directoryDto) throws EmailIsNotMatchesException, TypeMismatchException {
         AccountEntity currentUser = userServices.getCurrentUser();
         String name = directoryDto.getNewName();
         Long parent_id = directoryDto.getNewParentId();
@@ -60,7 +61,8 @@ public class DirectoryServiceImpl implements DirectoryService {
         } else {
             foundParentElement = storageService.findById(parent_id);
             SomeType type = foundParentElement.getType();
-            if (type.equals(SomeType.FILE)) return null;
+            if (type.equals(SomeType.FILE))
+                throw new TypeMismatchException("A different type of object was expected.");
         }
         directory.setParent(foundParentElement);
         if (role.equals(UserRole.USER) && !foundParentElement.getType().equals(SomeType.CONTENT)) {
