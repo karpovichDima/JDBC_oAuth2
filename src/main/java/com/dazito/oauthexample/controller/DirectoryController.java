@@ -7,6 +7,7 @@ import com.dazito.oauthexample.service.dto.response.DirectoryCreatedDto;
 import com.dazito.oauthexample.utils.exception.CurrentUserIsNotAdminException;
 import com.dazito.oauthexample.utils.exception.EmailIsNotMatchesException;
 import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuchException;
+import com.dazito.oauthexample.utils.exception.TypeMismatchException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +24,7 @@ public class DirectoryController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<DirectoryCreatedDto> create(@RequestBody DirectoryDto directoryDto) throws EmailIsNotMatchesException {
+    public ResponseEntity<DirectoryCreatedDto> create(@RequestBody DirectoryDto directoryDto) throws EmailIsNotMatchesException, TypeMismatchException {
         DirectoryCreatedDto directory = directoryService.createDirectory(directoryDto);
         return ResponseEntity.ok(directory);
     }

@@ -4,6 +4,8 @@ import com.dazito.oauthexample.service.StorageService;
 import com.dazito.oauthexample.service.dto.request.StorageUpdateDto;
 import com.dazito.oauthexample.service.dto.response.StorageDto;
 import com.dazito.oauthexample.service.dto.response.StorageUpdatedDto;
+import com.dazito.oauthexample.utils.exception.CurrentUserIsNotAdminException;
+import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuchException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +25,7 @@ public class StorageController {
     }
 
     @PatchMapping("/")
-    public ResponseEntity<StorageUpdatedDto> update(@RequestBody StorageUpdateDto storageUpdateDto) throws IOException {
+    public ResponseEntity<StorageUpdatedDto> update(@RequestBody StorageUpdateDto storageUpdateDto) throws IOException, CurrentUserIsNotAdminException, OrganizationIsNotMuchException {
         StorageUpdatedDto storageUpdatedDto = storageService.editData(storageUpdateDto);
         return ResponseEntity.ok(storageUpdatedDto);
     }

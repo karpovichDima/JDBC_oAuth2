@@ -5,13 +5,15 @@ import com.dazito.oauthexample.model.StorageElement;
 import com.dazito.oauthexample.service.dto.request.StorageUpdateDto;
 import com.dazito.oauthexample.service.dto.response.StorageDto;
 import com.dazito.oauthexample.service.dto.response.StorageUpdatedDto;
+import com.dazito.oauthexample.utils.exception.CurrentUserIsNotAdminException;
+import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuchException;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface StorageService {
 
-    StorageUpdatedDto editData(StorageUpdateDto storageUpdateDto);
+    StorageUpdatedDto editData(StorageUpdateDto storageUpdateDto) throws CurrentUserIsNotAdminException, OrganizationIsNotMuchException;
 
     StorageElement findById(Long id);
 

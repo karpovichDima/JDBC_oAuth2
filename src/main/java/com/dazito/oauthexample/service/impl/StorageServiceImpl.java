@@ -2,7 +2,6 @@ package com.dazito.oauthexample.service.impl;
 
 import com.dazito.oauthexample.dao.StorageRepository;
 import com.dazito.oauthexample.model.AccountEntity;
-import com.dazito.oauthexample.model.Organization;
 import com.dazito.oauthexample.model.StorageElement;
 import com.dazito.oauthexample.model.type.SomeType;
 import com.dazito.oauthexample.service.StorageService;
@@ -13,6 +12,8 @@ import com.dazito.oauthexample.service.dto.response.DirectoryStorageDto;
 import com.dazito.oauthexample.service.dto.response.FileStorageDto;
 import com.dazito.oauthexample.service.dto.response.StorageDto;
 import com.dazito.oauthexample.service.dto.response.StorageUpdatedDto;
+import com.dazito.oauthexample.utils.exception.CurrentUserIsNotAdminException;
+import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuchException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,6 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Service
 public class StorageServiceImpl implements StorageService {
@@ -37,7 +37,7 @@ public class StorageServiceImpl implements StorageService {
     private UtilService utilService;
 
     @Override
-    public StorageUpdatedDto editData(StorageUpdateDto storageUpdateDto) {
+    public StorageUpdatedDto editData(StorageUpdateDto storageUpdateDto) throws CurrentUserIsNotAdminException, OrganizationIsNotMuchException {
         AccountEntity currentUser = userService.getCurrentUser();
 
         Long id = storageUpdateDto.getId();
@@ -45,23 +45,19 @@ public class StorageServiceImpl implements StorageService {
         Long newParent = storageUpdateDto.getNewParentId();
 
         StorageElement foundStorageElement = findById(id);
-        if (foundStorageElement == null) return null;
         AccountEntity owner = foundStorageElement.getOwner();
         StorageElement parent = findById(newParent);
 
         // check Permission on change
         boolean canChange = utilService.isPermissionsAdminOrUserIsOwner(currentUser, owner, foundStorageElement);
-        if (!canChange) return null;
-        Organization organizationUser = currentUser.getOrganization();
-        Organization organizationStorage = foundStorageElement.getOrganization();
-        canChange = utilService.matchesOrganizations(organizationUser, organizationStorage);
-        if (!canChange) return null;
-
+        if (!canChange) throw new CurrentUserIsNotAdminException("You are not allowed to change");
+        String organizationNameCurrentUser = currentUser.getOrganization().getOrganizationName();
+        String organizationNameFoundStorage = foundStorageElement.getOrganization().getOrganizationName();
+        utilService.isMatchesOrganization(organizationNameCurrentUser, organizationNameFoundStorage);
         foundStorageElement.setName(newName);
         foundStorageElement.setParent(parent);
 
         storageRepository.saveAndFlush(foundStorageElement);
-
         return conversionService.convert(storageUpdateDto, StorageUpdatedDto.class);
     }
 
@@ -78,19 +74,16 @@ public class StorageServiceImpl implements StorageService {
     @Override
     public StorageDto buildStorageDto(Long id, StorageDto storageDtoParent, long sizeFileParent) {
         StorageElement storageElement = findById(id);
-
         Long idElement = storageElement.getId();
         String nameElement = storageElement.getName();
         SomeType typeElement = storageElement.getType();
 
         StorageDto storageDto;
-
         if (typeElement.equals(SomeType.FILE)) {
             storageDto = new FileStorageDto();
         } else {
             storageDto = new DirectoryStorageDto();
         }
-
         storageDto.setId(idElement);
         storageDto.setName(nameElement);
         storageDto.setType(typeElement);
@@ -106,11 +99,9 @@ public class StorageServiceImpl implements StorageService {
 
         long sizeElementFile = 0;
         SomeType type = null;
-
         for (StorageElement element : elementChildren) {
             type = element.getType();
             long elementId = element.getId();
-
             switch (type) {
                 case DIRECTORY:
                     listChildrenDirectories.add(buildStorageDto(elementId, storageDto, sizeElementFile));
@@ -119,19 +110,16 @@ public class StorageServiceImpl implements StorageService {
                     sizeElementFile = element.getSize();
                     storageDtoParent.setSize(storageDtoParent.getSize() + sizeElementFile);
                     storageDto.setSize(storageDto.getSize() + sizeElementFile);
-
                     listChildrenFiles.add(buildStorageDto(elementId, storageDto, sizeElementFile));
                     break;
             }
         }
-        if (storageDtoParent != null && type == SomeType.DIRECTORY){
+        if (storageDtoParent != null && type == SomeType.DIRECTORY) {
             storageDtoParent.setSize(storageDto.getSize() + storageDtoParent.getSize());
         }
-
         DirectoryStorageDto directoryStorageDtoDirectory = (DirectoryStorageDto) storageDto;
         directoryStorageDtoDirectory.setChildrenDirectories(listChildrenDirectories);
         directoryStorageDtoDirectory.setChildrenFiles(listChildrenFiles);
-
         return storageDto;
     }
 
