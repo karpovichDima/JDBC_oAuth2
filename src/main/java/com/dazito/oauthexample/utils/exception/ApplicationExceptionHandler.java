@@ -21,6 +21,23 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
         ExceptionDto error = new ExceptionDto(exception.getMessage(), HttpStatus.NOT_FOUND);
         return buildResponseEntity(error);
     }
+
+    @ExceptionHandler(CurrentUserIsNotAdminException.class)
+    public ResponseEntity userNotAdmin(CurrentUserIsNotAdminException exception) {
+        ExceptionDto error = new ExceptionDto(exception.getMessage(), HttpStatus.FORBIDDEN);
+        return buildResponseEntity(error);
+    }
+
+    @ExceptionHandler(UserWithSuchEmailExist.class)
+    public ResponseEntity userAlreadyExist(UserWithSuchEmailExist exception) {
+        ExceptionDto error = new ExceptionDto(exception.getMessage(), HttpStatus.CONFLICT);
+        return buildResponseEntity(error);
+    }
+
+
+
+
+
 //
 //    @ExceptionHandler(CreationSignupServiceException.class)
 //    public ResponseEntity handleDataValidation(CreationSignupServiceException exception) {

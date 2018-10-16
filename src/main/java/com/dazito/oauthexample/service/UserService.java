@@ -9,6 +9,9 @@ import com.dazito.oauthexample.service.dto.request.SetPasswordDto;
 import com.dazito.oauthexample.service.dto.response.ChangedActivateDto;
 import com.dazito.oauthexample.service.dto.response.EditedEmailNameDto;
 import com.dazito.oauthexample.service.dto.response.EditedPasswordDto;
+import com.dazito.oauthexample.utils.exception.CurrentUserIsNotAdminException;
+import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuch;
+import com.dazito.oauthexample.utils.exception.UserWithSuchEmailExist;
 
 import javax.xml.bind.ValidationException;
 import java.util.Optional;
@@ -29,7 +32,7 @@ public interface UserService {
      * @param personalData is case of the different properties user
      * @return EditedEmailNameDto is successful edit of the edit
      */
-    EditedEmailNameDto editPersonData(Long id, EditPersonalDataDto personalData);
+    EditedEmailNameDto editPersonData(Long id, EditPersonalDataDto personalData) throws CurrentUserIsNotAdminException, OrganizationIsNotMuch, UserWithSuchEmailExist;
 
     /**
      * We pass the user to understand whether he is in our database or not
@@ -48,7 +51,7 @@ public interface UserService {
 
     void forgotPassword(SetPasswordDto setPasswordDto);
 
-    void saveAccaunt(AccountEntity accountEntity);
+    void saveAccount(AccountEntity accountEntity);
 
     AccountEntity findUserByUuid(String uuid);
 
@@ -61,8 +64,6 @@ public interface UserService {
     boolean checkMatches(String rawOldPassword, String passwordCurrentUser);
 
     EditedPasswordDto convertToResponsePassword(String newPassword);
-
-    AccountEntity accountEditedSetEmailAndName(String newEmail, String newName, AccountEntity accountToBeEdited);
 
     /**
      * find user by email
@@ -103,14 +104,6 @@ public interface UserService {
      * @return AccountEntity
      */
     AccountEntity getCurrentUser();
-
-    /**
-     * converting AccountEntity to AccountDto
-     * @return AccountDto
-     */
-    AccountDto convertAccountToDto(AccountEntity accountEntity);
-
-    AccountEntity convertAccountToEntity(AccountDto accountDto);
 
     /**
      * Adds an organization to AccountDto

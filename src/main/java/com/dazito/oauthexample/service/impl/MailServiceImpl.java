@@ -59,7 +59,7 @@ public class MailServiceImpl implements MailService {
         AccountEntity foundUser = userService.getCurrentUser();
         String uuid = UUID.randomUUID() + "";
         foundUser.setUuid(uuid);
-        userService.saveAccaunt(foundUser);
+        userService.saveAccount(foundUser);
 
         String username = foundUser.getUsername();
 

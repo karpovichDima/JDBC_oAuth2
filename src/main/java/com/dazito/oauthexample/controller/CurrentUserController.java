@@ -10,6 +10,9 @@ import com.dazito.oauthexample.service.dto.request.SetPasswordDto;
 import com.dazito.oauthexample.service.dto.response.ContentUpdatedDto;
 import com.dazito.oauthexample.service.dto.response.EditedEmailNameDto;
 import com.dazito.oauthexample.service.dto.response.EditedPasswordDto;
+import com.dazito.oauthexample.utils.exception.CurrentUserIsNotAdminException;
+import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuch;
+import com.dazito.oauthexample.utils.exception.UserWithSuchEmailExist;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +37,7 @@ public class CurrentUserController {
 
     // edit email and name of the current user
     @PatchMapping("/")
-    public ResponseEntity<EditedEmailNameDto> editNameEmail(@RequestBody EditPersonalDataDto editPersonalDataDto) {
+    public ResponseEntity<EditedEmailNameDto> editNameEmail(@RequestBody EditPersonalDataDto editPersonalDataDto) throws CurrentUserIsNotAdminException, OrganizationIsNotMuch, UserWithSuchEmailExist {
         EditedEmailNameDto editEmail = userService.editPersonData(null, editPersonalDataDto);
         return ResponseEntity.ok(editEmail);
     }

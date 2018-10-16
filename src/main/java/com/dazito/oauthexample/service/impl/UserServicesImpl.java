@@ -17,7 +17,11 @@ import com.dazito.oauthexample.service.dto.request.*;
 import com.dazito.oauthexample.service.dto.response.ChangedActivateDto;
 import com.dazito.oauthexample.service.dto.response.EditedEmailNameDto;
 import com.dazito.oauthexample.service.dto.response.EditedPasswordDto;
+import com.dazito.oauthexample.utils.exception.CurrentUserIsNotAdminException;
+import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuch;
+import com.dazito.oauthexample.utils.exception.UserWithSuchEmailExist;
 import lombok.NonNull;
+import org.hibernate.validator.constraints.Email;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
@@ -25,7 +29,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import javax.annotation.Resource;
 import javax.xml.bind.ValidationException;
@@ -91,41 +94,32 @@ public class UserServicesImpl implements UserService {
 
     // Change user email and name, documentation on it in UserService
     @Override
-    public EditedEmailNameDto editPersonData(Long id, EditPersonalDataDto personalData) {
-
-        String newName;
-        String newEmail;
-
+    public EditedEmailNameDto editPersonData(Long id, @NonNull EditPersonalDataDto personalData) throws CurrentUserIsNotAdminException, OrganizationIsNotMuch, UserWithSuchEmailExist {
         AccountEntity currentUser = getCurrentUser();
-
-        newEmail = personalData.getNewEmail();
-        boolean checkedEmailOnNull = isEmpty(newEmail);
-        if (!checkedEmailOnNull) newEmail = currentUser.getEmail();
-
-        if (findUserByEmail(newEmail) != null) return null; // user with such email exist;
-
-        newName = personalData.getNewName();
-        boolean checkedNameOnNull = isEmpty(newName);
-        if (!checkedNameOnNull) newName = currentUser.getUsername();
-
-        AccountEntity accountWithNewEmail;
+        String newEmail = personalData.getNewEmail();
+        if (findUserByEmail(newEmail) != null)
+            throw new UserWithSuchEmailExist("User with such email exist.");
+        String newName = personalData.getNewName();
         if (id == null) {
-            accountWithNewEmail = accountEditedSetEmailAndName(newEmail, newName, currentUser);
-            accountRepository.saveAndFlush(accountWithNewEmail);
-            return responseDto(accountWithNewEmail);
+            currentUser.setEmail(newEmail);
+            currentUser.setUsername(newName);
+            accountRepository.saveAndFlush(currentUser);
+            return responseDto(currentUser);
         }
-
-        if (!adminRightsCheck(currentUser)) return null; // current user is not Admin;
+        if (!adminRightsCheck(currentUser))
+            throw new CurrentUserIsNotAdminException("Authorized user is not an administrator.");
 
         AccountEntity foundedAccount = findByIdAccountRepo(id);
         String organizationName = getOrganizationNameByUser(foundedAccount);
 
         if (!organizationMatch(organizationName, currentUser))
-            return null; // organization current user and user from account dto is not match
+            throw new OrganizationIsNotMuch("Organization current user and user from account dto is not match.");
 
-        accountWithNewEmail = accountEditedSetEmailAndName(newEmail, newName, currentUser);
-        accountRepository.saveAndFlush(accountWithNewEmail);
-        return responseDto(accountWithNewEmail);
+        foundedAccount.setEmail(newEmail);
+        foundedAccount.setUsername(newName);
+
+        accountRepository.saveAndFlush(foundedAccount);
+        return responseDto(foundedAccount);
     }
 
     // Create a new user
@@ -294,13 +288,6 @@ public class UserServicesImpl implements UserService {
     }
 
     @Override
-    public AccountEntity accountEditedSetEmailAndName(String newEmail, String newName, AccountEntity accountToBeEdited) {
-        accountToBeEdited.setEmail(newEmail);
-        accountToBeEdited.setUsername(newName);
-        return accountToBeEdited;
-    }
-
-    @Override
     public AccountEntity findUserByEmail(String email) {
         Optional<AccountEntity> foundedUser = accountRepository.findUserByEmail(email);
         if (isOptionalNotNull(foundedUser)) return foundedUser.get();
@@ -325,10 +312,8 @@ public class UserServicesImpl implements UserService {
     }
 
     @Override
-//    @ExceptionHandler(NoSuchElementException.class)
     public AccountEntity findByIdAccountRepo(@NonNull Long id) throws NoSuchElementException {
-        Optional<AccountEntity> foundByIdOptional = accountRepository.findById(id);
-        return foundByIdOptional.get();
+        return accountRepository.findById(id).get();
     }
 
     @Override
@@ -338,7 +323,7 @@ public class UserServicesImpl implements UserService {
     }
 
     @Override
-    public boolean organizationMatch(String userOrganization, AccountEntity currentUser) {
+    public boolean organizationMatch(@NonNull String userOrganization, @NonNull AccountEntity currentUser) {
         String userCurrentOrganization = getOrganizationNameCurrentUser(currentUser);
         return userOrganization.equals(userCurrentOrganization);
     }
@@ -349,30 +334,15 @@ public class UserServicesImpl implements UserService {
     }
 
     @Override
-    public AccountEntity getCurrentUser() {
+    public AccountEntity getCurrentUser() throws NoSuchElementException{
         Object anonymous = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (anonymous.equals("anonymousUser")) {
-            return null;
-        }
+        if (anonymous.equals("anonymousUser")) return null; // current user == null, only without authorization
         Long id = ((UserDetailsConfig) (SecurityContextHolder.getContext().getAuthentication().getPrincipal())).getUser().getId();
-        Optional<AccountEntity> optionalById = accountRepository.findById(id);
-        return optionalById.orElse(null);
-
-
+        return accountRepository.findById(id).get();
     }
 
     @Override
-    public AccountDto convertAccountToDto(AccountEntity accountEntity) {
-        return conversionService.convert(accountEntity, AccountDto.class);
-    }
-
-    @Override
-    public AccountEntity convertAccountToEntity(AccountDto accountDto) {
-        return conversionService.convert(accountDto, AccountEntity.class);
-    }
-
-    @Override
-    public AccountDto addToAccountDtoOrganization(AccountEntity foundedUser) {
+    public AccountDto addToAccountDtoOrganization(@NonNull AccountEntity foundedUser) throws NoSuchElementException {
         Organization organization = foundedUser.getOrganization();
         OrganizationDto convertedOrganization = conversionService.convert(organization, OrganizationDto.class);
         AccountDto accountDto = conversionService.convert(foundedUser, AccountDto.class);
@@ -428,7 +398,7 @@ public class UserServicesImpl implements UserService {
     }
 
     @Override
-    public void saveAccaunt(AccountEntity accountEntity){
+    public void saveAccount(AccountEntity accountEntity){
         accountRepository.saveAndFlush(accountEntity);
     }
 
