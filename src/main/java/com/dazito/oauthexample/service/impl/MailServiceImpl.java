@@ -56,7 +56,7 @@ public class MailServiceImpl implements MailService {
 
     @Override
     public void emailPreparation(String email) throws ValidationException {
-        AccountEntity foundUser = userService.findUserByEmail(email);
+        AccountEntity foundUser = userService.getCurrentUser();
         String uuid = UUID.randomUUID() + "";
         foundUser.setUuid(uuid);
         userService.saveAccaunt(foundUser);
