@@ -5,6 +5,8 @@ import com.dazito.oauthexample.service.FileService;
 import com.dazito.oauthexample.service.dto.request.ContentUpdateDto;
 import com.dazito.oauthexample.service.dto.response.ContentUpdatedDto;
 import com.dazito.oauthexample.service.dto.response.EditedEmailNameDto;
+import com.dazito.oauthexample.utils.exception.CurrentUserIsNotAdminException;
+import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuchException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +24,7 @@ public class ContentController {
     }
 
     @PatchMapping("/")
-    public ResponseEntity<ContentUpdatedDto> updateContent(@RequestBody ContentUpdateDto contentDto) {
+    public ResponseEntity<ContentUpdatedDto> updateContent(@RequestBody ContentUpdateDto contentDto) throws CurrentUserIsNotAdminException, OrganizationIsNotMuchException {
         ContentUpdatedDto contentUpdatedDto = contentService.updateContent(contentDto);
         return ResponseEntity.ok(contentUpdatedDto);
     }

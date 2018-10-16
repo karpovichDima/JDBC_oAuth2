@@ -38,7 +38,7 @@ public interface UserService {
      * @param accountDto is userDto which we will find in DB
      * @return EditedEmailNameDto is successful search result user
      */
-    EditedEmailNameDto createUser(AccountDto accountDto) throws ValidationException, OrganizationIsNotMuchException, CurrentUserIsNotAdminException;
+    EditedEmailNameDto createUser(AccountDto accountDto) throws ValidationException, OrganizationIsNotMuchException, CurrentUserIsNotAdminException, UserWithSuchEmailExistException;
 
     /**
      * delete user from DB, by id or DeleteAccountDto

@@ -3,6 +3,8 @@ package com.dazito.oauthexample.service;
 import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.model.Organization;
 import com.dazito.oauthexample.model.StorageElement;
+import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuchException;
+import lombok.NonNull;
 
 import java.io.File;
 
@@ -30,4 +32,6 @@ public interface UtilService{
     File createSinglePath(String path);
 
     File createMultiplyPath(String path);
+
+    void isMatchesOrganization(@NonNull String organizationName1, @NonNull String organizationName2) throws OrganizationIsNotMuchException;
 }

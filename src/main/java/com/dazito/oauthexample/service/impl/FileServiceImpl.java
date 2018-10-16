@@ -8,6 +8,7 @@ import com.dazito.oauthexample.model.type.UserRole;
 import com.dazito.oauthexample.service.*;
 import com.dazito.oauthexample.service.dto.response.FileDeletedDto;
 import com.dazito.oauthexample.service.dto.response.FileUploadedDto;
+import com.dazito.oauthexample.utils.exception.CurrentUserIsNotAdminException;
 import liquibase.util.file.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -92,7 +93,7 @@ public class FileServiceImpl implements FileService {
 
     // download file by uuid and response
     @Override
-    public ResponseEntity<org.springframework.core.io.Resource> download(String uuid) throws IOException {
+    public ResponseEntity<org.springframework.core.io.Resource> download(String uuid) throws IOException, CurrentUserIsNotAdminException {
 
         AccountEntity currentUser = userServices.getCurrentUser();
         Long idCurrent = currentUser.getId();
@@ -102,7 +103,7 @@ public class FileServiceImpl implements FileService {
         Long ownerId = fileOwner.getId();
 
         if (!utilService.matchesOwner(idCurrent, ownerId)) {
-            if (!userServices.adminRightsCheck(currentUser)) return null; // user is not admin and not owner of the file
+            userServices.adminRightsCheck(currentUser);
         }
 
         Path filePath = setFilePathDependingOnTheUserRole(currentUser, uuid);

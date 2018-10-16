@@ -141,31 +141,24 @@ public class UserServicesImpl implements UserService {
     }
 
     @Override
-    public EditedEmailNameDto createUser(AccountDto accountDto) throws ValidationException, OrganizationIsNotMuchException, CurrentUserIsNotAdminException {
+    public EditedEmailNameDto createUser(AccountDto accountDto) throws ValidationException, OrganizationIsNotMuchException, CurrentUserIsNotAdminException, UserWithSuchEmailExistException {
         AccountEntity currentUser = getCurrentUser();
         String email = accountDto.getEmail();
         String organizationName = accountDto.getOrganizationName();
-
-        String password;
-        String encodedPassword = null;
-
-        if (findUserByEmail(email) != null) return null; // user with such email exist;
-        if (currentUser != null) {
-            adminRightsCheck(currentUser);
-            isMatchesOrganization(organizationName, currentUser);
-            password = accountDto.getPassword();
-            encodedPassword = passwordEncode(password);
+        if (findUserByEmail(email) != null){
+            throw new UserWithSuchEmailExistException("User with such email exist.");
         }
+        adminRightsCheck(currentUser);
+        isMatchesOrganization(organizationName, currentUser);
+        String password = accountDto.getPassword();
+        String encodedPassword = passwordEncode(password);
 
         String userName = accountDto.getUsername();
         boolean isActivated = accountDto.getIsActivated();
         UserRole role = accountDto.getRole();
-
         AccountEntity newUser = new AccountEntity();
         newUser.setEmail(email);
-
         Organization organization = findOrganizationByName(organizationName);
-
         if (currentUser != null) newUser.setPassword(encodedPassword);
         newUser.setUsername(userName);
         newUser.setIsActivated(isActivated);
@@ -173,29 +166,20 @@ public class UserServicesImpl implements UserService {
         newUser.setOrganization(organization);
 
         Content rootContent = null;
-
         if (getCountStorageWithOwnerNullAndNotNullOrganization() < 1 || role.equals(UserRole.USER)) {
             rootContent = contentService.createContent(newUser);
         }
-
         newUser.setContent(rootContent);
-
-        UUID uuid = UUID.randomUUID();
-
+        String uuid = UUID.randomUUID() + "";
         Date date = new Date();
         LocalDateTime utc = LocalDateTime.from(date.toInstant().atZone(ZoneId.of("UTC"))).plusDays(1);
         Timestamp timestamp = Timestamp.valueOf(utc);
-
-        newUser.setUuid(uuid + "");
+        newUser.setUuid(uuid);
         newUser.setTokenEndDate(timestamp);
-
         accountRepository.saveAndFlush(newUser);
-
         mailService.emailPreparation(newUser);
-
         return responsePersonalDataDto(newUser);
     }
-
 
     @Override
     public void messageReply(SetPasswordDto setPasswordDto) {
@@ -274,10 +258,8 @@ public class UserServicesImpl implements UserService {
     }
 
     @Override
-    public AccountEntity findUserByUuid(String uuid) {
-        Optional<AccountEntity> foundUser = accountRepository.findUserByUuid(uuid);
-        if (isOptionalNotNull(foundUser)) return foundUser.get();
-        return null;
+    public AccountEntity findUserByUuid(String uuid) throws NoSuchElementException {
+        return accountRepository.findUserByUuid(uuid).get();
     }
 
     @Override

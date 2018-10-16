@@ -5,6 +5,7 @@ import com.dazito.oauthexample.service.dto.request.FileUpdateDto;
 import com.dazito.oauthexample.service.dto.response.FileDeletedDto;
 import com.dazito.oauthexample.service.dto.response.FileUploadedDto;
 import com.dazito.oauthexample.service.dto.response.StorageDto;
+import com.dazito.oauthexample.utils.exception.CurrentUserIsNotAdminException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
@@ -41,7 +42,7 @@ public class FileController {
     }
 
     @GetMapping("/{uuid:.+}")
-    public ResponseEntity<Resource> download(@PathVariable String uuid) throws IOException {
+    public ResponseEntity<Resource> download(@PathVariable String uuid) throws IOException, CurrentUserIsNotAdminException {
         return fileService.download(uuid);
     }
 

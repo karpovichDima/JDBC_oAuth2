@@ -6,17 +6,16 @@ import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.model.Content;
 import com.dazito.oauthexample.model.Organization;
 import com.dazito.oauthexample.model.StorageElement;
-import com.dazito.oauthexample.model.type.SomeType;
 import com.dazito.oauthexample.model.type.UserRole;
 import com.dazito.oauthexample.service.*;
 import com.dazito.oauthexample.service.dto.request.ContentUpdateDto;
 import com.dazito.oauthexample.service.dto.response.ContentUpdatedDto;
-import com.dazito.oauthexample.service.dto.response.DirectoryDeletedDto;
+import com.dazito.oauthexample.utils.exception.CurrentUserIsNotAdminException;
+import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuchException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.io.File;
@@ -76,7 +75,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public ContentUpdatedDto updateContent(ContentUpdateDto contentDto) {
+    public ContentUpdatedDto updateContent(ContentUpdateDto contentDto) throws CurrentUserIsNotAdminException, OrganizationIsNotMuchException {
         AccountEntity currentUser = userService.getCurrentUser();
 
         Long id = contentDto.getId();
@@ -86,10 +85,7 @@ public class ContentServiceImpl implements ContentService {
         StorageElement foundContent = storageService.findById(id);
         if (foundContent == null) return null;
         Content content = (Content) foundContent;
-
-        boolean canChange = filePermissionsCheck(currentUser, foundContent);
-        if (!canChange) return null;
-
+        filePermissionsCheck(currentUser, foundContent);
         content.setName(name);
         content.setRoot(root);
 
@@ -105,22 +101,18 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public boolean filePermissionsCheck(AccountEntity currentUser, StorageElement foundContent) {
-        boolean checkedOnTheAdmin = userService.adminRightsCheck(currentUser);
-        if (!checkedOnTheAdmin) return false;
+    public void filePermissionsCheck(AccountEntity currentUser, StorageElement foundContent) throws CurrentUserIsNotAdminException, OrganizationIsNotMuchException {
+        userService.adminRightsCheck(currentUser);
         Organization organizationUser = currentUser.getOrganization();
         Organization organizationContent = foundContent.getOrganization();
-        return utilService.matchesOrganizations(organizationUser, organizationContent);
+        utilService.isMatchesOrganization(organizationUser.getOrganizationName(), organizationContent.getOrganizationName());
     }
 
     @Override
-    public void deleteContent(Long id) {
+    public void deleteContent(Long id) throws CurrentUserIsNotAdminException, OrganizationIsNotMuchException {
         AccountEntity currentUser = userService.getCurrentUser();
         StorageElement foundStorage = storageService.findById(id);
-
-        boolean canChange = filePermissionsCheck(currentUser, foundStorage);
-        if (!canChange) return;
-
+        filePermissionsCheck(currentUser, foundStorage);
         storageRepository.delete(id);
     }
 

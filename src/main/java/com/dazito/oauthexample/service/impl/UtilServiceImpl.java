@@ -6,7 +6,10 @@ import com.dazito.oauthexample.model.StorageElement;
 import com.dazito.oauthexample.model.type.UserRole;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.UtilService;
+import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuchException;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -34,7 +37,7 @@ public class UtilServiceImpl implements UtilService {
     public boolean isPermissionsAdminOrUserIsOwner(AccountEntity currentUser, AccountEntity owner, StorageElement foundFile) {
         UserRole role = currentUser.getRole();
         Long idUser = currentUser.getId();
-        boolean checkedOnTheAdmin = userService.adminRightsCheck(currentUser);
+        boolean checkedOnTheAdmin = adminRightsCheck(currentUser);
         if (!checkedOnTheAdmin) {
             boolean checkedMatchesOwner = matchesOwner(idUser, owner.getId());
             if (!checkedMatchesOwner) return false;
@@ -43,6 +46,11 @@ public class UtilServiceImpl implements UtilService {
             return true;
         }
         return true;
+    }
+
+    private boolean adminRightsCheck(AccountEntity currentUser) {
+        UserRole role = currentUser.getRole();
+        return role == UserRole.ADMIN;
     }
 
     @Override
@@ -80,5 +88,10 @@ public class UtilServiceImpl implements UtilService {
         return rootPath2;
     }
 
-
+    @Override
+    public void isMatchesOrganization(@NonNull String organizationName1, @NonNull String organizationName2) throws OrganizationIsNotMuchException {
+        boolean equals = organizationName1.equals(organizationName2);
+        if (!equals)
+            throw new OrganizationIsNotMuchException("You are trying to access content not from your organization.");
+    }
 }

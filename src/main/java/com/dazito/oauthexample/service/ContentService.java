@@ -5,7 +5,8 @@ import com.dazito.oauthexample.model.Content;
 import com.dazito.oauthexample.model.StorageElement;
 import com.dazito.oauthexample.service.dto.request.ContentUpdateDto;
 import com.dazito.oauthexample.service.dto.response.ContentUpdatedDto;
-import com.dazito.oauthexample.service.dto.response.DirectoryDeletedDto;
+import com.dazito.oauthexample.utils.exception.CurrentUserIsNotAdminException;
+import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuchException;
 
 import java.util.List;
 
@@ -18,11 +19,11 @@ public interface ContentService {
      */
     Content createContent(AccountEntity newUser);
 
-    ContentUpdatedDto updateContent(ContentUpdateDto contentDto);
+    ContentUpdatedDto updateContent(ContentUpdateDto contentDto) throws CurrentUserIsNotAdminException, OrganizationIsNotMuchException;
 
-    boolean filePermissionsCheck(AccountEntity currentUser, StorageElement foundContent);
+    void filePermissionsCheck(AccountEntity currentUser, StorageElement foundContent) throws CurrentUserIsNotAdminException, OrganizationIsNotMuchException;
 
-    void deleteContent(Long id);
+    void deleteContent(Long id) throws CurrentUserIsNotAdminException, OrganizationIsNotMuchException;
 
     Content findById(Long id);
 
