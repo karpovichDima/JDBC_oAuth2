@@ -18,9 +18,6 @@ import java.util.Objects;
 @Service
 public class UtilServiceImpl implements UtilService {
 
-    @Autowired
-    private UserService userService;
-
     @Override
     public boolean matchesOrganizations(Organization organizationUser, Organization organizationStorage) {
         String organizationNameUser = organizationUser.getOrganizationName();

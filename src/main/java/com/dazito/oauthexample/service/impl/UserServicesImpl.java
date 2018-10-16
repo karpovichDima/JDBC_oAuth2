@@ -211,7 +211,7 @@ public class UserServicesImpl implements UserService {
     }
 
 
-    private void isMatchesEmail(@NonNull String emailCurrentUser, @NonNull String email) throws EmailIsNotMatchesException {
+    public void isMatchesEmail(@NonNull String emailCurrentUser, @NonNull String email) throws EmailIsNotMatchesException {
         boolean equals = emailCurrentUser.equals(email);
         if (!equals) throw new EmailIsNotMatchesException("Current user's email does not match mail from dto.");
     }

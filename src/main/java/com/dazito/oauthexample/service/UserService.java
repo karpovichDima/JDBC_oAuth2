@@ -11,6 +11,7 @@ import com.dazito.oauthexample.service.dto.response.DeletedUserDto;
 import com.dazito.oauthexample.service.dto.response.EditedEmailNameDto;
 import com.dazito.oauthexample.service.dto.response.EditedPasswordDto;
 import com.dazito.oauthexample.utils.exception.*;
+import lombok.NonNull;
 
 import javax.xml.bind.ValidationException;
 import java.util.Optional;
@@ -64,6 +65,7 @@ public interface UserService {
 
     EditedPasswordDto convertToResponsePassword(String newPassword);
 
+    void isMatchesEmail(@NonNull String emailCurrentUser, @NonNull String email) throws EmailIsNotMatchesException;
     /**
      * find user by email
      * @param email is email which we will find in DB

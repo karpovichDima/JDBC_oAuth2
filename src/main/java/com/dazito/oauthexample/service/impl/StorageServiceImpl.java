@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -65,9 +66,8 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    public StorageElement findById(Long id) {
-        Optional<StorageElement> storageOptional = storageRepository.findById(id);
-        return storageOptional.orElse(null);
+    public StorageElement findById(Long id) throws NoSuchElementException {
+        return storageRepository.findById(id).get();
     }
 
     @Override

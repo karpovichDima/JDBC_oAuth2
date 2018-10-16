@@ -77,26 +77,20 @@ public class ContentServiceImpl implements ContentService {
     @Override
     public ContentUpdatedDto updateContent(ContentUpdateDto contentDto) throws CurrentUserIsNotAdminException, OrganizationIsNotMuchException {
         AccountEntity currentUser = userService.getCurrentUser();
-
         Long id = contentDto.getId();
         String name = contentDto.getNewName();
         String root = contentDto.getNewRoot();
-
         StorageElement foundContent = storageService.findById(id);
-        if (foundContent == null) return null;
         Content content = (Content) foundContent;
         filePermissionsCheck(currentUser, foundContent);
         content.setName(name);
         content.setRoot(root);
-
         storageRepository.saveAndFlush(content);
 
         ContentUpdatedDto contentUpdatedDto = new ContentUpdatedDto();
         contentUpdatedDto.setId(id);
         contentUpdatedDto.setNewName(name);
         contentUpdatedDto.setNewRoot(root);
-
-
         return contentUpdatedDto;
     }
 
