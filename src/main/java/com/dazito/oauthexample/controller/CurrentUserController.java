@@ -17,12 +17,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(path = "/users/current")
 public class CurrentUserController {
 
-    private final UserService userService;
-
     @Autowired
-    public CurrentUserController(UserService userService) {
-        this.userService = userService;
-    }
+    UserService userService;
 
     @GetMapping()
     public AccountDto getAccountCurrentUser() {

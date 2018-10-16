@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.xml.bind.ValidationException;
 
 @RestController
-@RequestMapping(path = "/registration")
-public class RegistrationController {
+@RequestMapping(path = "/password")
+public class PasswordController {
 
     @Autowired
     UserService userService;
@@ -24,26 +24,19 @@ public class RegistrationController {
     @Autowired
     MailService mailService;
 
-    // create new user from accountDto without password
-    @PostMapping("/")
-    public ResponseEntity<EditedEmailNameDto> registration(@RequestBody AccountDto accountDto) throws ValidationException {
-        EditedEmailNameDto newUser = userService.createUser(accountDto);
-        return ResponseEntity.ok(newUser);
-    }
-
-    @PostMapping("/password/create")
+    @PostMapping("/create")
     public ResponseEntity<SetPasswordDto> setNewPasswordAfterCreateUser(@RequestBody SetPasswordDto setPasswordDto) {
         userService.messageReply(setPasswordDto);
         return ResponseEntity.ok(setPasswordDto);
     }
 
-    @PostMapping("/password/recovery")
+    @PostMapping("/recovery")
     public ResponseEntity<SetPasswordDto> setNewPasswordAfterForgot(@RequestBody SetPasswordDto setPasswordDto) {
         userService.forgotPassword(setPasswordDto);
         return ResponseEntity.ok(setPasswordDto);
     }
 
-    @PostMapping("/password/forgot")
+    @PostMapping("/forgot")
     public ResponseEntity<SetPasswordDto> sendEmailForgotPassword(@RequestBody SetPasswordDto setPasswordDto) throws ValidationException {
         mailService.emailPreparation(setPasswordDto.getEmail());
         return ResponseEntity.ok(setPasswordDto);
