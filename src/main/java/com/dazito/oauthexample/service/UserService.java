@@ -48,6 +48,8 @@ public interface UserService {
 
     void forgotPassword(SetPasswordDto setPasswordDto);
 
+    void saveAccaunt(AccountEntity accountEntity);
+
     AccountEntity findUserByUuid(String uuid);
 
     EditedPasswordDto savePassword(boolean matches, String encodedPassword, AccountEntity accountToBeEdited);

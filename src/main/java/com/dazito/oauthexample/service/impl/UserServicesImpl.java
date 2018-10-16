@@ -430,6 +430,10 @@ public class UserServicesImpl implements UserService {
         return changedActivateDto;
     }
 
+    @Override
+    public void saveAccaunt(AccountEntity accountEntity){
+        accountRepository.saveAndFlush(accountEntity);
+    }
 
     public Long getCountStorageWithOwnerNullAndNotNullOrganization() {
         return storageRepository.countStorageElementByOwnerIsNullAndOrganizationIsNotNull();
