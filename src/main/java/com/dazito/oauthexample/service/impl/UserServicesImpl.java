@@ -74,10 +74,7 @@ public class UserServicesImpl implements UserService {
             isMatchesPassword(rawOldPassword, passwordCurrentUser);
             return savePassword(encodedPassword, accountToBeEdited);
         }
-
-        if (!adminRightsCheck(getCurrentUser()))
-            throw new CurrentUserIsNotAdminException("Authorized user is not an administrator.");
-
+        adminRightsCheck(getCurrentUser());
         String organizationName = getOrganizationNameByUser(foundedUser);
         isMatchesOrganization(organizationName, currentUser);
         accountToBeEdited = getCurrentUser();
@@ -96,10 +93,9 @@ public class UserServicesImpl implements UserService {
             currentUser.setEmail(newEmail);
             currentUser.setUsername(newName);
             accountRepository.saveAndFlush(currentUser);
-            return responseDto(currentUser);
+            return responsePersonalDataDto(currentUser);
         }
-        if (!adminRightsCheck(currentUser))
-            throw new CurrentUserIsNotAdminException("Authorized user is not an administrator.");
+        adminRightsCheck(currentUser);
         AccountEntity foundedAccount = findByIdAccountRepo(id);
         String organizationName = getOrganizationNameByUser(foundedAccount);
 
@@ -107,7 +103,7 @@ public class UserServicesImpl implements UserService {
         foundedAccount.setEmail(newEmail);
         foundedAccount.setUsername(newName);
         accountRepository.saveAndFlush(foundedAccount);
-        return responseDto(foundedAccount);
+        return responsePersonalDataDto(foundedAccount);
     }
 
     @Transactional
@@ -126,8 +122,7 @@ public class UserServicesImpl implements UserService {
             accountRepository.delete(account);
             if (account.getRole().equals(UserRole.USER)) contentService.delete(children);
         }
-        if (!adminRightsCheck(getCurrentUser()))
-            throw new CurrentUserIsNotAdminException("Authorized user is not an administrator.");
+        adminRightsCheck(getCurrentUser());
         AccountEntity foundedUser = findByIdAccountRepo(id);
         String organizationName = getOrganizationNameByUser(foundedUser);
         isMatchesOrganization(organizationName, currentUser);
@@ -140,14 +135,13 @@ public class UserServicesImpl implements UserService {
         } else {
             accountRepository.delete(foundedUser);
         }
-
         DeletedUserDto userDto = new DeletedUserDto();
         userDto.setMessage("User is deleted");
         return userDto;
     }
 
     @Override
-    public EditedEmailNameDto createUser(AccountDto accountDto) throws ValidationException, OrganizationIsNotMuchException {
+    public EditedEmailNameDto createUser(AccountDto accountDto) throws ValidationException, OrganizationIsNotMuchException, CurrentUserIsNotAdminException {
         AccountEntity currentUser = getCurrentUser();
         String email = accountDto.getEmail();
         String organizationName = accountDto.getOrganizationName();
@@ -157,7 +151,7 @@ public class UserServicesImpl implements UserService {
 
         if (findUserByEmail(email) != null) return null; // user with such email exist;
         if (currentUser != null) {
-            if (!adminRightsCheck(currentUser)) return null; // current user is not Admin, if create user with password
+            adminRightsCheck(currentUser);
             isMatchesOrganization(organizationName, currentUser);
             password = accountDto.getPassword();
             encodedPassword = passwordEncode(password);
@@ -199,7 +193,7 @@ public class UserServicesImpl implements UserService {
 
         mailService.emailPreparation(newUser);
 
-        return responseDto(newUser);
+        return responsePersonalDataDto(newUser);
     }
 
 
@@ -237,7 +231,6 @@ public class UserServicesImpl implements UserService {
     }
 
 
-
     private void isMatchesEmail(@NonNull String emailCurrentUser, @NonNull String email) throws EmailIsNotMatchesException {
         boolean equals = emailCurrentUser.equals(email);
         if (!equals) throw new EmailIsNotMatchesException("Current user's email does not match mail from dto.");
@@ -245,8 +238,8 @@ public class UserServicesImpl implements UserService {
 
     @Override
     public EditedPasswordDto savePassword(String encodedPassword, AccountEntity accountToBeEdited) {
-            saveEncodedPassword(encodedPassword, accountToBeEdited);
-            return convertToResponsePassword(accountToBeEdited.getPassword());
+        saveEncodedPassword(encodedPassword, accountToBeEdited);
+        return convertToResponsePassword(accountToBeEdited.getPassword());
     }
 
     @Override
@@ -303,9 +296,10 @@ public class UserServicesImpl implements UserService {
     }
 
     @Override
-    public boolean adminRightsCheck(AccountEntity entity) {
+    public void adminRightsCheck(AccountEntity entity) throws CurrentUserIsNotAdminException {
         UserRole role = entity.getRole();
-        return role == UserRole.ADMIN;
+        if (role != UserRole.ADMIN)
+            throw new CurrentUserIsNotAdminException("Authorized user is not an administrator.");
     }
 
     @Override
@@ -322,7 +316,7 @@ public class UserServicesImpl implements UserService {
     }
 
     @Override
-    public AccountEntity getCurrentUser() throws NoSuchElementException{
+    public AccountEntity getCurrentUser() throws NoSuchElementException {
         Object anonymous = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (anonymous.equals("anonymousUser")) return null; // current user == null, only without authorization
         Long id = ((UserDetailsConfig) (SecurityContextHolder.getContext().getAuthentication().getPrincipal())).getUser().getId();
@@ -344,14 +338,12 @@ public class UserServicesImpl implements UserService {
     }
 
     @Override
-    public Organization findOrganizationByName(String organizationName) {
-        Optional<Organization> foundedOrganization = organizationRepo.findByOrganizationName(organizationName);
-        if (isOptionalNotNull(foundedOrganization)) return foundedOrganization.get();
-        return null;
+    public Organization findOrganizationByName(String organizationName) throws NoSuchElementException {
+        return organizationRepo.findByOrganizationName(organizationName).get();
     }
 
     @Override
-    public EditedEmailNameDto responseDto(AccountEntity accountEntity) {
+    public EditedEmailNameDto responsePersonalDataDto(AccountEntity accountEntity) {
         EditedEmailNameDto editedEmailNameDto = new EditedEmailNameDto();
         editedEmailNameDto.setUsername(accountEntity.getUsername());
         editedEmailNameDto.setEmail(accountEntity.getEmail());
@@ -359,14 +351,13 @@ public class UserServicesImpl implements UserService {
     }
 
     @Override
-    public ChangedActivateDto editActivate(AccountDto accountDto) throws OrganizationIsNotMuchException {
+    public ChangedActivateDto editActivate(AccountDto accountDto) throws OrganizationIsNotMuchException, CurrentUserIsNotAdminException {
         AccountEntity currentUser = getCurrentUser();
         String organizationName = currentUser.getOrganization().getOrganizationName();
 
         Boolean isActivated = accountDto.getIsActivated();
         Long id = accountDto.getId();
-
-        if (!adminRightsCheck(currentUser)) return null; // current user is not Admin;
+        adminRightsCheck(currentUser);
 
         AccountEntity account = findByIdAccountRepo(id);
         isMatchesOrganization(organizationName, account);
@@ -381,7 +372,7 @@ public class UserServicesImpl implements UserService {
     }
 
     @Override
-    public void saveAccount(AccountEntity accountEntity){
+    public void saveAccount(AccountEntity accountEntity) {
         accountRepository.saveAndFlush(accountEntity);
     }
 

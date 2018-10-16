@@ -59,30 +59,34 @@ public class ConcreteUserController {
         return ResponseEntity.ok(accountDto);
     }
 
-
-
-
-
-
-
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PatchMapping("/activated")
-    public ResponseEntity<ChangedActivateDto> editActivate(@RequestBody AccountDto accountDto) throws OrganizationIsNotMuchException {
+    public ResponseEntity<ChangedActivateDto> editActivate(@RequestBody AccountDto accountDto) throws OrganizationIsNotMuchException, CurrentUserIsNotAdminException {
         ChangedActivateDto changedActivateDto = userService.editActivate(accountDto);
         return ResponseEntity.ok(changedActivateDto);
     }
 
+
+
+
+
+
+
+
+
+
+
     // create new user from accountDto
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping("/")
-    public ResponseEntity<EditedEmailNameDto> createUser(@RequestBody AccountDto accountDto) throws ValidationException, OrganizationIsNotMuchException {
+    public ResponseEntity<EditedEmailNameDto> createUser(@RequestBody AccountDto accountDto) throws ValidationException, OrganizationIsNotMuchException, CurrentUserIsNotAdminException {
         EditedEmailNameDto newUser = userService.createUser(accountDto);
         return ResponseEntity.ok(newUser);
     }
 
     // create new user from accountDto without password
     @PostMapping("/create")
-    public ResponseEntity<EditedEmailNameDto> requestToCreateUser(@RequestBody AccountDto accountDto) throws ValidationException, OrganizationIsNotMuchException {
+    public ResponseEntity<EditedEmailNameDto> requestToCreateUser(@RequestBody AccountDto accountDto) throws ValidationException, OrganizationIsNotMuchException, CurrentUserIsNotAdminException {
         EditedEmailNameDto newUser = userService.createUser(accountDto);
         return ResponseEntity.ok(newUser);
     }

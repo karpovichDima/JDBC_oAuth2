@@ -38,7 +38,7 @@ public interface UserService {
      * @param accountDto is userDto which we will find in DB
      * @return EditedEmailNameDto is successful search result user
      */
-    EditedEmailNameDto createUser(AccountDto accountDto) throws ValidationException, OrganizationIsNotMuchException;
+    EditedEmailNameDto createUser(AccountDto accountDto) throws ValidationException, OrganizationIsNotMuchException, CurrentUserIsNotAdminException;
 
     /**
      * delete user from DB, by id or DeleteAccountDto
@@ -92,7 +92,7 @@ public interface UserService {
      * @param entity is entity, on which we want to check of the admin right
      * @return true = if current user hasRole(ADMIN), false = hasRole(NOT ADMIN)
      */
-    boolean adminRightsCheck(AccountEntity entity);
+    void adminRightsCheck(AccountEntity entity) throws CurrentUserIsNotAdminException;
 
     void isMatchesOrganization(String userOrganization, AccountEntity currentUser) throws OrganizationIsNotMuchException;
 
@@ -115,9 +115,9 @@ public interface UserService {
 
     Organization findOrganizationByName(String organizationName);
 
-    EditedEmailNameDto responseDto(AccountEntity accountEntity);
+    EditedEmailNameDto responsePersonalDataDto(AccountEntity accountEntity);
 
-    ChangedActivateDto editActivate(AccountDto accountDto) throws OrganizationIsNotMuchException;
+    ChangedActivateDto editActivate(AccountDto accountDto) throws OrganizationIsNotMuchException, CurrentUserIsNotAdminException;
 
 
 
