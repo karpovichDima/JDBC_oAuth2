@@ -27,6 +27,4 @@ public class ContentController {
         return ResponseEntity.ok(contentUpdatedDto);
     }
 
-
-
 }

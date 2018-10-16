@@ -4,6 +4,7 @@ import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.request.EditPersonalDataDto;
+import com.dazito.oauthexample.service.dto.request.SetPasswordDto;
 import com.dazito.oauthexample.service.dto.response.ChangedActivateDto;
 import com.dazito.oauthexample.service.dto.response.EditedEmailNameDto;
 import com.dazito.oauthexample.service.dto.response.EditedPasswordDto;
@@ -26,7 +27,7 @@ public class ConcreteUserController {
     }
 
     // get user by id
-    @GetMapping()
+    @GetMapping("/{id}")
     public ResponseEntity<AccountDto> getAccountCurrentUser(@PathVariable Long id) {
         AccountEntity foundedUser = userService.findByIdAccountRepo(id);
         AccountDto accountDto = userService.addToAccountDtoOrganization(foundedUser);
@@ -70,10 +71,17 @@ public class ConcreteUserController {
     }
 
     // create new user from accountDto without password
-    @PostMapping("/")
+    @PostMapping("/create")
     public ResponseEntity<EditedEmailNameDto> requestToCreateUser(@RequestBody AccountDto accountDto) throws ValidationException {
         EditedEmailNameDto newUser = userService.createUser(accountDto);
         return ResponseEntity.ok(newUser);
     }
 
+
+
+    @PatchMapping("/password")
+    public ResponseEntity<SetPasswordDto> setNewPasswordAfterCreateUser(@RequestBody SetPasswordDto setPasswordDto) {
+        userService.messageReply(setPasswordDto);
+        return ResponseEntity.ok(setPasswordDto);
+    }
 }

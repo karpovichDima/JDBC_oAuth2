@@ -1,10 +1,12 @@
 package com.dazito.oauthexample.controller;
 
 import com.dazito.oauthexample.model.AccountEntity;
+import com.dazito.oauthexample.service.MailService;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.request.DeleteAccountDto;
 import com.dazito.oauthexample.service.dto.request.EditPersonalDataDto;
+import com.dazito.oauthexample.service.dto.request.SetPasswordDto;
 import com.dazito.oauthexample.service.dto.response.ContentUpdatedDto;
 import com.dazito.oauthexample.service.dto.response.EditedEmailNameDto;
 import com.dazito.oauthexample.service.dto.response.EditedPasswordDto;
@@ -13,12 +15,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.xml.bind.ValidationException;
+
 @RestController
 @RequestMapping(path = "/users/current")
 public class CurrentUserController {
 
     @Autowired
     UserService userService;
+    @Autowired
+    MailService mailService;
 
     @GetMapping()
     public AccountDto getAccountCurrentUser() {
@@ -44,6 +50,23 @@ public class CurrentUserController {
     public ResponseEntity<AccountDto> deleteUser(@RequestBody DeleteAccountDto accountDto){
         AccountDto result = userService.deleteUser(null, accountDto);
         return ResponseEntity.ok(result);
+    }
+
+
+
+
+
+
+    @PostMapping("/recovery")
+    public ResponseEntity<SetPasswordDto> setNewPasswordAfterForgot(@RequestBody SetPasswordDto setPasswordDto) {
+        userService.forgotPassword(setPasswordDto);
+        return ResponseEntity.ok(setPasswordDto);
+    }
+
+    @PostMapping("/forgot")
+    public ResponseEntity<SetPasswordDto> sendEmailForgotPassword(@RequestBody SetPasswordDto setPasswordDto) throws ValidationException {
+        mailService.emailPreparation(setPasswordDto.getEmail());
+        return ResponseEntity.ok(setPasswordDto);
     }
 
 }
