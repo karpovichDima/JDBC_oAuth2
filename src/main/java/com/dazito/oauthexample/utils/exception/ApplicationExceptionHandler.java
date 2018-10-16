@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import javax.xml.bind.ValidationException;
 import java.util.NoSuchElementException;
 
 @ControllerAdvice
@@ -28,11 +27,33 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
         return buildResponseEntity(error);
     }
 
-    @ExceptionHandler(UserWithSuchEmailExist.class)
-    public ResponseEntity userAlreadyExist(UserWithSuchEmailExist exception) {
+    @ExceptionHandler(UserWithSuchEmailExistException.class)
+    public ResponseEntity userAlreadyExist(UserWithSuchEmailExistException exception) {
         ExceptionDto error = new ExceptionDto(exception.getMessage(), HttpStatus.CONFLICT);
         return buildResponseEntity(error);
     }
+
+    @ExceptionHandler(EmptyFieldException.class)
+    public ResponseEntity emptyField(EmptyFieldException exception) {
+        ExceptionDto error = new ExceptionDto(exception.getMessage(), HttpStatus.NOT_FOUND);
+        return buildResponseEntity(error);
+    }
+
+    @ExceptionHandler(PasswordNotMatchesException.class)
+    public ResponseEntity passwordsNotMatches(PasswordNotMatchesException exception) {
+        ExceptionDto error = new ExceptionDto(exception.getMessage(), HttpStatus.CONFLICT);
+        return buildResponseEntity(error);
+    }
+
+    @ExceptionHandler(OrganizationIsNotMuchException.class)
+    public ResponseEntity passwordsNotMatches(OrganizationIsNotMuchException exception) {
+        ExceptionDto error = new ExceptionDto(exception.getMessage(), HttpStatus.CONFLICT);
+        return buildResponseEntity(error);
+    }
+
+
+
+
 
 
 

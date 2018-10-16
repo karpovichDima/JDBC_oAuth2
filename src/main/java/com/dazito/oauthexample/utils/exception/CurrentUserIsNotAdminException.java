@@ -7,6 +7,8 @@ import lombok.Setter;
 @Setter
 public class CurrentUserIsNotAdminException extends Exception{
 
+    private String message = "Authorized user is not an administrator.";
+
     public CurrentUserIsNotAdminException() { super(); }
     public CurrentUserIsNotAdminException(String message) { super(message); }
     public CurrentUserIsNotAdminException(String message, Throwable cause) { super(message, cause); }

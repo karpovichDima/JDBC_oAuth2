@@ -6,6 +6,7 @@ import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.request.EditPersonalDataDto;
 import com.dazito.oauthexample.service.dto.request.SetPasswordDto;
 import com.dazito.oauthexample.service.dto.response.ChangedActivateDto;
+import com.dazito.oauthexample.service.dto.response.DeletedUserDto;
 import com.dazito.oauthexample.service.dto.response.EditedEmailNameDto;
 import com.dazito.oauthexample.service.dto.response.EditedPasswordDto;
 import com.dazito.oauthexample.utils.exception.*;
@@ -45,34 +46,28 @@ public class ConcreteUserController {
 
     // edit password of the user by id
     @PatchMapping("/password/{id}")
-    public ResponseEntity<EditedPasswordDto> editPassword(@PathVariable Long id, @RequestBody EditPersonalDataDto editPersonalDataDto) throws CurrentUserIsNotAdminException, PasswordNotMatchesException, OrganizationIsNotMuchException, EmptyFieldException {
+    public ResponseEntity<EditedPasswordDto> editPassword(@PathVariable Long id,
+                                                          @RequestBody EditPersonalDataDto editPersonalDataDto) throws CurrentUserIsNotAdminException, PasswordNotMatchesException, OrganizationIsNotMuchException, EmptyFieldException {
         EditedPasswordDto editedPasswordDto = userService.editPassword(id, editPersonalDataDto.getNewPassword(), editPersonalDataDto.getRawOldPassword());
         return ResponseEntity.ok(editedPasswordDto);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
     // delete user by email from accountDto
     @DeleteMapping("/{id}")
-    public ResponseEntity<AccountDto> deleteUser(@PathVariable Long id){
-        AccountDto accountDto = userService.deleteUser(id, null);
+    public ResponseEntity<DeletedUserDto> deleteUser(@PathVariable Long id) throws CurrentUserIsNotAdminException, PasswordNotMatchesException, OrganizationIsNotMuchException, EmailIsNotMatchesException {
+        DeletedUserDto accountDto = userService.deleteUser(id, null);
         return ResponseEntity.ok(accountDto);
     }
 
+
+
+
+
+
+
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PatchMapping("/activated")
-    public ResponseEntity<ChangedActivateDto> editActivate(@RequestBody AccountDto accountDto) {
+    public ResponseEntity<ChangedActivateDto> editActivate(@RequestBody AccountDto accountDto) throws OrganizationIsNotMuchException {
         ChangedActivateDto changedActivateDto = userService.editActivate(accountDto);
         return ResponseEntity.ok(changedActivateDto);
     }
@@ -80,14 +75,14 @@ public class ConcreteUserController {
     // create new user from accountDto
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping("/")
-    public ResponseEntity<EditedEmailNameDto> createUser(@RequestBody AccountDto accountDto) throws ValidationException {
+    public ResponseEntity<EditedEmailNameDto> createUser(@RequestBody AccountDto accountDto) throws ValidationException, OrganizationIsNotMuchException {
         EditedEmailNameDto newUser = userService.createUser(accountDto);
         return ResponseEntity.ok(newUser);
     }
 
     // create new user from accountDto without password
     @PostMapping("/create")
-    public ResponseEntity<EditedEmailNameDto> requestToCreateUser(@RequestBody AccountDto accountDto) throws ValidationException {
+    public ResponseEntity<EditedEmailNameDto> requestToCreateUser(@RequestBody AccountDto accountDto) throws ValidationException, OrganizationIsNotMuchException {
         EditedEmailNameDto newUser = userService.createUser(accountDto);
         return ResponseEntity.ok(newUser);
     }

@@ -7,14 +7,11 @@ import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.request.DeleteAccountDto;
 import com.dazito.oauthexample.service.dto.request.EditPersonalDataDto;
 import com.dazito.oauthexample.service.dto.request.SetPasswordDto;
-import com.dazito.oauthexample.service.dto.response.ContentUpdatedDto;
+import com.dazito.oauthexample.service.dto.response.DeletedUserDto;
 import com.dazito.oauthexample.service.dto.response.EditedEmailNameDto;
 import com.dazito.oauthexample.service.dto.response.EditedPasswordDto;
-import com.dazito.oauthexample.utils.exception.CurrentUserIsNotAdminException;
-import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuch;
-import com.dazito.oauthexample.utils.exception.UserWithSuchEmailExist;
+import com.dazito.oauthexample.utils.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,21 +34,21 @@ public class CurrentUserController {
 
     // edit email and name of the current user
     @PatchMapping("/")
-    public ResponseEntity<EditedEmailNameDto> editNameEmail(@RequestBody EditPersonalDataDto editPersonalDataDto) throws CurrentUserIsNotAdminException, OrganizationIsNotMuch, UserWithSuchEmailExist {
+    public ResponseEntity<EditedEmailNameDto> editNameEmail(@RequestBody EditPersonalDataDto editPersonalDataDto) throws CurrentUserIsNotAdminException, OrganizationIsNotMuchException, UserWithSuchEmailExistException {
         EditedEmailNameDto editEmail = userService.editPersonData(null, editPersonalDataDto);
         return ResponseEntity.ok(editEmail);
     }
 
     // edit password of the current user
     @PatchMapping("/password")
-    public ResponseEntity<EditedPasswordDto> editPassword(@RequestBody EditPersonalDataDto editingPersonalData) {
+    public ResponseEntity<EditedPasswordDto> editPassword(@RequestBody EditPersonalDataDto editingPersonalData) throws EmptyFieldException, CurrentUserIsNotAdminException, OrganizationIsNotMuchException, PasswordNotMatchesException {
         EditedPasswordDto editedPasswordDto = userService.editPassword(null, editingPersonalData.getNewPassword(),editingPersonalData.getRawOldPassword());
         return ResponseEntity.ok(editedPasswordDto);
     }
 
     @DeleteMapping("/")
-    public ResponseEntity<AccountDto> deleteUser(@RequestBody DeleteAccountDto accountDto){
-        AccountDto result = userService.deleteUser(null, accountDto);
+    public ResponseEntity<DeletedUserDto> deleteUser(@RequestBody DeleteAccountDto accountDto) throws CurrentUserIsNotAdminException, PasswordNotMatchesException, OrganizationIsNotMuchException, EmailIsNotMatchesException {
+        DeletedUserDto result = userService.deleteUser(null, accountDto);
         return ResponseEntity.ok(result);
     }
 

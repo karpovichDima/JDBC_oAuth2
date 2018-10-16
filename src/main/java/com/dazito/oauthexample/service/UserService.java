@@ -7,11 +7,10 @@ import com.dazito.oauthexample.service.dto.request.DeleteAccountDto;
 import com.dazito.oauthexample.service.dto.request.EditPersonalDataDto;
 import com.dazito.oauthexample.service.dto.request.SetPasswordDto;
 import com.dazito.oauthexample.service.dto.response.ChangedActivateDto;
+import com.dazito.oauthexample.service.dto.response.DeletedUserDto;
 import com.dazito.oauthexample.service.dto.response.EditedEmailNameDto;
 import com.dazito.oauthexample.service.dto.response.EditedPasswordDto;
-import com.dazito.oauthexample.utils.exception.CurrentUserIsNotAdminException;
-import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuch;
-import com.dazito.oauthexample.utils.exception.UserWithSuchEmailExist;
+import com.dazito.oauthexample.utils.exception.*;
 
 import javax.xml.bind.ValidationException;
 import java.util.Optional;
@@ -25,27 +24,27 @@ public interface UserService {
      * @param rawOldPassword is current password, unencrypted
      * @return EditedPasswordDto is successful password change response
      */
-    EditedPasswordDto editPassword(Long id, String newPassword, String rawOldPassword);
+    EditedPasswordDto editPassword(Long id, String newPassword, String rawOldPassword) throws EmptyFieldException, CurrentUserIsNotAdminException, OrganizationIsNotMuchException, PasswordNotMatchesException;
 
     /**
      * edit name/email of the current user
      * @param personalData is case of the different properties user
      * @return EditedEmailNameDto is successful edit of the edit
      */
-    EditedEmailNameDto editPersonData(Long id, EditPersonalDataDto personalData) throws CurrentUserIsNotAdminException, OrganizationIsNotMuch, UserWithSuchEmailExist;
+    EditedEmailNameDto editPersonData(Long id, EditPersonalDataDto personalData) throws CurrentUserIsNotAdminException, OrganizationIsNotMuchException, UserWithSuchEmailExistException;
 
     /**
      * We pass the user to understand whether he is in our database or not
      * @param accountDto is userDto which we will find in DB
      * @return EditedEmailNameDto is successful search result user
      */
-    EditedEmailNameDto createUser(AccountDto accountDto) throws ValidationException;
+    EditedEmailNameDto createUser(AccountDto accountDto) throws ValidationException, OrganizationIsNotMuchException;
 
     /**
      * delete user from DB, by id or DeleteAccountDto
      * @param accountDto is entity which we will find in DB and after that, delete
      */
-    AccountDto deleteUser(Long id, DeleteAccountDto accountDto);
+    DeletedUserDto deleteUser(Long id, DeleteAccountDto accountDto) throws EmailIsNotMatchesException, PasswordNotMatchesException, CurrentUserIsNotAdminException, OrganizationIsNotMuchException;
 
     void messageReply(SetPasswordDto setPasswordDto);
 
@@ -55,13 +54,13 @@ public interface UserService {
 
     AccountEntity findUserByUuid(String uuid);
 
-    EditedPasswordDto savePassword(boolean matches, String encodedPassword, AccountEntity accountToBeEdited);
+    EditedPasswordDto savePassword(String encodedPassword, AccountEntity accountToBeEdited);
 
     void saveEncodedPassword(String encodedPassword, AccountEntity accountToBeEdited);
 
     String passwordEncode(String newPassword);
 
-    boolean checkMatches(String rawOldPassword, String passwordCurrentUser);
+    void isMatchesPassword(String rawOldPassword, String passwordCurrentUser) throws PasswordNotMatchesException;
 
     EditedPasswordDto convertToResponsePassword(String newPassword);
 
@@ -95,7 +94,7 @@ public interface UserService {
      */
     boolean adminRightsCheck(AccountEntity entity);
 
-    boolean organizationMatch(String userOrganization, AccountEntity currentUser);
+    void isMatchesOrganization(String userOrganization, AccountEntity currentUser) throws OrganizationIsNotMuchException;
 
     String getOrganizationNameCurrentUser(AccountEntity currentUser);
 
@@ -118,7 +117,7 @@ public interface UserService {
 
     EditedEmailNameDto responseDto(AccountEntity accountEntity);
 
-    ChangedActivateDto editActivate(AccountDto accountDto);
+    ChangedActivateDto editActivate(AccountDto accountDto) throws OrganizationIsNotMuchException;
 
 
 

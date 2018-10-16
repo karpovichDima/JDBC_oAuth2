@@ -15,13 +15,11 @@ import com.dazito.oauthexample.service.OAuth2Service;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.*;
 import com.dazito.oauthexample.service.dto.response.ChangedActivateDto;
+import com.dazito.oauthexample.service.dto.response.DeletedUserDto;
 import com.dazito.oauthexample.service.dto.response.EditedEmailNameDto;
 import com.dazito.oauthexample.service.dto.response.EditedPasswordDto;
-import com.dazito.oauthexample.utils.exception.CurrentUserIsNotAdminException;
-import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuch;
-import com.dazito.oauthexample.utils.exception.UserWithSuchEmailExist;
+import com.dazito.oauthexample.utils.exception.*;
 import lombok.NonNull;
-import org.hibernate.validator.constraints.Email;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
@@ -62,43 +60,37 @@ public class UserServicesImpl implements UserService {
     @Autowired
     MailService mailService;
 
-    // Change user password
     @Override
-    public EditedPasswordDto editPassword(Long id, String newPassword, String rawOldPassword) {
+    public EditedPasswordDto editPassword(Long id, String newPassword, String rawOldPassword) throws EmptyFieldException, CurrentUserIsNotAdminException, OrganizationIsNotMuchException, PasswordNotMatchesException {
         AccountEntity foundedUser = findByIdAccountRepo(id);
-        if (!isEmpty(newPassword)) return null;
-        if (!isEmpty(rawOldPassword)) return null;
+        if (!isEmpty(newPassword) || !isEmpty(rawOldPassword)) throw new EmptyFieldException("Field is empty");
 
         AccountEntity currentUser = getCurrentUser();
         String passwordCurrentUser = currentUser.getPassword();
         AccountEntity accountToBeEdited;
         String encodedPassword = passwordEncode(newPassword);
-        boolean matches;
-
         if (id == null) {
             accountToBeEdited = currentUser;
-            matches = checkMatches(rawOldPassword, passwordCurrentUser);
-            return savePassword(matches, encodedPassword, accountToBeEdited);
+            isMatchesPassword(rawOldPassword, passwordCurrentUser);
+            return savePassword(encodedPassword, accountToBeEdited);
         }
 
-        if (!adminRightsCheck(getCurrentUser())) return null; // current user is not Admin;
+        if (!adminRightsCheck(getCurrentUser()))
+            throw new CurrentUserIsNotAdminException("Authorized user is not an administrator.");
 
         String organizationName = getOrganizationNameByUser(foundedUser);
-        if (organizationMatch(organizationName, currentUser))
-            return null; // organization current user and user from account dto is not match
-
+        isMatchesOrganization(organizationName, currentUser);
         accountToBeEdited = getCurrentUser();
-        matches = checkMatches(rawOldPassword, passwordCurrentUser);
-        return savePassword(matches, encodedPassword, accountToBeEdited);
+        isMatchesPassword(rawOldPassword, passwordCurrentUser);
+        return savePassword(encodedPassword, accountToBeEdited);
     }
 
-    // Change user email and name, documentation on it in UserService
     @Override
-    public EditedEmailNameDto editPersonData(Long id, @NonNull EditPersonalDataDto personalData) throws CurrentUserIsNotAdminException, OrganizationIsNotMuch, UserWithSuchEmailExist {
+    public EditedEmailNameDto editPersonData(Long id, @NonNull EditPersonalDataDto personalData) throws CurrentUserIsNotAdminException, OrganizationIsNotMuchException, UserWithSuchEmailExistException {
         AccountEntity currentUser = getCurrentUser();
         String newEmail = personalData.getNewEmail();
         if (findUserByEmail(newEmail) != null)
-            throw new UserWithSuchEmailExist("User with such email exist.");
+            throw new UserWithSuchEmailExistException("User with such email exist.");
         String newName = personalData.getNewName();
         if (id == null) {
             currentUser.setEmail(newEmail);
@@ -108,23 +100,54 @@ public class UserServicesImpl implements UserService {
         }
         if (!adminRightsCheck(currentUser))
             throw new CurrentUserIsNotAdminException("Authorized user is not an administrator.");
-
         AccountEntity foundedAccount = findByIdAccountRepo(id);
         String organizationName = getOrganizationNameByUser(foundedAccount);
 
-        if (!organizationMatch(organizationName, currentUser))
-            throw new OrganizationIsNotMuch("Organization current user and user from account dto is not match.");
-
+        isMatchesOrganization(organizationName, currentUser);
         foundedAccount.setEmail(newEmail);
         foundedAccount.setUsername(newName);
-
         accountRepository.saveAndFlush(foundedAccount);
         return responseDto(foundedAccount);
     }
 
-    // Create a new user
+    @Transactional
     @Override
-    public EditedEmailNameDto createUser(AccountDto accountDto) throws ValidationException {
+    public DeletedUserDto deleteUser(Long id, DeleteAccountDto accountDto) throws EmailIsNotMatchesException, PasswordNotMatchesException, CurrentUserIsNotAdminException, OrganizationIsNotMuchException {
+        AccountEntity currentUser = getCurrentUser();
+        if (id == null) {
+            String email = accountDto.getEmail();
+            String password = accountDto.getRawPassword();
+            isMatchesEmail(currentUser.getEmail(), email);
+            String encodedPassword = getCurrentUser().getPassword();
+            isMatchesPassword(password, encodedPassword);
+
+            List<StorageElement> children = currentUser.getContent().getChildren();
+            AccountEntity account = findUserByEmail(email);
+            accountRepository.delete(account);
+            if (account.getRole().equals(UserRole.USER)) contentService.delete(children);
+        }
+        if (!adminRightsCheck(getCurrentUser()))
+            throw new CurrentUserIsNotAdminException("Authorized user is not an administrator.");
+        AccountEntity foundedUser = findByIdAccountRepo(id);
+        String organizationName = getOrganizationNameByUser(foundedUser);
+        isMatchesOrganization(organizationName, currentUser);
+
+        UserRole role = foundedUser.getRole();
+        if (role == UserRole.USER) {
+            List<StorageElement> children = foundedUser.getContent().getChildren();
+            accountRepository.delete(foundedUser);
+            contentService.delete(children);
+        } else {
+            accountRepository.delete(foundedUser);
+        }
+
+        DeletedUserDto userDto = new DeletedUserDto();
+        userDto.setMessage("User is deleted");
+        return userDto;
+    }
+
+    @Override
+    public EditedEmailNameDto createUser(AccountDto accountDto) throws ValidationException, OrganizationIsNotMuchException {
         AccountEntity currentUser = getCurrentUser();
         String email = accountDto.getEmail();
         String organizationName = accountDto.getOrganizationName();
@@ -135,8 +158,7 @@ public class UserServicesImpl implements UserService {
         if (findUserByEmail(email) != null) return null; // user with such email exist;
         if (currentUser != null) {
             if (!adminRightsCheck(currentUser)) return null; // current user is not Admin, if create user with password
-            if (!organizationMatch(organizationName, currentUser))
-                return null; // organization current user and user from account dto is not match
+            isMatchesOrganization(organizationName, currentUser);
             password = accountDto.getPassword();
             encodedPassword = passwordEncode(password);
         }
@@ -215,53 +237,16 @@ public class UserServicesImpl implements UserService {
     }
 
 
-    // Delete user by id or current user
-    @Transactional
-    @Override
-    public AccountDto deleteUser(Long id, DeleteAccountDto accountDto) {
-        String email;
-        String password;
-        Long idContent;
-        AccountEntity currentUser = getCurrentUser();
-        if (id == null) {
-            email = accountDto.getEmail();
-            password = accountDto.getRawPassword();
 
-            boolean checkEmail = getCurrentUser().getEmail().equals(email);
-            if (!checkEmail) return null;
-
-            String encodedPassword = getCurrentUser().getPassword();
-            boolean checkPassword = passwordEncoder.matches(password, encodedPassword);
-            if (!checkPassword) return null;
-
-            List<StorageElement> children = currentUser.getContent().getChildren();
-            AccountEntity account = findUserByEmail(email);
-            accountRepository.delete(account);
-            if (account.getRole().equals(UserRole.USER)) contentService.delete(children);
-        }
-
-        if (!adminRightsCheck(getCurrentUser())) return null;
-
-        AccountEntity foundedUser = findByIdAccountRepo(id);
-        String organizationName = getOrganizationNameByUser(foundedUser);
-        if (!organizationMatch(organizationName, currentUser)) return null;
-
-        List<StorageElement> children = foundedUser.getContent().getChildren();
-        UserRole role = foundedUser.getRole();
-        accountRepository.delete(foundedUser);
-        if (role.equals(UserRole.USER)) contentService.delete(children);
-
-        AccountDto accountDtoResponse = new AccountDto();
-        return accountDtoResponse;
+    private void isMatchesEmail(@NonNull String emailCurrentUser, @NonNull String email) throws EmailIsNotMatchesException {
+        boolean equals = emailCurrentUser.equals(email);
+        if (!equals) throw new EmailIsNotMatchesException("Current user's email does not match mail from dto.");
     }
 
     @Override
-    public EditedPasswordDto savePassword(boolean matches, String encodedPassword, AccountEntity accountToBeEdited) {
-        if (matches) {
+    public EditedPasswordDto savePassword(String encodedPassword, AccountEntity accountToBeEdited) {
             saveEncodedPassword(encodedPassword, accountToBeEdited);
             return convertToResponsePassword(accountToBeEdited.getPassword());
-        }
-        return null;
     }
 
     @Override
@@ -276,8 +261,9 @@ public class UserServicesImpl implements UserService {
     }
 
     @Override
-    public boolean checkMatches(String rawOldPassword, String passwordCurrentUser) {
-        return passwordEncoder.matches(rawOldPassword, passwordCurrentUser);
+    public void isMatchesPassword(String rawOldPassword, String passwordCurrentUser) throws PasswordNotMatchesException {
+        boolean matches = passwordEncoder.matches(rawOldPassword, passwordCurrentUser);
+        if (!matches) throw new PasswordNotMatchesException("Passwords not matches.");
     }
 
     @Override
@@ -323,9 +309,11 @@ public class UserServicesImpl implements UserService {
     }
 
     @Override
-    public boolean organizationMatch(@NonNull String userOrganization, @NonNull AccountEntity currentUser) {
+    public void isMatchesOrganization(@NonNull String userOrganization, @NonNull AccountEntity currentUser) throws OrganizationIsNotMuchException {
         String userCurrentOrganization = getOrganizationNameCurrentUser(currentUser);
-        return userOrganization.equals(userCurrentOrganization);
+        boolean equals = userOrganization.equals(userCurrentOrganization);
+        if (!equals)
+            throw new OrganizationIsNotMuchException("Organization current user and user from account dto is not match.");
     }
 
     @Override
@@ -371,7 +359,7 @@ public class UserServicesImpl implements UserService {
     }
 
     @Override
-    public ChangedActivateDto editActivate(AccountDto accountDto) {
+    public ChangedActivateDto editActivate(AccountDto accountDto) throws OrganizationIsNotMuchException {
         AccountEntity currentUser = getCurrentUser();
         String organizationName = currentUser.getOrganization().getOrganizationName();
 
@@ -381,15 +369,10 @@ public class UserServicesImpl implements UserService {
         if (!adminRightsCheck(currentUser)) return null; // current user is not Admin;
 
         AccountEntity account = findByIdAccountRepo(id);
-        if (!organizationMatch(organizationName, account))
-            return null; // organization current user and user from account dto is not match
-
+        isMatchesOrganization(organizationName, account);
         account.setIsActivated(isActivated);
         accountRepository.saveAndFlush(account);
-
-        if (!isActivated) {
-            oAuth2Service.deleteToken(account);
-        }
+        if (!isActivated) oAuth2Service.deleteToken(account);
 
         ChangedActivateDto changedActivateDto = new ChangedActivateDto();
         changedActivateDto.setId(id);
