@@ -14,6 +14,8 @@ import com.dazito.oauthexample.service.dto.response.StorageDto;
 import com.dazito.oauthexample.service.dto.response.StorageUpdatedDto;
 import com.dazito.oauthexample.utils.exception.CurrentUserIsNotAdminException;
 import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuchException;
+import com.dazito.oauthexample.utils.exception.TypeMismatchException;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
@@ -124,13 +126,13 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    public void setSizeForParents(Long size, StorageDto storageDtoParent) {
-
-        if (storageDtoParent == null) return;
+    public void setSizeForParents(Long size,@NonNull StorageDto storageDtoParent) throws TypeMismatchException {
         Long sizeParent = storageDtoParent.getSize();
         sizeParent = sizeParent + size;
         storageDtoParent.setSize(sizeParent);
-        if (storageDtoParent.getType().equals(SomeType.CONTENT)) return;
+        if (storageDtoParent.getType().equals(SomeType.CONTENT)){
+            throw new TypeMismatchException("A different type of object was expected.");
+        }
         StorageDto preParent = storageDtoParent.getParent();
         if (storageDtoParent.getParent() != null) setSizeForParents(size, preParent);
     }

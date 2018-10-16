@@ -24,7 +24,7 @@ public interface DirectoryService {
 
     DirectoryCreatedDto updateDirectory(DirectoryDto directoryDto) throws CurrentUserIsNotAdminException, OrganizationIsNotMuchException;
 
-    DirectoryDeletedDto delete(Long id) throws CurrentUserIsNotAdminException, OrganizationIsNotMuchException;
+    DirectoryDeletedDto delete(Long id) throws CurrentUserIsNotAdminException, OrganizationIsNotMuchException, TypeMismatchException;
 
     void deleteChildFiles(List<StorageElement> listChildToDelete, List<StorageElement> listChildrenFoundStorage);
 }

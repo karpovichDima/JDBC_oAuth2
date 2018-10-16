@@ -111,13 +111,13 @@ public class DirectoryServiceImpl implements DirectoryService {
 
     @Transactional
     @Override
-    public DirectoryDeletedDto delete(Long id) throws CurrentUserIsNotAdminException, OrganizationIsNotMuchException {
+    public DirectoryDeletedDto delete(Long id) throws CurrentUserIsNotAdminException, OrganizationIsNotMuchException, TypeMismatchException {
         AccountEntity currentUser = userServices.getCurrentUser();
         StorageElement foundStorage = findById(id);
         AccountEntity owner = foundStorage.getOwner();
         SomeType type = foundStorage.getType();
 
-        if (type == SomeType.FILE) return null;
+        if (type == SomeType.FILE) throw new TypeMismatchException("A different type of object was expected.");
 
         boolean canChange = utilService.isPermissionsAdminOrUserIsOwner(currentUser, owner, foundStorage);
         if (!canChange) throw new CurrentUserIsNotAdminException("You are not allowed to change");

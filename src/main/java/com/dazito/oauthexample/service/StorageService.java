@@ -7,6 +7,7 @@ import com.dazito.oauthexample.service.dto.response.StorageDto;
 import com.dazito.oauthexample.service.dto.response.StorageUpdatedDto;
 import com.dazito.oauthexample.utils.exception.CurrentUserIsNotAdminException;
 import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuchException;
+import com.dazito.oauthexample.utils.exception.TypeMismatchException;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +27,7 @@ public interface StorageService {
 
     StorageDto createHierarchy(Long id);
 
-    void setSizeForParents(Long size, StorageDto storageDtoParent);
+    void setSizeForParents(Long size, StorageDto storageDtoParent) throws TypeMismatchException;
 
     List<StorageElement> getChildListElement(StorageElement storageElement);
 
