@@ -5,10 +5,7 @@ import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.request.EditPersonalDataDto;
 import com.dazito.oauthexample.service.dto.request.SetPasswordDto;
-import com.dazito.oauthexample.service.dto.response.ChangedActivateDto;
-import com.dazito.oauthexample.service.dto.response.DeletedUserDto;
-import com.dazito.oauthexample.service.dto.response.EditedEmailNameDto;
-import com.dazito.oauthexample.service.dto.response.EditedPasswordDto;
+import com.dazito.oauthexample.service.dto.response.*;
 import com.dazito.oauthexample.utils.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -30,53 +27,53 @@ public class ConcreteUserController {
 
     // get user by id
     @GetMapping("/{id}")
-    public ResponseEntity<AccountDto> getAccountCurrentUser(@PathVariable Long id) {
+    public ResponseEntity<GeneralResponseDto<AccountDto>> getAccountCurrentUser(@PathVariable Long id) {
         AccountEntity foundedUser = userService.findByIdAccountRepo(id);
         AccountDto accountDto = userService.addToAccountDtoOrganization(foundedUser);
-        return ResponseEntity.ok(accountDto);
+        return ResponseEntity.ok(new GeneralResponseDto<>(null, accountDto));
     }
 
     // edit email and name of the current user
     @PatchMapping("/{id}")
-    public ResponseEntity<EditedEmailNameDto> editEmail(@PathVariable Long id,
-                                                        @RequestBody EditPersonalDataDto editPersonalDataDto) throws CurrentUserIsNotAdminException, OrganizationIsNotMuchException, UserWithSuchEmailExistException {
+    public ResponseEntity<GeneralResponseDto<EditedEmailNameDto>> editEmail(@PathVariable Long id,
+                                                                            @RequestBody EditPersonalDataDto editPersonalDataDto) throws AppException {
         EditedEmailNameDto editEmail = userService.editPersonData(id, editPersonalDataDto);
-        return ResponseEntity.ok(editEmail);
+        return ResponseEntity.ok(new GeneralResponseDto<>(null, editEmail));
     }
 
     // edit password of the user by id
     @PatchMapping("/password/{id}")
-    public ResponseEntity<EditedPasswordDto> editPassword(@PathVariable Long id,
-                                                          @RequestBody EditPersonalDataDto editPersonalDataDto) throws CurrentUserIsNotAdminException, PasswordNotMatchesException, OrganizationIsNotMuchException, EmptyFieldException {
+    public ResponseEntity<GeneralResponseDto<EditedPasswordDto>> editPassword(@PathVariable Long id,
+                                                                              @RequestBody EditPersonalDataDto editPersonalDataDto) throws AppException {
         EditedPasswordDto editedPasswordDto = userService.editPassword(id, editPersonalDataDto.getNewPassword(), editPersonalDataDto.getRawOldPassword());
-        return ResponseEntity.ok(editedPasswordDto);
+        return ResponseEntity.ok(new GeneralResponseDto<>(null, editedPasswordDto));
     }
 
     // delete user by email from accountDto
     @DeleteMapping("/{id}")
-    public ResponseEntity<DeletedUserDto> deleteUser(@PathVariable Long id) throws CurrentUserIsNotAdminException, PasswordNotMatchesException, OrganizationIsNotMuchException, EmailIsNotMatchesException {
+    public ResponseEntity<GeneralResponseDto<DeletedUserDto>> deleteUser(@PathVariable Long id) throws AppException {
         DeletedUserDto accountDto = userService.deleteUser(id, null);
-        return ResponseEntity.ok(accountDto);
+        return ResponseEntity.ok(new GeneralResponseDto<>(null, accountDto));
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PatchMapping("/activated")
-    public ResponseEntity<ChangedActivateDto> editActivate(@RequestBody AccountDto accountDto) throws OrganizationIsNotMuchException, CurrentUserIsNotAdminException {
+    public ResponseEntity<GeneralResponseDto<ChangedActivateDto>> editActivate(@RequestBody AccountDto accountDto) throws AppException {
         ChangedActivateDto changedActivateDto = userService.editActivate(accountDto);
-        return ResponseEntity.ok(changedActivateDto);
+        return ResponseEntity.ok(new GeneralResponseDto<>(null, changedActivateDto));
     }
 
     // create new user from accountDto without password
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping("/create")
-    public ResponseEntity<EditedEmailNameDto> createUser(@RequestBody AccountDto accountDto) throws ValidationException, OrganizationIsNotMuchException, CurrentUserIsNotAdminException, UserWithSuchEmailExistException {
+    public ResponseEntity<GeneralResponseDto<EditedEmailNameDto>> createUser(@RequestBody AccountDto accountDto) throws ValidationException, AppException {
         EditedEmailNameDto newUser = userService.createUser(accountDto);
-        return ResponseEntity.ok(newUser);
+        return ResponseEntity.ok(new GeneralResponseDto<>(null, newUser));
     }
 
     @PatchMapping("/password")
-    public ResponseEntity<SetPasswordDto> setNewPasswordAfterCreateUser(@RequestBody SetPasswordDto setPasswordDto) {
+    public ResponseEntity<GeneralResponseDto<SetPasswordDto>> setNewPasswordAfterCreateUser(@RequestBody SetPasswordDto setPasswordDto) {
         userService.messageReply(setPasswordDto);
-        return ResponseEntity.ok(setPasswordDto);
+        return ResponseEntity.ok(new GeneralResponseDto<>(null, setPasswordDto));
     }
 }

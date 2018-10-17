@@ -1,34 +1,57 @@
 package com.dazito.oauthexample.service;
 
-import com.dazito.oauthexample.model.FileEntity;
 import com.dazito.oauthexample.model.StorageElement;
 import com.dazito.oauthexample.service.dto.request.StorageUpdateDto;
 import com.dazito.oauthexample.service.dto.response.StorageDto;
 import com.dazito.oauthexample.service.dto.response.StorageUpdatedDto;
-import com.dazito.oauthexample.utils.exception.CurrentUserIsNotAdminException;
-import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuchException;
-import com.dazito.oauthexample.utils.exception.TypeMismatchException;
+import com.dazito.oauthexample.utils.exception.AppException;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface StorageService {
 
-    StorageUpdatedDto editData(StorageUpdateDto storageUpdateDto) throws CurrentUserIsNotAdminException, OrganizationIsNotMuchException;
+    /**
+     * Transfer directory from one parent to another. Name, uuid, root change.
+     * @param storageUpdateDto the the entity from which we take data to change
+     * @return StorageUpdatedDto is response, about successful operation
+     */
+    StorageUpdatedDto editData(StorageUpdateDto storageUpdateDto) throws AppException;
 
+    /**
+     * StorageElement search by id
+     * @param id is id by which we will to find StorageElement
+     * @return StorageElement is root point object
+     */
     StorageElement findById(Long id);
 
     /**
      * create hierarchy object
      * @param id of the object from which we will begin the hierarchy
+     * @param storageDtoParent dto of the parent
+     * @param sizeFile is size of the file child + size current object
      * @return new object of the hierarchy
      */
     StorageDto buildStorageDto(Long id, StorageDto storageDtoParent, long sizeFile);
 
+    /**
+     * create hierarchy object(recursion)
+     * @param id of the object from which we will begin the hierarchy
+     * @return new object of the hierarchy
+     */
     StorageDto createHierarchy(Long id);
 
-    void setSizeForParents(Long size, StorageDto storageDtoParent) throws TypeMismatchException;
+    /**
+     * irrational way of calculating the size of the hierarchy
+     * @param size
+     * @param storageDtoParent
+     */
+    void setSizeForParents(Long size, StorageDto storageDtoParent) throws AppException;
 
+    /**
+     * get child list item
+     * @param storageElement is item whose list of children we will receive
+     * @return child list item
+     */
     List<StorageElement> getChildListElement(StorageElement storageElement);
 
 

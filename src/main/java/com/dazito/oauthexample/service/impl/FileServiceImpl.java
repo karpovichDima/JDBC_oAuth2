@@ -3,15 +3,13 @@ package com.dazito.oauthexample.service.impl;
 import com.dazito.oauthexample.dao.FileRepository;
 import com.dazito.oauthexample.dao.StorageRepository;
 import com.dazito.oauthexample.model.*;
+import com.dazito.oauthexample.model.type.ResponseCode;
 import com.dazito.oauthexample.model.type.SomeType;
 import com.dazito.oauthexample.model.type.UserRole;
 import com.dazito.oauthexample.service.*;
 import com.dazito.oauthexample.service.dto.response.FileDeletedDto;
 import com.dazito.oauthexample.service.dto.response.FileUploadedDto;
-import com.dazito.oauthexample.utils.exception.CurrentUserIsNotAdminException;
-import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuchException;
-import com.dazito.oauthexample.utils.exception.PathNotExistException;
-import com.dazito.oauthexample.utils.exception.TypeMismatchException;
+import com.dazito.oauthexample.utils.exception.AppException;
 import liquibase.util.file.FilenameUtils;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +51,7 @@ public class FileServiceImpl implements FileService {
 
     // upload multipart file on the server
     @Override
-    public FileUploadedDto upload(@NonNull MultipartFile file, Long parentId) throws IOException, PathNotExistException {
+    public FileUploadedDto upload(@NonNull MultipartFile file, Long parentId) throws IOException, AppException {
         String originalFilename = file.getOriginalFilename();
 
         AccountEntity currentUser = userServices.getCurrentUser();
@@ -64,7 +62,7 @@ public class FileServiceImpl implements FileService {
 
         rootPath = this.root;
         if (role == UserRole.USER) rootPath = Paths.get(rootReference);
-        if (!Files.exists(rootPath)) throw new PathNotExistException("The path does not exist or has an error.");
+        if (!Files.exists(rootPath)) throw new AppException("The path does not exist or has an error.", ResponseCode.PATH_NOT_EXIST);
         String extension = FilenameUtils.getExtension(originalFilename);
         String name = FilenameUtils.getBaseName(originalFilename);
         String uuidString = generateStringUuid();
@@ -88,7 +86,7 @@ public class FileServiceImpl implements FileService {
 
     // download file by uuid and response
     @Override
-    public ResponseEntity<org.springframework.core.io.Resource> download(String uuid) throws IOException, CurrentUserIsNotAdminException, PathNotExistException {
+    public ResponseEntity<org.springframework.core.io.Resource> download(String uuid) throws IOException, AppException {
 
         AccountEntity currentUser = userServices.getCurrentUser();
         Long idCurrent = currentUser.getId();
@@ -101,13 +99,13 @@ public class FileServiceImpl implements FileService {
             userServices.adminRightsCheck(currentUser);
         }
         Path filePath = setFilePathDependingOnTheUserRole(currentUser, uuid);
-        if (!Files.exists(filePath)) throw new PathNotExistException("The path does not exist or has an error.");
+        if (!Files.exists(filePath)) throw new AppException("The path does not exist or has an error.", ResponseCode.PATH_NOT_EXIST);
         ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(filePath));
         return ResponseEntity.ok().body(resource);
     }
 
     @Override
-    public FileUploadedDto updateFile(@NonNull MultipartFile file, String uuid) throws IOException, CurrentUserIsNotAdminException, OrganizationIsNotMuchException, PathNotExistException {
+    public FileUploadedDto updateFile(@NonNull MultipartFile file, String uuid) throws IOException, AppException {
         AccountEntity currentUser = userServices.getCurrentUser();
         FileEntity foundFile = findByUUID(uuid);
         Long parentId = foundFile.getParent().getId();
@@ -115,7 +113,7 @@ public class FileServiceImpl implements FileService {
         Organization organization = currentUser.getOrganization();
 
         boolean canChange = utilService.isPermissionsAdminOrUserIsOwner(currentUser, owner, foundFile);
-        if (!canChange) throw new CurrentUserIsNotAdminException("You are not allowed to change");
+        if (!canChange) throw new AppException("You are not allowed to change", ResponseCode.CURRENT_USER_IS_NOT_ADMIN);
         String organizationNameCurrentUser = currentUser.getOrganization().getOrganizationName();
         String organizationNameFound = foundFile.getOrganization().getOrganizationName();
         utilService.isMatchesOrganization(organizationNameCurrentUser,organizationNameFound);
@@ -125,7 +123,7 @@ public class FileServiceImpl implements FileService {
         Path rootPath;
         rootPath = this.root;
         if (role == UserRole.USER) rootPath = Paths.get(rootReference);
-        if (!Files.exists(rootPath)) throw new PathNotExistException("The path does not exist or has an error.");
+        if (!Files.exists(rootPath)) throw new AppException("The path does not exist or has an error.", ResponseCode.PATH_NOT_EXIST);
 
         String originalFilename = file.getOriginalFilename();
         String extension = FilenameUtils.getExtension(originalFilename);
@@ -150,7 +148,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public FileDeletedDto delete(String uuid) throws IOException, CurrentUserIsNotAdminException, OrganizationIsNotMuchException, TypeMismatchException {
+    public FileDeletedDto delete(String uuid) throws IOException, AppException {
         AccountEntity currentUser = userServices.getCurrentUser();
         StorageElement foundStorage = findByUUID(uuid);
         AccountEntity owner = foundStorage.getOwner();
@@ -158,13 +156,13 @@ public class FileServiceImpl implements FileService {
         UserRole role = currentUser.getRole();
 
         boolean canChange = utilService.isPermissionsAdminOrUserIsOwner(currentUser, owner, foundStorage);
-        if (!canChange) throw new CurrentUserIsNotAdminException("You are not allowed to change.");
+        if (!canChange) throw new AppException("You are not allowed to change.", ResponseCode.CURRENT_USER_IS_NOT_ADMIN);
         String organizationNameCurrentUser = currentUser.getOrganization().getOrganizationName();
         String organizationNameFound = foundStorage.getOrganization().getOrganizationName();
         utilService.isMatchesOrganization(organizationNameCurrentUser,organizationNameFound);
 
         if (!type.equals(SomeType.FILE))
-            throw new TypeMismatchException("A different type of object was expected.");
+            throw new AppException("A different type of object was expected.", ResponseCode.TYPE_MISMATCH);
         storageRepository.delete(foundStorage);
 
         Path rootContent;

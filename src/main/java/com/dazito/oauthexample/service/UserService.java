@@ -25,47 +25,72 @@ public interface UserService {
      * @param rawOldPassword is current password, unencrypted
      * @return EditedPasswordDto is successful password change response
      */
-    EditedPasswordDto editPassword(Long id, String newPassword, String rawOldPassword) throws EmptyFieldException, CurrentUserIsNotAdminException, OrganizationIsNotMuchException, PasswordNotMatchesException;
+    EditedPasswordDto editPassword(Long id, String newPassword, String rawOldPassword) throws AppException;
 
     /**
      * edit name/email of the current user
      * @param personalData is case of the different properties user
+     * @param id is ID of the user whose data the administrator wants to change
      * @return EditedEmailNameDto is successful edit of the edit
      */
-    EditedEmailNameDto editPersonData(Long id, EditPersonalDataDto personalData) throws CurrentUserIsNotAdminException, OrganizationIsNotMuchException, UserWithSuchEmailExistException;
+    EditedEmailNameDto editPersonData(Long id, EditPersonalDataDto personalData) throws AppException;
 
     /**
      * We pass the user to understand whether he is in our database or not
      * @param accountDto is userDto which we will find in DB
      * @return EditedEmailNameDto is successful search result user
      */
-    EditedEmailNameDto createUser(AccountDto accountDto) throws ValidationException, OrganizationIsNotMuchException, CurrentUserIsNotAdminException, UserWithSuchEmailExistException;
+    EditedEmailNameDto createUser(AccountDto accountDto) throws ValidationException, AppException;
 
     /**
      * delete user from DB, by id or DeleteAccountDto
      * @param accountDto is entity which we will find in DB and after that, delete
+     * @param id is ID of the user the administrator wants to delete
      */
-    DeletedUserDto deleteUser(Long id, DeleteAccountDto accountDto) throws EmailIsNotMatchesException, PasswordNotMatchesException, CurrentUserIsNotAdminException, OrganizationIsNotMuchException;
+    DeletedUserDto deleteUser(Long id, DeleteAccountDto accountDto) throws AppException;
 
+    /**
+     * the method that sets a new password for the newly created user starts its
+     * work only after the user follows the link in the letter
+     * @param setPasswordDto is data to set a password
+     */
     void messageReply(SetPasswordDto setPasswordDto);
 
+    /**
+     * we send the letter that the user forgot the password
+     * @param setPasswordDto is password recovery data
+     */
     void forgotPassword(SetPasswordDto setPasswordDto);
 
+    /**
+     * quick way to save an account
+     * @param accountEntity is account that we want to keep
+     */
     void saveAccount(AccountEntity accountEntity);
 
+    /**
+     * AccountEntity search by uuid
+     * @param uuid is uuid by which we will to find AccountEntity
+     * @return AccountEntity
+     */
     AccountEntity findUserByUuid(String uuid);
 
+    /**
+     * save new password
+//     * @param uuid is uuid by which we will to find AccountEntity
+     * @return AccountEntity
+     */
     EditedPasswordDto savePassword(String encodedPassword, AccountEntity accountToBeEdited);
 
     void saveEncodedPassword(String encodedPassword, AccountEntity accountToBeEdited);
 
     String passwordEncode(String newPassword);
 
-    void isMatchesPassword(String rawOldPassword, String passwordCurrentUser) throws PasswordNotMatchesException;
+    void isMatchesPassword(String rawOldPassword, String passwordCurrentUser) throws AppException;
 
     EditedPasswordDto convertToResponsePassword(String newPassword);
 
-    void isMatchesEmail(@NonNull String emailCurrentUser, @NonNull String email) throws EmailIsNotMatchesException;
+    void isMatchesEmail(@NonNull String emailCurrentUser, @NonNull String email) throws AppException;
     /**
      * find user by email
      * @param email is email which we will find in DB
@@ -94,9 +119,9 @@ public interface UserService {
      * @param entity is entity, on which we want to check of the admin right
      * @return true = if current user hasRole(ADMIN), false = hasRole(NOT ADMIN)
      */
-    void adminRightsCheck(AccountEntity entity) throws CurrentUserIsNotAdminException;
+    void adminRightsCheck(AccountEntity entity) throws AppException;
 
-    void isMatchesOrganization(String userOrganization, AccountEntity currentUser) throws OrganizationIsNotMuchException;
+    void isMatchesOrganization(String userOrganization, AccountEntity currentUser) throws AppException;
 
     String getOrganizationNameCurrentUser(AccountEntity currentUser);
 
@@ -119,15 +144,6 @@ public interface UserService {
 
     EditedEmailNameDto responsePersonalDataDto(AccountEntity accountEntity);
 
-    ChangedActivateDto editActivate(AccountDto accountDto) throws OrganizationIsNotMuchException, CurrentUserIsNotAdminException;
-
-
-
-
-
-
-
-
-
+    ChangedActivateDto editActivate(AccountDto accountDto) throws AppException;
 
 }

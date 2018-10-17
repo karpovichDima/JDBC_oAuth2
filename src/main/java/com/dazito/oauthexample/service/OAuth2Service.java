@@ -7,5 +7,9 @@ import javax.xml.bind.ValidationException;
 
 public interface OAuth2Service {
 
+    /**
+     * delete access token by account entity
+     * @param account the user entity
+     */
     void deleteToken(AccountEntity account);
 }

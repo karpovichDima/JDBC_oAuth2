@@ -2,12 +2,11 @@ package com.dazito.oauthexample.controller;
 
 import com.dazito.oauthexample.service.StorageService;
 import com.dazito.oauthexample.service.dto.request.StorageUpdateDto;
+import com.dazito.oauthexample.service.dto.response.GeneralResponseDto;
 import com.dazito.oauthexample.service.dto.response.StorageDto;
 import com.dazito.oauthexample.service.dto.response.StorageUpdatedDto;
-import com.dazito.oauthexample.utils.exception.CurrentUserIsNotAdminException;
-import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuchException;
+import com.dazito.oauthexample.utils.exception.AppException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,14 +24,15 @@ public class StorageController {
     }
 
     @PatchMapping("/")
-    public ResponseEntity<StorageUpdatedDto> update(@RequestBody StorageUpdateDto storageUpdateDto) throws IOException, CurrentUserIsNotAdminException, OrganizationIsNotMuchException {
+    public ResponseEntity<GeneralResponseDto<StorageUpdatedDto>> update(@RequestBody StorageUpdateDto storageUpdateDto) throws IOException, AppException {
         StorageUpdatedDto storageUpdatedDto = storageService.editData(storageUpdateDto);
-        return ResponseEntity.ok(storageUpdatedDto);
+        return ResponseEntity.ok(new GeneralResponseDto<>(null, storageUpdatedDto));
     }
 
-    @GetMapping("/chierarchy/{id:.+}")
-    public ResponseEntity<StorageDto> createHierarchy(@PathVariable Long id) throws IOException {
+    @GetMapping("/hierarchy/{id:.+}")
+    public ResponseEntity<GeneralResponseDto<StorageDto>> createHierarchy(@PathVariable Long id) throws IOException {
         StorageDto hierarchy = storageService.createHierarchy(id);
-        return ResponseEntity.ok(hierarchy);
+        return ResponseEntity.ok(new GeneralResponseDto<>(null, hierarchy));
+
     }
 }

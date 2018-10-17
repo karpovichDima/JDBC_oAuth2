@@ -3,6 +3,7 @@ package com.dazito.oauthexample.service.impl;
 import com.dazito.oauthexample.dao.StorageRepository;
 import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.model.StorageElement;
+import com.dazito.oauthexample.model.type.ResponseCode;
 import com.dazito.oauthexample.model.type.SomeType;
 import com.dazito.oauthexample.service.StorageService;
 import com.dazito.oauthexample.service.UserService;
@@ -12,15 +13,14 @@ import com.dazito.oauthexample.service.dto.response.DirectoryStorageDto;
 import com.dazito.oauthexample.service.dto.response.FileStorageDto;
 import com.dazito.oauthexample.service.dto.response.StorageDto;
 import com.dazito.oauthexample.service.dto.response.StorageUpdatedDto;
-import com.dazito.oauthexample.utils.exception.CurrentUserIsNotAdminException;
-import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuchException;
-import com.dazito.oauthexample.utils.exception.TypeMismatchException;
+import com.dazito.oauthexample.utils.exception.AppException;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.security.auth.login.AppConfigurationEntry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -39,7 +39,7 @@ public class StorageServiceImpl implements StorageService {
     private UtilService utilService;
 
     @Override
-    public StorageUpdatedDto editData(StorageUpdateDto storageUpdateDto) throws CurrentUserIsNotAdminException, OrganizationIsNotMuchException {
+    public StorageUpdatedDto editData(StorageUpdateDto storageUpdateDto) throws AppException {
         AccountEntity currentUser = userService.getCurrentUser();
 
         Long id = storageUpdateDto.getId();
@@ -52,7 +52,7 @@ public class StorageServiceImpl implements StorageService {
 
         // check Permission on change
         boolean canChange = utilService.isPermissionsAdminOrUserIsOwner(currentUser, owner, foundStorageElement);
-        if (!canChange) throw new CurrentUserIsNotAdminException("You are not allowed to change");
+        if (!canChange) throw new AppException("You are not allowed to change", ResponseCode.CURRENT_USER_IS_NOT_ADMIN);
         String organizationNameCurrentUser = currentUser.getOrganization().getOrganizationName();
         String organizationNameFoundStorage = foundStorageElement.getOrganization().getOrganizationName();
         utilService.isMatchesOrganization(organizationNameCurrentUser, organizationNameFoundStorage);
@@ -126,12 +126,12 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    public void setSizeForParents(Long size,@NonNull StorageDto storageDtoParent) throws TypeMismatchException {
+    public void setSizeForParents(Long size,@NonNull StorageDto storageDtoParent) throws AppException {
         Long sizeParent = storageDtoParent.getSize();
         sizeParent = sizeParent + size;
         storageDtoParent.setSize(sizeParent);
         if (storageDtoParent.getType().equals(SomeType.CONTENT)){
-            throw new TypeMismatchException("A different type of object was expected.");
+            throw new AppException("A different type of object was expected.", ResponseCode.TYPE_MISMATCH);
         }
         StorageDto preParent = storageDtoParent.getParent();
         if (storageDtoParent.getParent() != null) setSizeForParents(size, preParent);

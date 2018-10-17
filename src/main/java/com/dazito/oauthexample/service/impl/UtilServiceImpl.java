@@ -3,13 +3,11 @@ package com.dazito.oauthexample.service.impl;
 import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.model.Organization;
 import com.dazito.oauthexample.model.StorageElement;
+import com.dazito.oauthexample.model.type.ResponseCode;
 import com.dazito.oauthexample.model.type.UserRole;
-import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.UtilService;
-import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuchException;
+import com.dazito.oauthexample.utils.exception.AppException;
 import lombok.NonNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -86,9 +84,9 @@ public class UtilServiceImpl implements UtilService {
     }
 
     @Override
-    public void isMatchesOrganization(@NonNull String organizationName1, @NonNull String organizationName2) throws OrganizationIsNotMuchException {
+    public void isMatchesOrganization(@NonNull String organizationName1, @NonNull String organizationName2) throws AppException {
         boolean equals = organizationName1.equals(organizationName2);
         if (!equals)
-            throw new OrganizationIsNotMuchException("You are trying to access content not from your organization.");
+            throw new AppException("You are trying to access content not from your organization.", ResponseCode.ORGANIZATIONS_NOT_MUCH);
     }
 }

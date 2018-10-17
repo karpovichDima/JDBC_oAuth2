@@ -1,20 +1,14 @@
 package com.dazito.oauthexample.controller;
 
 import com.dazito.oauthexample.service.FileService;
-import com.dazito.oauthexample.service.dto.request.FileUpdateDto;
 import com.dazito.oauthexample.service.dto.response.FileDeletedDto;
 import com.dazito.oauthexample.service.dto.response.FileUploadedDto;
-import com.dazito.oauthexample.service.dto.response.StorageDto;
-import com.dazito.oauthexample.utils.exception.CurrentUserIsNotAdminException;
-import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuchException;
-import com.dazito.oauthexample.utils.exception.PathNotExistException;
-import com.dazito.oauthexample.utils.exception.TypeMismatchException;
+import com.dazito.oauthexample.service.dto.response.GeneralResponseDto;
+import com.dazito.oauthexample.utils.exception.AppException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,26 +32,26 @@ public class FileController {
     }
 
     @PostMapping("/{parentId}")
-    public ResponseEntity<FileUploadedDto> upload(@RequestParam MultipartFile file, @PathVariable Long parentId) throws IOException, PathNotExistException {
+    public ResponseEntity<GeneralResponseDto<FileUploadedDto>> upload(@RequestParam MultipartFile file, @PathVariable Long parentId) throws IOException, AppException {
         FileUploadedDto upload = fileService.upload(file, parentId);
-        return ResponseEntity.ok(upload);
+        return ResponseEntity.ok(new GeneralResponseDto<>(null, upload));
     }
 
     @GetMapping("/{uuid:.+}")
-    public ResponseEntity<Resource> download(@PathVariable String uuid) throws IOException, CurrentUserIsNotAdminException, PathNotExistException {
-        return fileService.download(uuid);
+    public ResponseEntity<GeneralResponseDto<String>> download(@PathVariable String uuid) throws IOException, AppException {
+        return ResponseEntity.ok(new GeneralResponseDto<>(null, uuid));
     }
 
     @PostMapping("/update/{uuid:.+}")
-    public ResponseEntity<FileUploadedDto> update(@RequestParam MultipartFile file, @PathVariable String uuid) throws IOException, PathNotExistException, CurrentUserIsNotAdminException, OrganizationIsNotMuchException {
+    public ResponseEntity<GeneralResponseDto<FileUploadedDto>> update(@RequestParam MultipartFile file, @PathVariable String uuid) throws IOException, AppException {
         FileUploadedDto fileUploadedDto = fileService.updateFile(file, uuid);
-        return ResponseEntity.ok(fileUploadedDto);
+        return ResponseEntity.ok(new GeneralResponseDto<>(null, fileUploadedDto));
     }
 
     @DeleteMapping("/{uuid}")
-    public ResponseEntity<FileDeletedDto> delete(@PathVariable String uuid) throws IOException, CurrentUserIsNotAdminException, OrganizationIsNotMuchException, TypeMismatchException {
+    public ResponseEntity<GeneralResponseDto<FileDeletedDto>> delete(@PathVariable String uuid) throws IOException, AppException {
         FileDeletedDto deleted = fileService.delete(uuid);
-        return ResponseEntity.ok(deleted);
+        return ResponseEntity.ok(new GeneralResponseDto<>(null, deleted));
     }
 
     @Bean

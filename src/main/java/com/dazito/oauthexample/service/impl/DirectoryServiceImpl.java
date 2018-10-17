@@ -6,21 +6,18 @@ import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.model.Directory;
 import com.dazito.oauthexample.model.Organization;
 import com.dazito.oauthexample.model.StorageElement;
+import com.dazito.oauthexample.model.type.ResponseCode;
 import com.dazito.oauthexample.model.type.SomeType;
 import com.dazito.oauthexample.model.type.UserRole;
 import com.dazito.oauthexample.service.*;
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
 import com.dazito.oauthexample.service.dto.response.DirectoryCreatedDto;
 import com.dazito.oauthexample.service.dto.response.DirectoryDeletedDto;
-import com.dazito.oauthexample.utils.exception.CurrentUserIsNotAdminException;
-import com.dazito.oauthexample.utils.exception.EmailIsNotMatchesException;
-import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuchException;
-import com.dazito.oauthexample.utils.exception.TypeMismatchException;
+import com.dazito.oauthexample.utils.exception.AppException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.swing.event.TreeModelEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -44,7 +41,7 @@ public class DirectoryServiceImpl implements DirectoryService {
 
     // create new Directory by parent id and name
     @Override
-    public DirectoryCreatedDto createDirectory(DirectoryDto directoryDto) throws EmailIsNotMatchesException, TypeMismatchException {
+    public DirectoryCreatedDto createDirectory(DirectoryDto directoryDto) throws AppException {
         AccountEntity currentUser = userServices.getCurrentUser();
         String name = directoryDto.getNewName();
         Long parent_id = directoryDto.getNewParentId();
@@ -62,7 +59,7 @@ public class DirectoryServiceImpl implements DirectoryService {
             foundParentElement = storageService.findById(parent_id);
             SomeType type = foundParentElement.getType();
             if (type.equals(SomeType.FILE))
-                throw new TypeMismatchException("A different type of object was expected.");
+                throw new AppException("A different type of object was expected.", ResponseCode.TYPE_MISMATCH);
         }
         directory.setParent(foundParentElement);
         if (role.equals(UserRole.USER) && !foundParentElement.getType().equals(SomeType.CONTENT)) {
@@ -87,7 +84,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     }
 
     @Override
-    public DirectoryCreatedDto updateDirectory(DirectoryDto directoryDto) throws CurrentUserIsNotAdminException, OrganizationIsNotMuchException {
+    public DirectoryCreatedDto updateDirectory(DirectoryDto directoryDto) throws AppException {
         AccountEntity currentUser = userServices.getCurrentUser();
         Long id = directoryDto.getId();
         Long parent = directoryDto.getNewParentId();
@@ -100,7 +97,7 @@ public class DirectoryServiceImpl implements DirectoryService {
         StorageElement parentDirectory = storageService.findById(parent);
 
         boolean isRight = utilService.isPermissionsAdminOrUserIsOwner(currentUser, owner, foundDirectory);
-        if (!isRight) throw new CurrentUserIsNotAdminException("You are not allowed to change");
+        if (!isRight) throw new AppException("You are not allowed to change", ResponseCode.CURRENT_USER_IS_NOT_ADMIN);
         utilService.isMatchesOrganization(organization.getOrganizationName(),
                                           organizationDirectory.getOrganizationName());
         foundDirectory.setParent(parentDirectory);
@@ -111,16 +108,16 @@ public class DirectoryServiceImpl implements DirectoryService {
 
     @Transactional
     @Override
-    public DirectoryDeletedDto delete(Long id) throws CurrentUserIsNotAdminException, OrganizationIsNotMuchException, TypeMismatchException {
+    public DirectoryDeletedDto delete(Long id) throws AppException {
         AccountEntity currentUser = userServices.getCurrentUser();
         StorageElement foundStorage = findById(id);
         AccountEntity owner = foundStorage.getOwner();
         SomeType type = foundStorage.getType();
 
-        if (type == SomeType.FILE) throw new TypeMismatchException("A different type of object was expected.");
+        if (type == SomeType.FILE) throw new AppException("A different type of object was expected.", ResponseCode.TYPE_MISMATCH);
 
         boolean canChange = utilService.isPermissionsAdminOrUserIsOwner(currentUser, owner, foundStorage);
-        if (!canChange) throw new CurrentUserIsNotAdminException("You are not allowed to change");
+        if (!canChange) throw new AppException("You are not allowed to change", ResponseCode.CURRENT_USER_IS_NOT_ADMIN);
         String organizationNameCurrentUser = currentUser.getOrganization().getOrganizationName();
         String organizationNameFound = foundStorage.getOrganization().getOrganizationName();
         utilService.isMatchesOrganization(organizationNameCurrentUser,organizationNameFound);

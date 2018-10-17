@@ -10,8 +10,7 @@ import com.dazito.oauthexample.model.type.UserRole;
 import com.dazito.oauthexample.service.*;
 import com.dazito.oauthexample.service.dto.request.ContentUpdateDto;
 import com.dazito.oauthexample.service.dto.response.ContentUpdatedDto;
-import com.dazito.oauthexample.utils.exception.CurrentUserIsNotAdminException;
-import com.dazito.oauthexample.utils.exception.OrganizationIsNotMuchException;
+import com.dazito.oauthexample.utils.exception.AppException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
@@ -75,7 +74,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public ContentUpdatedDto updateContent(ContentUpdateDto contentDto) throws CurrentUserIsNotAdminException, OrganizationIsNotMuchException {
+    public ContentUpdatedDto updateContent(ContentUpdateDto contentDto) throws AppException {
         AccountEntity currentUser = userService.getCurrentUser();
         Long id = contentDto.getId();
         String name = contentDto.getNewName();
@@ -95,7 +94,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public void filePermissionsCheck(AccountEntity currentUser, StorageElement foundContent) throws CurrentUserIsNotAdminException, OrganizationIsNotMuchException {
+    public void filePermissionsCheck(AccountEntity currentUser, StorageElement foundContent) throws AppException {
         userService.adminRightsCheck(currentUser);
         Organization organizationUser = currentUser.getOrganization();
         Organization organizationContent = foundContent.getOrganization();
@@ -103,7 +102,7 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public void deleteContent(Long id) throws CurrentUserIsNotAdminException, OrganizationIsNotMuchException {
+    public void deleteContent(Long id) throws AppException {
         AccountEntity currentUser = userService.getCurrentUser();
         StorageElement foundStorage = storageService.findById(id);
         filePermissionsCheck(currentUser, foundStorage);
