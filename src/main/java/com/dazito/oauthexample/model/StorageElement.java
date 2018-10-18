@@ -18,6 +18,10 @@ import java.util.List;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public abstract class StorageElement{
 
+    @Enumerated(value = EnumType.STRING)
+    @Column(updatable = false, insertable = false)
+    private SomeType type;
+
     @Id
     @GeneratedValue
     private Long id;
@@ -28,10 +32,6 @@ public abstract class StorageElement{
     @OneToOne
     @JoinColumn(name="parent_id")
     private StorageElement parent;
-
-    @Enumerated(value = EnumType.STRING)
-    @Column(updatable = false, insertable = false)
-    private SomeType type;
 
     @OneToOne
     @JoinColumn(name="user_id")
@@ -49,4 +49,7 @@ public abstract class StorageElement{
     @OneToMany(targetEntity = StorageElement.class, mappedBy = "parent")
     @JsonIgnore
     private List<StorageElement> children;
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    private List<Channel> channelList;
 }

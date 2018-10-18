@@ -8,5 +8,6 @@
 
     <include file="changelog/create_tab_copy.xml" relativeToChangelogFile="true"/>
     <include file="changelog/first_insert_copy.xml" relativeToChangelogFile="true"/>
-    <include file="changelog/v2__create_storage_element.xml" relativeToChangelogFile="true"/>
+    <include file="changelog/v3__create_channel_element.xml" relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

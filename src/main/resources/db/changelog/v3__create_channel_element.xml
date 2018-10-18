@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="add_table_channel" author="karpovich">
+
+        <createTable tableName="channel">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" unique="true"/>
+            </column>
+            <column name="name" type="varchar(128)"/>
+            <column name="owner" type="bigint">
+                <constraints foreignKeyName="fk_owner" referencedTableName="account"
+                             referencedColumnNames="id" nullable="true"/></column>
+        </createTable>
+
+        <createTable tableName="storage_parent">
+            <column name="storage_id" type="bigint">
+                <constraints foreignKeyName="fk_storage_element" referencedTableName="storage_element"
+                             referencedColumnNames="id" nullable="true"/></column>
+            <column name="channel_id" type="bigint">
+                <constraints foreignKeyName="fk_channel" referencedTableName="channel"
+                             referencedColumnNames="id" nullable="true"/></column>
+        </createTable>
+
+        <createTable tableName="channel_account">
+            <column name="channel_id" type="bigint">
+                <constraints foreignKeyName="fk_channel_account" referencedTableName="channel"
+                             referencedColumnNames="id" nullable="true"/></column>
+            <column name="user_id" type="bigint">
+                <constraints foreignKeyName="fk_account_channel" referencedTableName="account"
+                             referencedColumnNames="id" nullable="true"/></column>
+        </createTable>
+
+    </changeSet>
+</databaseChangeLog>

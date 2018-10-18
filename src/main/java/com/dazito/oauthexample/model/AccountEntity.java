@@ -25,11 +25,11 @@ public class AccountEntity{
     @GeneratedValue
     private Long id;
 
-    @Column(name = "name", length = 128)
-    private String username;
-
     @Column(name = "password", length = 128)
     private String password;
+
+    @Column(name = "name", length = 128)
+    private String username;
 
     @Enumerated(value = EnumType.STRING)
     @Column(name = "role", length = 128)
@@ -46,8 +46,8 @@ public class AccountEntity{
     @OneToMany
     private List<FileEntity> files;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="content")
+    @OneToOne(cascade = CascadeType.ALL, mappedBy="owner")
+//    @JoinColumn(name="content")
     private Content content;
 
     @Column(name = "uuid", length = 128)
