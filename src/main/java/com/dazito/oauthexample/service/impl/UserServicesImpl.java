@@ -266,8 +266,10 @@ public class UserServicesImpl implements UserService {
     }
 
     @Override
-    public AccountEntity findByIdAccountRepo(@NonNull Long id) throws NoSuchElementException {
-        return accountRepository.findById(id).get();
+    public AccountEntity findByIdAccountRepo(@NonNull Long id) throws AppException {
+        Optional<AccountEntity> foundOptional = accountRepository.findById(id);
+        if (!foundOptional.isPresent()) throw new AppException("No objects were found by your request.",ResponseCode.NO_SUCH_ELEMENT);
+        return foundOptional.get();
     }
 
     @Override

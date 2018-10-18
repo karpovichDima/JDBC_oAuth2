@@ -22,9 +22,17 @@ public class Channel {
     @JoinColumn(name = "owner")
     private AccountEntity owner;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany
+    @JoinTable(
+            name="channel_account",
+            joinColumns=@JoinColumn(name="channel_id", referencedColumnName="id"),
+            inverseJoinColumns=@JoinColumn(name="user_id", referencedColumnName="id"))
     List<AccountEntity> accountEntityList;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany
+    @JoinTable(
+            name="storage_parent",
+            joinColumns=@JoinColumn(name="channel_id", referencedColumnName="id"),
+            inverseJoinColumns=@JoinColumn(name="storage_id", referencedColumnName="id"))
     List<FileEntity> fileEntityList;
 }

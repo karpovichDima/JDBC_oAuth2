@@ -50,6 +50,10 @@ public abstract class StorageElement{
     @JsonIgnore
     private List<StorageElement> children;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany
+    @JoinTable(
+            name="storage_parent",
+            joinColumns=@JoinColumn(name="storage_id", referencedColumnName="id"),
+            inverseJoinColumns=@JoinColumn(name="channel_id", referencedColumnName="id"))
     private List<Channel> channelList;
 }

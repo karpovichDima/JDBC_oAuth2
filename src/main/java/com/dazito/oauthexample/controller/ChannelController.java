@@ -1,9 +1,11 @@
 package com.dazito.oauthexample.controller;
 
 import com.dazito.oauthexample.service.ChannelService;
+import com.dazito.oauthexample.service.dto.request.UserAddToChannelDto;
 import com.dazito.oauthexample.service.dto.response.ChannelCreatedDto;
 import com.dazito.oauthexample.service.dto.response.GeneralResponseDto;
 import com.dazito.oauthexample.service.dto.response.StorageDto;
+import com.dazito.oauthexample.service.dto.response.UserAddedToChannelDto;
 import com.dazito.oauthexample.utils.exception.AppException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,4 +25,11 @@ public class ChannelController {
         ChannelCreatedDto channel = channelService.createChannel(name);
         return ResponseEntity.ok(new GeneralResponseDto<>(null, channel));
     }
+
+    @PostMapping("/add/user")
+    public ResponseEntity<GeneralResponseDto<UserAddedToChannelDto>> createChannel(@RequestBody UserAddToChannelDto userAddToChannelDto) throws AppException {
+        UserAddedToChannelDto response = channelService.addUserToChannel(userAddToChannelDto);
+        return ResponseEntity.ok(new GeneralResponseDto<>(null, response));
+    }
+
 }

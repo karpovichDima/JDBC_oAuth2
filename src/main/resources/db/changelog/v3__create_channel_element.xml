@@ -21,19 +21,20 @@
         <createTable tableName="storage_parent">
             <column name="storage_id" type="bigint">
                 <constraints foreignKeyName="fk_storage_element" referencedTableName="storage_element"
-                             referencedColumnNames="id" nullable="true"/></column>
+                             referencedColumnNames="id" nullable="false" primaryKey="true"/></column>
             <column name="channel_id" type="bigint">
                 <constraints foreignKeyName="fk_channel" referencedTableName="channel"
-                             referencedColumnNames="id" nullable="true"/></column>
+                             referencedColumnNames="id" nullable="false" primaryKey="true"/></column>
         </createTable>
 
         <createTable tableName="channel_account">
             <column name="channel_id" type="bigint">
                 <constraints foreignKeyName="fk_channel_account" referencedTableName="channel"
-                             referencedColumnNames="id" nullable="true"/></column>
+                             referencedColumnNames="id" nullable="false" primaryKey="true"/></column>
             <column name="user_id" type="bigint">
                 <constraints foreignKeyName="fk_account_channel" referencedTableName="account"
-                             referencedColumnNames="id" nullable="true"/></column>
+                             referencedColumnNames="id" nullable="false" primaryKey="true"/></column>
+
         </createTable>
 
     </changeSet>

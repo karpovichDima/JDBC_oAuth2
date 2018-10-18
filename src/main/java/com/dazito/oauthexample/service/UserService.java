@@ -112,7 +112,7 @@ public interface UserService {
      * @param id the identifier of the user we are looking for
      * @return AccountEntity
      */
-    AccountEntity findByIdAccountRepo(Long id);
+    AccountEntity findByIdAccountRepo(Long id) throws AppException;
 
     /**
      * check rights of the Admin

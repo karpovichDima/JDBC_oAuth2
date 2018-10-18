@@ -56,6 +56,13 @@ public class AccountEntity{
     @Column(name = "token_end_date", length = 128)
     private Timestamp tokenEndDate;
 
+    @ManyToMany
+    @JoinTable(
+            name="channel_account",
+            joinColumns=@JoinColumn(name="user_id", referencedColumnName="id"),
+            inverseJoinColumns=@JoinColumn(name="channel_id", referencedColumnName="id"))
+    private List<Channel> channelList;
+
     AccountEntity(String username, String password){
         this.username = username;
         this.password = password;

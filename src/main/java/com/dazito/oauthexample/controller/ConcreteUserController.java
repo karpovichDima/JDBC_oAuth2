@@ -27,7 +27,7 @@ public class ConcreteUserController {
 
     // get user by id
     @GetMapping("/{id}")
-    public ResponseEntity<GeneralResponseDto<AccountDto>> getAccountCurrentUser(@PathVariable Long id) {
+    public ResponseEntity<GeneralResponseDto<AccountDto>> getAccountCurrentUser(@PathVariable Long id) throws AppException {
         AccountEntity foundedUser = userService.findByIdAccountRepo(id);
         AccountDto accountDto = userService.addToAccountDtoOrganization(foundedUser);
         return ResponseEntity.ok(new GeneralResponseDto<>(null, accountDto));
