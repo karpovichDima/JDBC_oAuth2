@@ -22,7 +22,7 @@ public interface StorageService {
      * @param id is id by which we will to find StorageElement
      * @return StorageElement is root point object
      */
-    StorageElement findById(Long id);
+    StorageElement findById(Long id) throws AppException;
 
     /**
      * create hierarchy object
@@ -31,14 +31,14 @@ public interface StorageService {
      * @param sizeFile is size of the file child + size current object
      * @return new object of the hierarchy
      */
-    StorageDto buildStorageDto(Long id, StorageDto storageDtoParent, long sizeFile);
+    StorageDto buildStorageDto(Long id, StorageDto storageDtoParent, long sizeFile) throws AppException;
 
     /**
      * create hierarchy object(recursion)
      * @param id of the object from which we will begin the hierarchy
      * @return new object of the hierarchy
      */
-    StorageDto createHierarchy(Long id);
+    StorageDto createHierarchy(Long id) throws AppException;
 
     /**
      * irrational way of calculating the size of the hierarchy

@@ -15,6 +15,7 @@ import com.dazito.oauthexample.service.dto.response.StorageDto;
 import com.dazito.oauthexample.service.dto.response.StorageUpdatedDto;
 import com.dazito.oauthexample.utils.exception.AppException;
 import lombok.NonNull;
+import org.omg.CORBA.portable.ApplicationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import javax.security.auth.login.AppConfigurationEntry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 public class StorageServiceImpl implements StorageService {
@@ -64,17 +66,12 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    public StorageElement findById(Long id) throws NoSuchElementException {
-        return storageRepository.findById(id).get();
-    }
-
-    @Override
-    public StorageDto createHierarchy(Long id) {
+    public StorageDto createHierarchy(Long id) throws AppException {
         return buildStorageDto(id, null, 0);
     }
 
     @Override
-    public StorageDto buildStorageDto(Long id, StorageDto storageDtoParent, long sizeFileParent) {
+    public StorageDto buildStorageDto(Long id, StorageDto storageDtoParent, long sizeFileParent) throws AppException {
         StorageElement storageElement = findById(id);
         Long idElement = storageElement.getId();
         String nameElement = storageElement.getName();
@@ -140,5 +137,14 @@ public class StorageServiceImpl implements StorageService {
     @Override
     public List<StorageElement> getChildListElement(StorageElement storageElement) {
         return storageRepository.findByParent(storageElement);
+    }
+
+    @Override
+    public StorageElement findById(Long id) throws AppException {
+        Optional<StorageElement> foundOptional = storageRepository.findById(id);
+        if (!foundOptional.isPresent()) {
+            throw new AppException("By the specified parameters there is no element", ResponseCode.NO_SUCH_ELEMENT);
+        }
+        return foundOptional.get();
     }
 }

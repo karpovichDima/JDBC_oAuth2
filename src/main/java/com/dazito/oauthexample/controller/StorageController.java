@@ -30,9 +30,8 @@ public class StorageController {
     }
 
     @GetMapping("/hierarchy/{id:.+}")
-    public ResponseEntity<GeneralResponseDto<StorageDto>> createHierarchy(@PathVariable Long id) throws IOException {
+    public ResponseEntity<GeneralResponseDto<StorageDto>> createHierarchy(@PathVariable Long id) throws IOException, AppException {
         StorageDto hierarchy = storageService.createHierarchy(id);
         return ResponseEntity.ok(new GeneralResponseDto<>(null, hierarchy));
-
     }
 }

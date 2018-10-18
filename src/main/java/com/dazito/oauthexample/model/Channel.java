@@ -34,5 +34,5 @@ public class Channel {
             name="storage_parent",
             joinColumns=@JoinColumn(name="channel_id", referencedColumnName="id"),
             inverseJoinColumns=@JoinColumn(name="storage_id", referencedColumnName="id"))
-    List<FileEntity> fileEntityList;
+    List<StorageElement> storageElementList;
 }
