@@ -5,7 +5,6 @@ import com.dazito.oauthexample.service.dto.response.FileDeletedDto;
 import com.dazito.oauthexample.service.dto.response.FileUploadedDto;
 import com.dazito.oauthexample.utils.exception.AppException;
 import org.springframework.core.io.Resource;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -26,7 +25,7 @@ public interface FileService{
      * download multipart file
      * @param uuid is uuid of the file which we want to download on the client
      */
-    ResponseEntity<Resource> download(String uuid) throws IOException, AppException;
+    Resource download(String uuid) throws IOException, AppException;
 
     /**
      * look for the Storage Element in different ways depending on the parameter passed

@@ -15,7 +15,6 @@ import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -86,7 +85,7 @@ public class FileServiceImpl implements FileService {
 
     // download file by uuid and response
     @Override
-    public ResponseEntity<org.springframework.core.io.Resource> download(String uuid) throws IOException, AppException {
+    public org.springframework.core.io.Resource download(String uuid) throws IOException, AppException {
 
         AccountEntity currentUser = userServices.getCurrentUser();
         Long idCurrent = currentUser.getId();
@@ -101,7 +100,7 @@ public class FileServiceImpl implements FileService {
         Path filePath = setFilePathDependingOnTheUserRole(currentUser, uuid);
         if (!Files.exists(filePath)) throw new AppException("The path does not exist or has an error.", ResponseCode.PATH_NOT_EXIST);
         ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(filePath));
-        return ResponseEntity.ok().body(resource);
+        return resource;
     }
 
     @Override

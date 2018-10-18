@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,8 +39,9 @@ public class FileController {
     }
 
     @GetMapping("/{uuid:.+}")
-    public ResponseEntity<GeneralResponseDto<String>> download(@PathVariable String uuid) throws IOException, AppException {
-        return ResponseEntity.ok(new GeneralResponseDto<>(null, uuid));
+    public ResponseEntity<Resource> download(@PathVariable String uuid) throws IOException, AppException {
+        Resource download = fileService.download(uuid);
+        return ResponseEntity.ok(download);
     }
 
     @PostMapping("/update/{uuid:.+}")
