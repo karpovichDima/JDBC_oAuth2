@@ -75,7 +75,7 @@ public interface FileService{
      * @param uuid is uuid by which we will to find File
      * @return FileEntity
      */
-    FileEntity findByUUID(String uuid);
+    FileEntity findByUUID(String uuid) throws AppException;
 
     /**
      * Get file from optional if optional is not null

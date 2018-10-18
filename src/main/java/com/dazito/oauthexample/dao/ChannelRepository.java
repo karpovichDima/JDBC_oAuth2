@@ -10,4 +10,9 @@ import java.util.Optional;
 public interface ChannelRepository extends JpaRepository<Channel, Long> {
 
     Optional<Channel> findById(Long id);
+
+    Long countByAccountEntityList_Id(Long id);
+
+    Long countByAccountEntityList_IdAndId(Long accountId, Long id);
+
 }

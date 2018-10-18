@@ -233,8 +233,10 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public FileEntity findByUUID(String uuid) throws NoSuchElementException {
-        return fileRepository.findByUuid(uuid).get();
+    public FileEntity findByUUID(String uuid) throws NoSuchElementException, AppException {
+        Optional<FileEntity> fileOptional = fileRepository.findByUuid(uuid);
+        if (!fileOptional.isPresent()) throw new AppException("File by uuid not found", ResponseCode.NO_SUCH_ELEMENT);
+        return fileOptional.get();
     }
 
     @Override
