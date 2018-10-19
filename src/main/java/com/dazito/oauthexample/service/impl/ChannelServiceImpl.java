@@ -7,13 +7,12 @@ import com.dazito.oauthexample.model.Channel;
 import com.dazito.oauthexample.model.FileEntity;
 import com.dazito.oauthexample.model.StorageElement;
 import com.dazito.oauthexample.model.type.ResponseCode;
+import com.dazito.oauthexample.model.type.SomeType;
 import com.dazito.oauthexample.model.type.UserRole;
 import com.dazito.oauthexample.service.*;
 import com.dazito.oauthexample.service.dto.request.StorageAddToChannelDto;
 import com.dazito.oauthexample.service.dto.request.UserAddToChannelDto;
-import com.dazito.oauthexample.service.dto.response.ChannelCreatedDto;
-import com.dazito.oauthexample.service.dto.response.StorageAddedToChannelDto;
-import com.dazito.oauthexample.service.dto.response.UserAddedToChannelDto;
+import com.dazito.oauthexample.service.dto.response.*;
 import com.dazito.oauthexample.utils.exception.AppException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,6 +36,8 @@ public class ChannelServiceImpl implements ChannelService {
     UserService userService;
     @Autowired
     StorageRepository storageRepository;
+    @Autowired
+    DirectoryService directoryService;
     @Autowired
     ChannelRepository channelRepository;
     @Autowired
@@ -156,7 +157,7 @@ public class ChannelServiceImpl implements ChannelService {
                 filePath = Paths.get(root.toString(), uuid);
                 break;
         }
-        boolean fileOnChannel = checkFileOnChannel(foundChannel, foundFile);
+        boolean fileOnChannel = checkStorageOnChannel(foundChannel, foundFile);
         if (!fileOnChannel) throw new AppException("The requested object is not on the selected channel.", ResponseCode.NO_FILE_ON_CHANNEL);
         if (!Files.exists(filePath)) throw new AppException("The path does not exist or has an error.", ResponseCode.PATH_NOT_EXIST);
 
@@ -164,8 +165,75 @@ public class ChannelServiceImpl implements ChannelService {
         return resource;
     }
 
-    private boolean checkFileOnChannel(Channel foundChannel, FileEntity foundFile) {
-        Long idFile = foundFile.getId();
+    @Override
+    @Transactional
+    public DeletedStorageDto deleteStorageFromChannel(Long idChannel, Long idStorage) throws AppException {
+        AccountEntity currentUser = userService.getCurrentUser();
+        userService.adminRightsCheck(currentUser);
+        StorageElement foundStorageElement = storageService.findById(idStorage);
+        SomeType typeFoundStorage = foundStorageElement.getType();
+        String organizationNameFoundStorage = foundStorageElement.getOrganization().getOrganizationName();
+        userService.isMatchesOrganization(organizationNameFoundStorage, currentUser);
+
+        Channel foundChannel = findById(idChannel);
+        boolean isIncludedInChannel = checkStorageOnChannel(foundChannel, foundStorageElement);
+        if (!isIncludedInChannel)
+            throw new AppException("StorageElement is not included in select channel.", ResponseCode.NO_SUCH_ELEMENT);
+
+        List<StorageElement> storageElementListChannelFirstLevel = foundChannel.getStorageElementList();
+
+        if (typeFoundStorage == SomeType.FILE) {
+            String foundStorageElementName = foundStorageElement.getName();
+            storageElementListChannelFirstLevel.remove(foundStorageElement);
+            foundChannel.setStorageElementList(storageElementListChannelFirstLevel);
+            channelRepository.saveAndFlush(foundChannel);
+
+            DeletedStorageDto deletedStorageDto = new DeletedStorageDto();
+            deletedStorageDto.setIdDeletedStorage(idStorage);
+            deletedStorageDto.setNameDeletedStorage(foundStorageElementName);
+            return deletedStorageDto;
+        }
+
+        DeletedStorageDto deletedStorageDto = new DeletedStorageDto();
+        deletedStorageDto.setIdDeletedStorage(idStorage);
+        return deletedStorageDto;
+    }
+//        List<StorageElement> listChildToDelete = new ArrayList<>();
+//        List<StorageElement> listChildrenFoundStorage = foundStorageElement.getChildren();
+//        listChildToDelete.add(foundStorageElement);
+//        for (StorageElement element : listChildrenFoundStorage) {
+//            boolean isPartChannel = checkStorageOnChannel(foundChannel, element);
+//            if (isPartChannel) listChildToDelete.add(element);
+//        }
+//        getChildFiles(listChildToDelete, listChildrenFoundStorage);
+//
+//        List<StorageElement> listAllChildrenFoundChannel = new ArrayList<>();
+//        getChildFiles(listAllChildrenFoundChannel, storageElementListChannelFirstLevel);
+//
+//
+//
+//        storageRepository.delete(listChildToDelete);
+
+//        DirectoryDeletedDto directoryDeletedDto = new DirectoryDeletedDto();
+//        directoryDeletedDto.setId(id);
+//        directoryDeletedDto.setName(foundStorageElement.getName());
+//        directoryDeletedDto.setParentId(foundStorageElement.getParent().getId());
+//        return directoryDeletedDto;
+//    }
+
+    public void getChildFiles(List<StorageElement> listChildToDelete, List<StorageElement> listChildrenFoundStorage) {
+        List<StorageElement> childrenElement;
+        for (StorageElement element : listChildrenFoundStorage) {
+            childrenElement = element.getChildren();
+            if (childrenElement.size() != 0) {
+                listChildToDelete.addAll(childrenElement);
+                getChildFiles(listChildToDelete, childrenElement);
+            }
+        }
+    }
+
+    private boolean checkStorageOnChannel(Channel foundChannel, StorageElement foundStorage) {
+        Long idFile = foundStorage.getId();
         List<StorageElement> foundStorageElementList = foundChannel.getStorageElementList();
         for (StorageElement element : foundStorageElementList) {
             if (element.getId().equals(idFile)) return true;

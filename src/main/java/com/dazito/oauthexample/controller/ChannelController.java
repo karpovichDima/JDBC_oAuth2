@@ -1,18 +1,15 @@
 package com.dazito.oauthexample.controller;
 
 import com.dazito.oauthexample.dao.ChannelRepository;
-import com.dazito.oauthexample.model.Channel;
 import com.dazito.oauthexample.service.ChannelService;
 import com.dazito.oauthexample.service.dto.request.StorageAddToChannelDto;
 import com.dazito.oauthexample.service.dto.request.UserAddToChannelDto;
-import com.dazito.oauthexample.service.dto.response.ChannelCreatedDto;
-import com.dazito.oauthexample.service.dto.response.GeneralResponseDto;
-import com.dazito.oauthexample.service.dto.response.StorageAddedToChannelDto;
-import com.dazito.oauthexample.service.dto.response.UserAddedToChannelDto;
+import com.dazito.oauthexample.service.dto.response.*;
 import com.dazito.oauthexample.utils.exception.AppException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -28,18 +25,21 @@ public class ChannelController {
     @Autowired
     ChannelRepository channelRepository;
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping("/{name:.+}")
     public ResponseEntity<GeneralResponseDto<ChannelCreatedDto>> createChannel(@PathVariable String name) throws AppException {
         ChannelCreatedDto channel = channelService.createChannel(name);
         return ResponseEntity.ok(new GeneralResponseDto<>(null, channel));
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping("/add/user")
     public ResponseEntity<GeneralResponseDto<UserAddedToChannelDto>> addUser(@RequestBody UserAddToChannelDto userAddToChannelDto) throws AppException {
         UserAddedToChannelDto response = channelService.addUserToChannel(userAddToChannelDto);
         return ResponseEntity.ok(new GeneralResponseDto<>(null, response));
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping("/add/storage")
     public ResponseEntity<GeneralResponseDto<StorageAddedToChannelDto>> addStorageElement(@RequestBody StorageAddToChannelDto storageAddToChannelDto) throws AppException {
         StorageAddedToChannelDto response = channelService.addStorageToChannel(storageAddToChannelDto);
@@ -57,4 +57,12 @@ public class ChannelController {
         Resource download = channelService.download(idChannel, id);
         return ResponseEntity.ok(download);
     }
+
+    @DeleteMapping("/{idChannel}/{idStorage}")
+    public ResponseEntity<GeneralResponseDto<DeletedStorageDto>> deleteUser(@PathVariable Long idChannel, @PathVariable Long idStorage) throws AppException {
+        DeletedStorageDto deletedStorageDto = channelService.deleteStorageFromChannel(idChannel, idStorage);
+        return ResponseEntity.ok(new GeneralResponseDto<>(null, deletedStorageDto));
+    }
+
+
 }

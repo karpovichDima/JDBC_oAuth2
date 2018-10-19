@@ -3,6 +3,7 @@ package com.dazito.oauthexample.service;
 import com.dazito.oauthexample.service.dto.request.StorageAddToChannelDto;
 import com.dazito.oauthexample.service.dto.request.UserAddToChannelDto;
 import com.dazito.oauthexample.service.dto.response.ChannelCreatedDto;
+import com.dazito.oauthexample.service.dto.response.DeletedStorageDto;
 import com.dazito.oauthexample.service.dto.response.StorageAddedToChannelDto;
 import com.dazito.oauthexample.service.dto.response.UserAddedToChannelDto;
 import com.dazito.oauthexample.utils.exception.AppException;
@@ -22,4 +23,6 @@ public interface ChannelService {
     List<Long> getAllStorageElements(Long idChannel) throws AppException;
 
     Resource download(Long idChannel, Long id) throws AppException, IOException;
+
+    DeletedStorageDto deleteStorageFromChannel(Long idChannel, Long idStorage) throws AppException;
 }
