@@ -30,6 +30,7 @@
             <column name="email" type="varchar(255)"/>
             <column name="uuid" type="varchar(128)"/>
             <column name="token_end_date" type="timestamp"/>
+            <column name="content" type="varchar(128)"/>
         </createTable>
         <createTable tableName="storage_element">
             <column name="type" type="varchar(128)"/>
@@ -37,10 +38,6 @@
                 <constraints primaryKey="true" nullable="false" unique="true"/>
             </column>
             <column name="name" type="varchar(128)"/>
-            <column name="parent_id" type="bigint(20)">
-                <!--<constraints foreignKeyName="fk_storage_element_parent_id" referencedTableName="storage_element"-->
-                             <!--referencedColumnNames="id" nullable="true"/>-->
-            </column>
             <column name="user_id" type="bigint">
                 <!--<constraints foreignKeyName="fk_account_user_id" referencedTableName="account"-->
                              <!--referencedColumnNames="id" nullable="true"/>-->
@@ -66,18 +63,13 @@
                                  referencedColumnNames="id"
                                  referencedTableName="organization"/>
 
-        <addForeignKeyConstraint baseColumnNames="parent_id"
-                                 baseTableName="storage_element"
-                                 constraintName="fk_storage_element_parent_id"
-                                 onDelete="CASCADE"
-                                 referencedColumnNames="id"
-                                 referencedTableName="storage_element"/>
         <addForeignKeyConstraint baseColumnNames="user_id"
                                  baseTableName="storage_element"
                                  constraintName="fk_account_user_id"
                                  onDelete="CASCADE"
                                  referencedColumnNames="id"
                                  referencedTableName="account"/>
+
         <addForeignKeyConstraint baseColumnNames="organization_id"
                                  baseTableName="storage_element"
                                  constraintName="fk_organization_storage"

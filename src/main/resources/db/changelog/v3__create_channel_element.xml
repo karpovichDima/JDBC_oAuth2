@@ -8,29 +8,12 @@
 
     <changeSet id="add_table_channel" author="karpovich">
 
-        <createTable tableName="channel">
-            <column name="id" type="bigint" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false" unique="true" />
-            </column>
-            <column name="name" type="varchar(128)"/>
-            <column name="owner" type="bigint">
-                <!--<constraints foreignKeyName="fk_owner" referencedTableName="account"-->
-                             <!--referencedColumnNames="id" nullable="true"/>-->
-            </column>
-        </createTable>
-        <addForeignKeyConstraint baseColumnNames="owner"
-                                 baseTableName="channel"
-                                 constraintName="fk_owner"
-                                 onDelete="CASCADE"
-                                 referencedColumnNames="id"
-                                 referencedTableName="account"/>
-
         <createTable tableName="storage_parent">
             <column name="storage_id" type="bigint">
                 <!--<constraints foreignKeyName="fk_storage_element" referencedTableName="storage_element"-->
                              <!--referencedColumnNames="id" nullable="false" primaryKey="true"/>-->
             </column>
-            <column name="channel_id" type="bigint">
+            <column name="parent_id" type="bigint">
                 <!--<constraints foreignKeyName="fk_channel" referencedTableName="channel"-->
                              <!--referencedColumnNames="id" nullable="false" primaryKey="true"/>-->
             </column>
@@ -41,12 +24,13 @@
                                  onDelete="CASCADE"
                                  referencedColumnNames="id"
                                  referencedTableName="storage_element"/>
-        <addForeignKeyConstraint baseColumnNames="channel_id"
+
+        <addForeignKeyConstraint baseColumnNames="parent_id"
                                  baseTableName="storage_parent"
-                                 constraintName="fk_channel"
+                                 constraintName="fk_storage_element_parent"
                                  onDelete="CASCADE"
                                  referencedColumnNames="id"
-                                 referencedTableName="channel"/>
+                                 referencedTableName="storage_element"/>
 
 
         <createTable tableName="channel_account">
@@ -64,7 +48,7 @@
                                  constraintName="fk_channel_account"
                                  onDelete="CASCADE"
                                  referencedColumnNames="id"
-                                 referencedTableName="channel"/>
+                                 referencedTableName="storage_element"/>
         <addForeignKeyConstraint baseColumnNames="user_id"
                                  baseTableName="channel_account"
                                  constraintName="fk_account_channel"

@@ -59,7 +59,7 @@ public class StorageServiceImpl implements StorageService {
         String organizationNameFoundStorage = foundStorageElement.getOrganization().getOrganizationName();
         utilService.isMatchesOrganization(organizationNameCurrentUser, organizationNameFoundStorage);
         foundStorageElement.setName(newName);
-        foundStorageElement.setParent(parent);
+//        foundStorageElement.setParent(parent);
 
         storageRepository.saveAndFlush(foundStorageElement);
         return conversionService.convert(storageUpdateDto, StorageUpdatedDto.class);
@@ -136,7 +136,8 @@ public class StorageServiceImpl implements StorageService {
 
     @Override
     public List<StorageElement> getChildListElement(StorageElement storageElement) {
-        return storageRepository.findByParent(storageElement);
+//        return storageRepository.findByParent(storageElement);
+        return null;
     }
 
     @Override

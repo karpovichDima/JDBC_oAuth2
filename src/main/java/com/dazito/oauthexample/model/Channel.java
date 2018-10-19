@@ -8,19 +8,9 @@ import java.util.List;
 
 @Setter
 @Getter
-@Table(name = "channel")
 @Entity
-public class Channel {
-    @Id
-    @GeneratedValue
-    private Long id;
-
-    @Column(name = "name")
-    private String channelName;
-
-    @ManyToOne
-    @JoinColumn(name = "owner")
-    private AccountEntity owner;
+@DiscriminatorValue("CHANNEL")
+public class Channel extends StorageElement{
 
     @ManyToMany(cascade = CascadeType.REMOVE)
     @JoinTable(
@@ -32,7 +22,7 @@ public class Channel {
     @ManyToMany(cascade = CascadeType.REMOVE)
     @JoinTable(
             name="storage_parent",
-            joinColumns=@JoinColumn(name="channel_id", referencedColumnName="id"),
+            joinColumns=@JoinColumn(name="parent_id", referencedColumnName="id"),
             inverseJoinColumns=@JoinColumn(name="storage_id", referencedColumnName="id"))
     List<StorageElement> storageElementList;
 }

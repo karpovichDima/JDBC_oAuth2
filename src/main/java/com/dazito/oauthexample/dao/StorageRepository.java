@@ -15,7 +15,7 @@ public interface StorageRepository extends JpaRepository<StorageElement, Long> {
     Optional<StorageElement> findById(Long id);
     Optional<StorageElement> findByNameAndType(String name, SomeType type);
 
-    List<StorageElement> findByParent(StorageElement storageElement);
+//    List<StorageElement> findByParent(StorageElement storageElement);
 
     Long countStorageElementByOwnerIsNullAndOrganizationIsNotNull();
 

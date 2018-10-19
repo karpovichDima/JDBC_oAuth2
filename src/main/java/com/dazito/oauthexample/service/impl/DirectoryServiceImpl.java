@@ -61,7 +61,7 @@ public class DirectoryServiceImpl implements DirectoryService {
             if (type.equals(SomeType.FILE))
                 throw new AppException("A different type of object was expected.", ResponseCode.TYPE_MISMATCH);
         }
-        directory.setParent(foundParentElement);
+//        directory.setParent(foundParentElement);
         if (role.equals(UserRole.USER) && !foundParentElement.getType().equals(SomeType.CONTENT)) {
             AccountEntity owner = foundParentElement.getOwner();
             userServices.isMatchesEmail(currentUser.getEmail(), owner.getEmail());
@@ -74,11 +74,11 @@ public class DirectoryServiceImpl implements DirectoryService {
     @Override
     public DirectoryCreatedDto responseDirectoryCreated(Directory directory) {
         String nameDir = directory.getName();
-        StorageElement parentDir = directory.getParent();
-        Long idDir = parentDir.getId();
-
+//        StorageElement parentDir = directory.getParent();
+//        Long idDir = parentDir.getId();
+//
         DirectoryCreatedDto directoryResponseDto = new DirectoryCreatedDto();
-        directoryResponseDto.setParentId(idDir);
+//        directoryResponseDto.setParentId(idDir);
         directoryResponseDto.setName(nameDir);
         return directoryResponseDto;
     }
@@ -100,7 +100,7 @@ public class DirectoryServiceImpl implements DirectoryService {
         if (!isRight) throw new AppException("You are not allowed to change", ResponseCode.CURRENT_USER_IS_NOT_ADMIN);
         utilService.isMatchesOrganization(organization.getOrganizationName(),
                                           organizationDirectory.getOrganizationName());
-        foundDirectory.setParent(parentDirectory);
+//        foundDirectory.setParent(parentDirectory);
         foundDirectory.setName(name);
         storageRepository.saveAndFlush(foundDirectory);
         return responseDirectoryCreated((Directory) foundDirectory);
@@ -132,7 +132,7 @@ public class DirectoryServiceImpl implements DirectoryService {
         DirectoryDeletedDto directoryDeletedDto = new DirectoryDeletedDto();
         directoryDeletedDto.setId(id);
         directoryDeletedDto.setName(foundStorage.getName());
-        directoryDeletedDto.setParentId(foundStorage.getParent().getId());
+//        directoryDeletedDto.setParentId(foundStorage.getParent().getId());
         return directoryDeletedDto;
     }
 

@@ -56,7 +56,7 @@ public class ChannelServiceImpl implements ChannelService {
         userService.adminRightsCheck(currentUser);
         Channel channel = new Channel();
         channel.setOwner(currentUser);
-        channel.setChannelName(name);
+        channel.setName(name);
         ArrayList<AccountEntity> listAccount = new ArrayList<>();
         channel.setAccountEntityList(listAccount);
         ArrayList<StorageElement> listFiles = new ArrayList<>();

@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.List;
 
 @Getter
@@ -16,7 +15,7 @@ import java.util.List;
 @Entity
 @DiscriminatorColumn(name = "type")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-public abstract class StorageElement{
+public abstract class StorageElement {
 
     @Enumerated(value = EnumType.STRING)
     @Column(updatable = false, insertable = false)
@@ -30,11 +29,7 @@ public abstract class StorageElement{
     private String name;
 
     @OneToOne
-    @JoinColumn(name="parent_id")
-    private StorageElement parent;
-
-    @OneToOne
-    @JoinColumn(name="user_id")
+    @JoinColumn(name = "user_id")
     @JsonIgnore
     private AccountEntity owner;
 
@@ -42,18 +37,12 @@ public abstract class StorageElement{
     private Long size;
 
     @ManyToOne(targetEntity = Organization.class)
-    @JoinColumn(name="organization_id")
+    @JoinColumn(name = "organization_id")
     @JsonIgnore
     private Organization organization;
 
-    @OneToMany(targetEntity = StorageElement.class, mappedBy = "parent")
+    //    @OneToMany(targetEntity = StorageElement.class, mappedBy = "parent")
+    @OneToMany(targetEntity = StorageElement.class)
     @JsonIgnore
     private List<StorageElement> children;
-
-    @ManyToMany(cascade = CascadeType.REMOVE)
-    @JoinTable(
-            name="storage_parent",
-            joinColumns=@JoinColumn(name="storage_id", referencedColumnName="id"),
-            inverseJoinColumns=@JoinColumn(name="channel_id", referencedColumnName="id"))
-    private List<Channel> channelList;
 }
