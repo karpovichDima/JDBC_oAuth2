@@ -22,14 +22,14 @@ public class Channel {
     @JoinColumn(name = "owner")
     private AccountEntity owner;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.REMOVE)
     @JoinTable(
             name="channel_account",
             joinColumns=@JoinColumn(name="channel_id", referencedColumnName="id"),
             inverseJoinColumns=@JoinColumn(name="user_id", referencedColumnName="id"))
     List<AccountEntity> accountEntityList;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.REMOVE)
     @JoinTable(
             name="storage_parent",
             joinColumns=@JoinColumn(name="channel_id", referencedColumnName="id"),

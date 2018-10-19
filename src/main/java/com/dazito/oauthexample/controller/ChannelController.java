@@ -57,5 +57,4 @@ public class ChannelController {
         Resource download = channelService.download(idChannel, id);
         return ResponseEntity.ok(download);
     }
-
 }

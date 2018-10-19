@@ -50,7 +50,7 @@ public abstract class StorageElement{
     @JsonIgnore
     private List<StorageElement> children;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.REMOVE)
     @JoinTable(
             name="storage_parent",
             joinColumns=@JoinColumn(name="storage_id", referencedColumnName="id"),

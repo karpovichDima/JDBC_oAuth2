@@ -15,7 +15,6 @@
             <column name="name" type="varchar(255)"/>
             <column name="salary" type="varchar(255)"/>
         </createTable>
-
         <createTable tableName="account">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false" unique="true"/>
@@ -24,15 +23,14 @@
             <column name="name" type="varchar(128)"/>
             <column name="role" type="varchar(128)"/>
             <column name="organization_id" type="bigint">
-                <constraints foreignKeyName="fk_organization" referencedTableName="organization"
-                             referencedColumnNames="id" nullable="true"/>
+                <!--<constraints foreignKeyName="fk_organization" referencedTableName="organization"-->
+                             <!--referencedColumnNames="id" nullable="true"/>-->
             </column>
             <column name="is_activated" type="bit(1)"/>
             <column name="email" type="varchar(255)"/>
             <column name="uuid" type="varchar(128)"/>
             <column name="token_end_date" type="timestamp"/>
         </createTable>
-
         <createTable tableName="storage_element">
             <column name="type" type="varchar(128)"/>
             <column name="id" type="bigint" autoIncrement="true">
@@ -40,20 +38,54 @@
             </column>
             <column name="name" type="varchar(128)"/>
             <column name="parent_id" type="bigint(20)">
-                <constraints foreignKeyName="fk_storage_element_parent_id" referencedTableName="storage_element"
-                             referencedColumnNames="id" nullable="true"/></column>
+                <!--<constraints foreignKeyName="fk_storage_element_parent_id" referencedTableName="storage_element"-->
+                             <!--referencedColumnNames="id" nullable="true"/>-->
+            </column>
             <column name="user_id" type="bigint">
-                <constraints foreignKeyName="fk_account_user_id" referencedTableName="account"
-                             referencedColumnNames="id" nullable="true"/></column>
-            <column name="uuid" type="varchar(128)"><constraints unique="true"/></column>
+                <!--<constraints foreignKeyName="fk_account_user_id" referencedTableName="account"-->
+                             <!--referencedColumnNames="id" nullable="true"/>-->
+            </column>
+            <column name="uuid" type="varchar(128)">
+                <constraints unique="true"/>
+            </column>
             <column name="extension" type="varchar(128)"/>
             <column name="size" type="bigint(20)"/>
             <column name="root" type="varchar(128)"/>
             <column name="organization_id" type="bigint">
-                <constraints foreignKeyName="fk_organization_storage" referencedTableName="organization"
-                             referencedColumnNames="id" nullable="true"/>
+                <!--<constraints foreignKeyName="fk_organization_storage" referencedTableName="organization"-->
+                             <!--referencedColumnNames="id" nullable="true"/>-->
             </column>
         </createTable>
+
+
+
+        <addForeignKeyConstraint baseColumnNames="organization_id"
+                                 baseTableName="account"
+                                 constraintName="fk_organization"
+                                 onDelete="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="organization"/>
+
+        <addForeignKeyConstraint baseColumnNames="parent_id"
+                                 baseTableName="storage_element"
+                                 constraintName="fk_storage_element_parent_id"
+                                 onDelete="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="storage_element"/>
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="storage_element"
+                                 constraintName="fk_account_user_id"
+                                 onDelete="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="account"/>
+        <addForeignKeyConstraint baseColumnNames="organization_id"
+                                 baseTableName="storage_element"
+                                 constraintName="fk_organization_storage"
+                                 onDelete="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="organization"/>
+
+
 
         <createTable tableName="clientdetails">
             <column name="appId" type="VARCHAR(255)">
