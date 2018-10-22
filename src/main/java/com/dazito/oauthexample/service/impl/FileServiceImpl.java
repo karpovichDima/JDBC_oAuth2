@@ -78,7 +78,12 @@ public class FileServiceImpl implements FileService {
         fileEntity.setOrganization(currentUser.getOrganization());
 
         Content foundContent = findContentDependingOnTheParent(parentId, organization);
-//        fileEntity.setParent(foundContent);
+        fileEntity.setParent(foundContent);
+
+        List<StorageElement> parents = new ArrayList<>();
+        parents.add(foundContent);
+
+        fileEntity.setParents(parents);
         storageRepository.saveAndFlush(fileEntity);
         return buildFileUploadedDto(fileEntity);
     }
@@ -107,7 +112,7 @@ public class FileServiceImpl implements FileService {
     public FileUploadedDto updateFile(@NonNull MultipartFile file, String uuid) throws IOException, AppException {
         AccountEntity currentUser = userServices.getCurrentUser();
         FileEntity foundFile = findByUUID(uuid);
-//        Long parentId = foundFile.getParent().getId();
+        Long parentId = foundFile.getParent().getId();
         AccountEntity owner = foundFile.getOwner();
         Organization organization = currentUser.getOrganization();
 
@@ -139,8 +144,8 @@ public class FileServiceImpl implements FileService {
         fileEntity.setExtension(extension);
         fileEntity.setOrganization(currentUser.getOrganization());
         storageRepository.delete(foundFile);
-//        StorageElement foundStorageElement = findContentDependingOnTheParent(parentId, organization);
-//        fileEntity.setParent(foundStorageElement);
+        StorageElement foundStorageElement = findContentDependingOnTheParent(parentId, organization);
+        fileEntity.setParent(foundStorageElement);
         storageRepository.saveAndFlush(fileEntity);
 
         return buildFileUploadedDto(fileEntity);
@@ -177,7 +182,7 @@ public class FileServiceImpl implements FileService {
         fileDeletedResponseDto.setUuid(uuid);
         fileDeletedResponseDto.setId(foundStorage.getId());
         fileDeletedResponseDto.setName(foundStorage.getName());
-//        fileDeletedResponseDto.setParentId(foundStorage.getParent().getId());
+        fileDeletedResponseDto.setParentId(foundStorage.getParent().getId());
 
         return fileDeletedResponseDto;
     }

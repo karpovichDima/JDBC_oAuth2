@@ -22,15 +22,11 @@
             <column name="password" type="varchar(128)"/>
             <column name="name" type="varchar(128)"/>
             <column name="role" type="varchar(128)"/>
-            <column name="organization_id" type="bigint">
-                <!--<constraints foreignKeyName="fk_organization" referencedTableName="organization"-->
-                             <!--referencedColumnNames="id" nullable="true"/>-->
-            </column>
+            <column name="organization_id" type="bigint"/>
             <column name="is_activated" type="bit(1)"/>
             <column name="email" type="varchar(255)"/>
             <column name="uuid" type="varchar(128)"/>
             <column name="token_end_date" type="timestamp"/>
-            <column name="content" type="varchar(128)"/>
         </createTable>
         <createTable tableName="storage_element">
             <column name="type" type="varchar(128)"/>
@@ -38,35 +34,38 @@
                 <constraints primaryKey="true" nullable="false" unique="true"/>
             </column>
             <column name="name" type="varchar(128)"/>
-            <column name="user_id" type="bigint">
-                <!--<constraints foreignKeyName="fk_account_user_id" referencedTableName="account"-->
-                             <!--referencedColumnNames="id" nullable="true"/>-->
-            </column>
+            <column name="parent_id" type="bigint(20)"/>
+            <column name="user_id" type="bigint"/>
             <column name="uuid" type="varchar(128)">
                 <constraints unique="true"/>
             </column>
             <column name="extension" type="varchar(128)"/>
             <column name="size" type="bigint(20)"/>
             <column name="root" type="varchar(128)"/>
-            <column name="organization_id" type="bigint">
-                <!--<constraints foreignKeyName="fk_organization_storage" referencedTableName="organization"-->
-                             <!--referencedColumnNames="id" nullable="true"/>-->
-            </column>
+            <column name="organization_id" type="bigint"/>
         </createTable>
-
-
 
         <addForeignKeyConstraint baseColumnNames="organization_id"
                                  baseTableName="account"
                                  constraintName="fk_organization"
                                  onDelete="CASCADE"
+                                 onUpdate="CASCADE"
                                  referencedColumnNames="id"
                                  referencedTableName="organization"/>
+
+        <addForeignKeyConstraint baseColumnNames="parent_id"
+                                 baseTableName="storage_element"
+                                 constraintName="fk_storage_element_parent_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="storage_element"/>
 
         <addForeignKeyConstraint baseColumnNames="user_id"
                                  baseTableName="storage_element"
                                  constraintName="fk_account_user_id"
                                  onDelete="CASCADE"
+                                 onUpdate="CASCADE"
                                  referencedColumnNames="id"
                                  referencedTableName="account"/>
 
@@ -74,6 +73,7 @@
                                  baseTableName="storage_element"
                                  constraintName="fk_organization_storage"
                                  onDelete="CASCADE"
+                                 onUpdate="CASCADE"
                                  referencedColumnNames="id"
                                  referencedTableName="organization"/>
 

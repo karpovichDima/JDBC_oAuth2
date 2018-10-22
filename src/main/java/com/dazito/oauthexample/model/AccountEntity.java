@@ -60,7 +60,7 @@ public class AccountEntity{
     @JoinTable(
             name="channel_account",
             joinColumns=@JoinColumn(name="user_id", referencedColumnName="id"),
-            inverseJoinColumns=@JoinColumn(name="channel_id", referencedColumnName="id"))
+            inverseJoinColumns=@JoinColumn(name="storage_id", referencedColumnName="id"))
     private List<Channel> channelList;
 
     AccountEntity(String username, String password){

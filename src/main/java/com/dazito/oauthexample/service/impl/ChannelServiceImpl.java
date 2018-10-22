@@ -51,16 +51,16 @@ public class ChannelServiceImpl implements ChannelService {
     Path root;
 
     @Override
+    @Transactional
     public ChannelCreatedDto createChannel(String name) throws AppException {
         AccountEntity currentUser = userService.getCurrentUser();
         userService.adminRightsCheck(currentUser);
         Channel channel = new Channel();
         channel.setOwner(currentUser);
-        channel.setName(name);
         ArrayList<AccountEntity> listAccount = new ArrayList<>();
-        channel.setAccountEntityList(listAccount);
+        channel.setListOwners(listAccount);
         ArrayList<StorageElement> listFiles = new ArrayList<>();
-        channel.setStorageElementList(listFiles);
+        channel.setParents(listFiles);
 
         channelRepository.saveAndFlush(channel);
 
@@ -81,9 +81,9 @@ public class ChannelServiceImpl implements ChannelService {
 
         Long idChannel = userAddToChannelDto.getIdChannel();
         Channel foundChannel = findById(idChannel);
-        List<AccountEntity> userListFromChannel = foundChannel.getAccountEntityList();
+        List<AccountEntity> userListFromChannel = foundChannel.getListOwners();
         userListFromChannel.add(foundUser);
-        foundChannel.setAccountEntityList(userListFromChannel);
+        foundChannel.setListOwners(userListFromChannel);
         channelRepository.saveAndFlush(foundChannel);
 
         UserAddedToChannelDto userAddedToChannelDto = new UserAddedToChannelDto();
@@ -99,14 +99,18 @@ public class ChannelServiceImpl implements ChannelService {
         userService.adminRightsCheck(currentUser);
         Long idStorage = storageAddToChannelDto.getIdStorage();
         StorageElement foundStorageElement = storageService.findById(idStorage);
+
         String organizationNameFoundStorage = foundStorageElement.getOrganization().getOrganizationName();
         userService.isMatchesOrganization(organizationNameFoundStorage, currentUser);
 
         Long idChannel = storageAddToChannelDto.getIdChannel();
         Channel foundChannel = findById(idChannel);
-        List<StorageElement> storageElementList = foundChannel.getStorageElementList();
-        storageElementList.add(foundStorageElement);
-        foundChannel.setStorageElementList(storageElementList);
+
+        List<StorageElement> parentsStorageElement = foundStorageElement.getParents();
+        parentsStorageElement.add(foundChannel);
+        foundStorageElement.setParents(parentsStorageElement);
+
+        storageRepository.saveAndFlush(foundStorageElement);
         channelRepository.saveAndFlush(foundChannel);
 
         StorageAddedToChannelDto storageAddedToChannelDto = new StorageAddedToChannelDto();
@@ -124,7 +128,7 @@ public class ChannelServiceImpl implements ChannelService {
         boolean isHaveAccess = changeRightsCheck(currentUser, foundChannel);
         if (!isHaveAccess) throw new AppException("You do not have access to this channel",ResponseCode.DO_NOT_HAVE_ACCESS);
 
-        List<StorageElement> storageElementList = foundChannel.getStorageElementList();
+        List<StorageElement> storageElementList = foundChannel.getParents();
         List<Long> storageElementListIds = new ArrayList<>();
 
         for (StorageElement element : storageElementList) {
@@ -180,12 +184,12 @@ public class ChannelServiceImpl implements ChannelService {
         if (!isIncludedInChannel)
             throw new AppException("StorageElement is not included in select channel.", ResponseCode.NO_SUCH_ELEMENT);
 
-        List<StorageElement> storageElementListChannelFirstLevel = foundChannel.getStorageElementList();
+        List<StorageElement> storageElementListChannelFirstLevel = foundChannel.getParents();
 
         if (typeFoundStorage == SomeType.FILE) {
             String foundStorageElementName = foundStorageElement.getName();
             storageElementListChannelFirstLevel.remove(foundStorageElement);
-            foundChannel.setStorageElementList(storageElementListChannelFirstLevel);
+            foundChannel.setParents(storageElementListChannelFirstLevel);
             channelRepository.saveAndFlush(foundChannel);
 
             DeletedStorageDto deletedStorageDto = new DeletedStorageDto();
@@ -224,17 +228,17 @@ public class ChannelServiceImpl implements ChannelService {
     public void getChildFiles(List<StorageElement> listChildToDelete, List<StorageElement> listChildrenFoundStorage) {
         List<StorageElement> childrenElement;
         for (StorageElement element : listChildrenFoundStorage) {
-            childrenElement = element.getChildren();
-            if (childrenElement.size() != 0) {
-                listChildToDelete.addAll(childrenElement);
-                getChildFiles(listChildToDelete, childrenElement);
-            }
+//            childrenElement = element.getChildren();
+//            if (childrenElement.size() != 0) {
+//                listChildToDelete.addAll(childrenElement);
+//                getChildFiles(listChildToDelete, childrenElement);
+//            }
         }
     }
 
     private boolean checkStorageOnChannel(Channel foundChannel, StorageElement foundStorage) {
         Long idFile = foundStorage.getId();
-        List<StorageElement> foundStorageElementList = foundChannel.getStorageElementList();
+        List<StorageElement> foundStorageElementList = foundChannel.getParents();
         for (StorageElement element : foundStorageElementList) {
             if (element.getId().equals(idFile)) return true;
         }
