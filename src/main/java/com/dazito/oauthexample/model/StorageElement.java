@@ -16,7 +16,7 @@ import java.util.List;
 @Entity
 @DiscriminatorColumn(name = "type")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-public abstract class StorageElement{
+public abstract class StorageElement implements Serializable{
 
     @Enumerated(value = EnumType.STRING)
     @Column(updatable = false, insertable = false)
@@ -28,10 +28,6 @@ public abstract class StorageElement{
 
     @Column
     private String name;
-
-    @OneToOne
-    @JoinColumn(name="parent_id")
-    private StorageElement parent;
 
     @OneToOne
     @JoinColumn(name="user_id")
@@ -53,7 +49,18 @@ public abstract class StorageElement{
     @ManyToMany(cascade = CascadeType.REMOVE)
     @JoinTable(
             name="storage_parent",
+            joinColumns=@JoinColumn(name="parent_id", referencedColumnName="parent_id"),
+            inverseJoinColumns=@JoinColumn(name="storage_id", referencedColumnName="id"))
+    private List<StorageElement> parents;
+
+    @ManyToMany(cascade = CascadeType.REMOVE)
+    @JoinTable(
+            name="channel_account",
             joinColumns=@JoinColumn(name="storage_id", referencedColumnName="id"),
-            inverseJoinColumns=@JoinColumn(name="channel_id", referencedColumnName="id"))
-    private List<Channel> channelList;
+            inverseJoinColumns=@JoinColumn(name="user_id", referencedColumnName="id"))
+    List<AccountEntity> listOwners;
+
+    @OneToOne
+    @JoinColumn(name="parent_id")
+    private StorageElement parent;
 }

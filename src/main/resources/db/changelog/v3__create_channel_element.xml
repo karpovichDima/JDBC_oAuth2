@@ -8,69 +8,64 @@
 
     <changeSet id="add_table_channel" author="karpovich">
 
-        <createTable tableName="channel">
-            <column name="id" type="bigint" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false" unique="true" />
-            </column>
-            <column name="name" type="varchar(128)"/>
-            <column name="owner" type="bigint">
-                <!--<constraints foreignKeyName="fk_owner" referencedTableName="account"-->
-                             <!--referencedColumnNames="id" nullable="true"/>-->
-            </column>
-        </createTable>
-        <addForeignKeyConstraint baseColumnNames="owner"
-                                 baseTableName="channel"
-                                 constraintName="fk_owner"
-                                 onDelete="CASCADE"
-                                 referencedColumnNames="id"
-                                 referencedTableName="account"/>
+        <!--<createTable tableName="channel">-->
+            <!--<column name="id" type="bigint" autoIncrement="true">-->
+                <!--<constraints primaryKey="true" nullable="false" unique="true" />-->
+            <!--</column>-->
+            <!--<column name="name" type="varchar(128)"/>-->
+            <!--<column name="owner" type="bigint">-->
+                <!--&lt;!&ndash;<constraints foreignKeyName="fk_owner" referencedTableName="account"&ndash;&gt;-->
+                             <!--&lt;!&ndash;referencedColumnNames="id" nullable="true"/>&ndash;&gt;-->
+            <!--</column>-->
+        <!--</createTable>-->
+        <!--<addForeignKeyConstraint baseColumnNames="owner"-->
+                                 <!--baseTableName="channel"-->
+                                 <!--constraintName="fk_owner"-->
+                                 <!--onDelete="CASCADE"-->
+                                 <!--referencedColumnNames="id"-->
+                                 <!--referencedTableName="account"/>-->
 
         <createTable tableName="storage_parent">
-            <column name="storage_id" type="bigint">
-                <!--<constraints foreignKeyName="fk_storage_element" referencedTableName="storage_element"-->
-                             <!--referencedColumnNames="id" nullable="false" primaryKey="true"/>-->
-            </column>
-            <column name="channel_id" type="bigint">
-                <!--<constraints foreignKeyName="fk_channel" referencedTableName="channel"-->
-                             <!--referencedColumnNames="id" nullable="false" primaryKey="true"/>-->
-            </column>
+            <column name="storage_id" type="bigint"/>
+            <column name="parent_id" type="bigint"/>
         </createTable>
+
         <addForeignKeyConstraint baseColumnNames="storage_id"
                                  baseTableName="storage_parent"
                                  constraintName="fk_storage_element"
                                  onDelete="CASCADE"
+                                 onUpdate="CASCADE"
                                  referencedColumnNames="id"
                                  referencedTableName="storage_element"/>
-        <addForeignKeyConstraint baseColumnNames="channel_id"
+
+        <addForeignKeyConstraint baseColumnNames="parent_id"
                                  baseTableName="storage_parent"
-                                 constraintName="fk_channel"
+                                 constraintName="fk_storage_parent"
                                  onDelete="CASCADE"
-                                 referencedColumnNames="id"
-                                 referencedTableName="channel"/>
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="parent_id"
+                                 referencedTableName="storage_element"/>
 
 
         <createTable tableName="channel_account">
-            <column name="channel_id" type="bigint">
-                <!--<constraints foreignKeyName="fk_channel_accountt" referencedTableName="channel"-->
-                             <!--referencedColumnNames="id" nullable="false" primaryKey="true"/>-->
-            </column>
-            <column name="user_id" type="bigint">
-                <!--<constraints foreignKeyName="fk_account_channelt" referencedTableName="account"-->
-                             <!--referencedColumnNames="id" nullable="false" primaryKey="true"/>-->
-            </column>
+            <column name="storage_id" type="bigint"/>
+            <column name="user_id" type="bigint"/>
         </createTable>
-        <addForeignKeyConstraint baseColumnNames="channel_id"
+
+        <addForeignKeyConstraint baseColumnNames="storage_id"
                                  baseTableName="channel_account"
-                                 constraintName="fk_channel_account"
+                                 constraintName="fk_storage_account"
                                  onDelete="CASCADE"
+                                 onUpdate="CASCADE"
                                  referencedColumnNames="id"
-                                 referencedTableName="channel"/>
+                                 referencedTableName="storage_element"/>
+
         <addForeignKeyConstraint baseColumnNames="user_id"
                                  baseTableName="channel_account"
                                  constraintName="fk_account_channel"
                                  onDelete="CASCADE"
+                                 onUpdate="CASCADE"
                                  referencedColumnNames="id"
                                  referencedTableName="account"/>
-
     </changeSet>
 </databaseChangeLog>

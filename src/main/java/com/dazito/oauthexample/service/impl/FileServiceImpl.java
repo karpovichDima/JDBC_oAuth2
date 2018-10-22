@@ -79,6 +79,11 @@ public class FileServiceImpl implements FileService {
 
         Content foundContent = findContentDependingOnTheParent(parentId, organization);
         fileEntity.setParent(foundContent);
+
+        List<StorageElement> parents = new ArrayList<>();
+        parents.add(foundContent);
+
+        fileEntity.setParents(parents);
         storageRepository.saveAndFlush(fileEntity);
         return buildFileUploadedDto(fileEntity);
     }
