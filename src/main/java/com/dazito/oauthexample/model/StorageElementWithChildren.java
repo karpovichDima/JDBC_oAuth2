@@ -9,7 +9,8 @@ import java.util.List;
 
 @Getter
 @Setter
-public class StorageElementWithChildren extends StorageElement{
+public class StorageElementWithChildren extends StorageElement {
+
     @OneToMany(targetEntity = StorageElement.class, mappedBy = "parent")
     @JsonIgnore
     private List<StorageElement> children;

@@ -77,13 +77,12 @@ public class FileServiceImpl implements FileService {
         fileEntity.setExtension(extension);
         fileEntity.setOrganization(currentUser.getOrganization());
 
-        Content foundContent = findContentDependingOnTheParent(parentId, organization);
-        fileEntity.setParent(foundContent);
+        StorageElement foundContent = findContentDependingOnTheParent(parentId, organization);
 
         List<StorageElement> parents = new ArrayList<>();
         parents.add(foundContent);
-
         fileEntity.setParents(parents);
+
         storageRepository.saveAndFlush(fileEntity);
         return buildFileUploadedDto(fileEntity);
     }
@@ -112,7 +111,9 @@ public class FileServiceImpl implements FileService {
     public FileUploadedDto updateFile(@NonNull MultipartFile file, String uuid) throws IOException, AppException {
         AccountEntity currentUser = userServices.getCurrentUser();
         FileEntity foundFile = findByUUID(uuid);
-        Long parentId = foundFile.getParent().getId();
+
+        StorageElementWithChildren parentLeadingToContent = findContentParent(foundFile);
+
         AccountEntity owner = foundFile.getOwner();
         Organization organization = currentUser.getOrganization();
 
@@ -144,11 +145,43 @@ public class FileServiceImpl implements FileService {
         fileEntity.setExtension(extension);
         fileEntity.setOrganization(currentUser.getOrganization());
         storageRepository.delete(foundFile);
-        StorageElement foundStorageElement = findContentDependingOnTheParent(parentId, organization);
-        fileEntity.setParent(foundStorageElement);
+        StorageElement foundStorageElement = findContentDependingOnTheParent(parentLeadingToContent.getId(), organization);
+
+        List<StorageElement> parents = fileEntity.getParents();
+        parents.add(foundStorageElement);
+        fileEntity.setParents(parents);
+
         storageRepository.saveAndFlush(fileEntity);
 
         return buildFileUploadedDto(fileEntity);
+    }
+
+    private StorageElementWithChildren findContentParent(FileEntity foundFile) throws AppException {
+        StorageElementWithChildren parent;
+        List<StorageElement> parents = foundFile.getParents();
+        for (StorageElement element : parents) {
+            if (element.getType() == SomeType.CONTENT){
+                parent = (StorageElementWithChildren) element;
+                return parent;
+            }
+            StorageElementWithChildren storageElementWithChildren = recursForFindContentParent(element);
+            if (storageElementWithChildren != null) return (StorageElementWithChildren) element;
+        }
+        throw new AppException("Content for object not exist", ResponseCode.CONTENT_NOT_EXIST);
+    }
+
+    private StorageElementWithChildren recursForFindContentParent(StorageElement transferElement) throws AppException {
+        StorageElementWithChildren parent;
+        List<StorageElement> parents = transferElement.getParents();
+        for (StorageElement element : parents) {
+            if (element.getType() == SomeType.CONTENT){
+                parent = (StorageElementWithChildren) element;
+                return parent;
+            } else {
+                recursForFindContentParent(element);
+            }
+        }
+        return null;
     }
 
     @Override
@@ -182,20 +215,21 @@ public class FileServiceImpl implements FileService {
         fileDeletedResponseDto.setUuid(uuid);
         fileDeletedResponseDto.setId(foundStorage.getId());
         fileDeletedResponseDto.setName(foundStorage.getName());
-        fileDeletedResponseDto.setParentId(foundStorage.getParent().getId());
 
         return fileDeletedResponseDto;
     }
 
     @Override
-    public Content findContentDependingOnTheParent(Long parentId, Organization organization) {
-        Content foundContent;
+    public StorageElement findContentDependingOnTheParent(Long parentId, Organization organization) {
+        StorageElement foundParent;
         if (parentId != 0) {
-            foundContent = contentService.findById(parentId);
+            foundParent = storageRepository.findById(parentId).get();
+            return  foundParent;
         } else {
-            foundContent = contentService.findContentForAdmin(organization.getOrganizationName());
+            AccountEntity currentUser = userServices.getCurrentUser();
+            foundParent = currentUser.getContent();
+            return foundParent;
         }
-        return foundContent;
     }
 
     @Override

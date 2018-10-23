@@ -34,7 +34,6 @@
                 <constraints primaryKey="true" nullable="false" unique="true"/>
             </column>
             <column name="name" type="varchar(128)"/>
-            <column name="parent_id" type="bigint(20)"/>
             <column name="user_id" type="bigint"/>
             <column name="uuid" type="varchar(128)">
                 <constraints unique="true"/>
@@ -52,14 +51,6 @@
                                  onUpdate="CASCADE"
                                  referencedColumnNames="id"
                                  referencedTableName="organization"/>
-
-        <addForeignKeyConstraint baseColumnNames="parent_id"
-                                 baseTableName="storage_element"
-                                 constraintName="fk_storage_element_parent_id"
-                                 onDelete="CASCADE"
-                                 onUpdate="CASCADE"
-                                 referencedColumnNames="id"
-                                 referencedTableName="storage_element"/>
 
         <addForeignKeyConstraint baseColumnNames="user_id"
                                  baseTableName="storage_element"

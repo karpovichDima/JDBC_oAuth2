@@ -43,7 +43,7 @@
                                  constraintName="fk_storage_parent"
                                  onDelete="CASCADE"
                                  onUpdate="CASCADE"
-                                 referencedColumnNames="parent_id"
+                                 referencedColumnNames="id"
                                  referencedTableName="storage_element"/>
 
 
