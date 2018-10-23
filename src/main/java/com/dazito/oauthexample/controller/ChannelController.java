@@ -52,15 +52,13 @@ public class ChannelController {
         return ResponseEntity.ok(download);
     }
 
-
-
-
     @GetMapping("/storage/access/{idChannel:.+}")
     public ResponseEntity<GeneralResponseDto<List<Long>>> getAllStorageElements(@PathVariable Long idChannel) throws AppException {
         List<Long> allStorageElements = channelService.getAllStorageElements(idChannel);
         return ResponseEntity.ok(new GeneralResponseDto<>(null, allStorageElements));
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @DeleteMapping("/{idChannel}/{idStorage}")
     public ResponseEntity<GeneralResponseDto<DeletedStorageDto>> deleteUser(@PathVariable Long idChannel, @PathVariable Long idStorage) throws AppException {
         DeletedStorageDto deletedStorageDto = channelService.deleteStorageFromChannel(idChannel, idStorage);

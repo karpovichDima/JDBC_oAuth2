@@ -55,4 +55,6 @@ public abstract class StorageElement implements Serializable{
             joinColumns=@JoinColumn(name="storage_id", referencedColumnName="id"),
             inverseJoinColumns=@JoinColumn(name="user_id", referencedColumnName="id"))
     List<AccountEntity> listOwners;
+
+
 }

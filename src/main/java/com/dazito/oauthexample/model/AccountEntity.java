@@ -56,7 +56,7 @@ public class AccountEntity{
     @Column(name = "token_end_date", length = 128)
     private Timestamp tokenEndDate;
 
-    @ManyToMany(cascade = CascadeType.REMOVE)
+    @ManyToMany(cascade = CascadeType.PERSIST)
     @JoinTable(
             name="channel_account",
             joinColumns=@JoinColumn(name="user_id", referencedColumnName="id"),
