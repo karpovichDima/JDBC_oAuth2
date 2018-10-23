@@ -2,10 +2,7 @@ package com.dazito.oauthexample.service.impl;
 
 import com.dazito.oauthexample.dao.ChannelRepository;
 import com.dazito.oauthexample.dao.StorageRepository;
-import com.dazito.oauthexample.model.AccountEntity;
-import com.dazito.oauthexample.model.Channel;
-import com.dazito.oauthexample.model.FileEntity;
-import com.dazito.oauthexample.model.StorageElement;
+import com.dazito.oauthexample.model.*;
 import com.dazito.oauthexample.model.type.ResponseCode;
 import com.dazito.oauthexample.model.type.SomeType;
 import com.dazito.oauthexample.model.type.UserRole;
@@ -161,8 +158,7 @@ public class ChannelServiceImpl implements ChannelService {
                 filePath = Paths.get(root.toString(), uuid);
                 break;
         }
-        boolean fileOnChannel = checkStorageOnChannel(foundChannel, foundFile);
-        if (!fileOnChannel) throw new AppException("The requested object is not on the selected channel.", ResponseCode.NO_FILE_ON_CHANNEL);
+        checkStorageOnChannel(foundChannel, foundFile);
         if (!Files.exists(filePath)) throw new AppException("The path does not exist or has an error.", ResponseCode.PATH_NOT_EXIST);
 
         ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(filePath));
@@ -236,14 +232,28 @@ public class ChannelServiceImpl implements ChannelService {
         }
     }
 
-    private boolean checkStorageOnChannel(Channel foundChannel, StorageElement foundStorage) {
-        Long idFile = foundStorage.getId();
-        List<StorageElement> foundStorageElementList = foundChannel.getParents();
-        for (StorageElement element : foundStorageElementList) {
-            if (element.getId().equals(idFile)) return true;
+
+
+    private boolean checkStorageOnChannel(Channel foundChannel, StorageElement foundFile) throws AppException {
+        List<StorageElement> parents = foundFile.getParents();
+        for (StorageElement element : parents) {
+            if (element.getType() == SomeType.CHANNEL && element.getId() == foundChannel.getId()) return true;
+            if (recursForFindChannelParent(foundChannel, element)) return true;
         }
-    return false;
+        throw new AppException("The channel does not have this file.", ResponseCode.NO_FILE_ON_CHANNEL);
     }
+    private boolean recursForFindChannelParent(Channel foundChannel, StorageElement transferElement) throws AppException {
+        List<StorageElement> parents = transferElement.getParents();
+        for (StorageElement element : parents) {
+            if (element.getType() == SomeType.CHANNEL && element.getId() == foundChannel.getId()){
+                return true;
+            } else {
+                recursForFindChannelParent(foundChannel, element);
+            }
+        }
+        return false;
+    }
+
 
     private boolean changeRightsCheck(AccountEntity currentUser, Channel foundChannel) throws AppException {
         UserRole role = currentUser.getRole();

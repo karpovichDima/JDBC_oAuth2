@@ -46,6 +46,11 @@ public class ChannelController {
         return ResponseEntity.ok(new GeneralResponseDto<>(null, response));
     }
 
+
+
+
+
+
     @GetMapping("/storage/access/{idChannel:.+}")
     public ResponseEntity<GeneralResponseDto<List<Long>>> getAllStorageElements(@PathVariable Long idChannel) throws AppException {
         List<Long> allStorageElements = channelService.getAllStorageElements(idChannel);

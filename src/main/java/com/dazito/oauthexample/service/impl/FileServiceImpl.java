@@ -60,8 +60,15 @@ public class FileServiceImpl implements FileService {
         Path rootPath;
 
         rootPath = this.root;
+
+        StorageElement parent = storageRepository.findById(parentId).get();
+
+        if (!parent.getOwner().getId().equals(currentUser.getId())) {
+            throw new AppException("You are trying to upload a file where you do not have access.", ResponseCode.DO_NOT_HAVE_ACCESS);
+        }
         if (role == UserRole.USER) rootPath = Paths.get(rootReference);
         if (!Files.exists(rootPath)) throw new AppException("The path does not exist or has an error.", ResponseCode.PATH_NOT_EXIST);
+
         String extension = FilenameUtils.getExtension(originalFilename);
         String name = FilenameUtils.getBaseName(originalFilename);
         String uuidString = generateStringUuid();
