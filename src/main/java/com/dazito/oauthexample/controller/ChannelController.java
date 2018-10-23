@@ -46,7 +46,11 @@ public class ChannelController {
         return ResponseEntity.ok(new GeneralResponseDto<>(null, response));
     }
 
-
+    @GetMapping("/{idChannel:.+}/{id:.+}")
+    public ResponseEntity<Resource> download(@PathVariable Long idChannel, @PathVariable Long id) throws IOException, AppException {
+        Resource download = channelService.download(idChannel, id);
+        return ResponseEntity.ok(download);
+    }
 
 
 
@@ -55,12 +59,6 @@ public class ChannelController {
     public ResponseEntity<GeneralResponseDto<List<Long>>> getAllStorageElements(@PathVariable Long idChannel) throws AppException {
         List<Long> allStorageElements = channelService.getAllStorageElements(idChannel);
         return ResponseEntity.ok(new GeneralResponseDto<>(null, allStorageElements));
-    }
-
-    @GetMapping("/{idChannel:.+}/{id:.+}")
-    public ResponseEntity<Resource> download(@PathVariable Long idChannel, @PathVariable Long id) throws IOException, AppException {
-        Resource download = channelService.download(idChannel, id);
-        return ResponseEntity.ok(download);
     }
 
     @DeleteMapping("/{idChannel}/{idStorage}")

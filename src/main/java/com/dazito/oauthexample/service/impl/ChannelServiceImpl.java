@@ -125,7 +125,7 @@ public class ChannelServiceImpl implements ChannelService {
         boolean isHaveAccess = changeRightsCheck(currentUser, foundChannel);
         if (!isHaveAccess) throw new AppException("You do not have access to this channel",ResponseCode.DO_NOT_HAVE_ACCESS);
 
-        List<StorageElement> storageElementList = foundChannel.getParents();
+        List<StorageElement> storageElementList = foundChannel.getChildren();
         List<Long> storageElementListIds = new ArrayList<>();
 
         for (StorageElement element : storageElementList) {
