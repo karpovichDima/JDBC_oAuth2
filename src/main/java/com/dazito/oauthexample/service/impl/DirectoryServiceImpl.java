@@ -2,10 +2,7 @@ package com.dazito.oauthexample.service.impl;
 
 import com.dazito.oauthexample.dao.DirectoryRepository;
 import com.dazito.oauthexample.dao.StorageRepository;
-import com.dazito.oauthexample.model.AccountEntity;
-import com.dazito.oauthexample.model.Directory;
-import com.dazito.oauthexample.model.Organization;
-import com.dazito.oauthexample.model.StorageElement;
+import com.dazito.oauthexample.model.*;
 import com.dazito.oauthexample.model.type.ResponseCode;
 import com.dazito.oauthexample.model.type.SomeType;
 import com.dazito.oauthexample.model.type.UserRole;
@@ -116,22 +113,24 @@ public class DirectoryServiceImpl implements DirectoryService {
 
         if (type == SomeType.FILE) throw new AppException("A different type of object was expected.", ResponseCode.TYPE_MISMATCH);
 
-        boolean canChange = utilService.isPermissionsAdminOrUserIsOwner(currentUser, owner, foundStorage);
+        StorageElementWithChildren downcastFoundStorage = (StorageElementWithChildren)foundStorage;
+
+        boolean canChange = utilService.isPermissionsAdminOrUserIsOwner(currentUser, owner, downcastFoundStorage);
         if (!canChange) throw new AppException("You are not allowed to change", ResponseCode.CURRENT_USER_IS_NOT_ADMIN);
         String organizationNameCurrentUser = currentUser.getOrganization().getOrganizationName();
-        String organizationNameFound = foundStorage.getOrganization().getOrganizationName();
+        String organizationNameFound = downcastFoundStorage.getOrganization().getOrganizationName();
         utilService.isMatchesOrganization(organizationNameCurrentUser,organizationNameFound);
 
         List<StorageElement> listChildToDelete = new ArrayList<>();
-        List<StorageElement> listChildrenFoundStorage = foundStorage.getChildren();
-        listChildToDelete.add(foundStorage);
+        List<StorageElement> listChildrenFoundStorage = downcastFoundStorage.getChildren();
+        listChildToDelete.add(downcastFoundStorage);
         listChildToDelete.addAll(listChildrenFoundStorage);
         deleteChildFiles(listChildToDelete, listChildrenFoundStorage);
         storageRepository.delete(listChildToDelete);
 
         DirectoryDeletedDto directoryDeletedDto = new DirectoryDeletedDto();
         directoryDeletedDto.setId(id);
-        directoryDeletedDto.setName(foundStorage.getName());
+        directoryDeletedDto.setName(downcastFoundStorage.getName());
 //        directoryDeletedDto.setParentId(foundStorage.getParent().getId());
         return directoryDeletedDto;
     }
@@ -140,8 +139,9 @@ public class DirectoryServiceImpl implements DirectoryService {
     public void deleteChildFiles(List<StorageElement> listChildToDelete, List<StorageElement> listChildrenFoundStorage) {
         List<StorageElement> childrenElement;
         for (StorageElement element : listChildrenFoundStorage) {
-            childrenElement = element.getChildren();
-            if (childrenElement.size() != 0) {
+            if (element.getType() != SomeType.FILE) {
+                StorageElementWithChildren downcastElement = (StorageElementWithChildren) element;
+                childrenElement = downcastElement.getChildren();
                 listChildToDelete.addAll(childrenElement);
                 deleteChildFiles(listChildToDelete, childrenElement);
             }

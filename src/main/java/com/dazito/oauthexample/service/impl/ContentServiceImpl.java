@@ -68,6 +68,7 @@ public class ContentServiceImpl implements ContentService {
         }
 //        content.setParent(null);
         content.setSize(0L);
+        content.setOwner(newUser);
         content.setOrganization(organization);
 
         return content;

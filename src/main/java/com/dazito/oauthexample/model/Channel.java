@@ -10,12 +10,11 @@ import java.util.List;
 @Getter
 @Entity
 @DiscriminatorValue("CHANNEL")
-public class Channel extends StorageElement{
-
+public class Channel extends StorageElementWithChildren{
     @ManyToMany(cascade = CascadeType.REMOVE)
     @JoinTable(
             name="storage_parent",
             joinColumns=@JoinColumn(name="storage_id", referencedColumnName="id"),
             inverseJoinColumns=@JoinColumn(name="parent_id", referencedColumnName="parent_id"))
-    private List<StorageElement> storageElements;
+    private List<StorageElement> children;
 }

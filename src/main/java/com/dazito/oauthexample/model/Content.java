@@ -1,5 +1,6 @@
 package com.dazito.oauthexample.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,6 +11,6 @@ import java.util.List;
 @Getter
 @Entity
 @DiscriminatorValue("CONTENT")
-public class Content extends StorageElement {
+public class Content extends StorageElementWithChildren {
     private String root;
 }

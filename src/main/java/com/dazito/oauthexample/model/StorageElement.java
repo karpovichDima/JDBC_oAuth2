@@ -42,9 +42,7 @@ public abstract class StorageElement implements Serializable{
     @JsonIgnore
     private Organization organization;
 
-    @OneToMany(targetEntity = StorageElement.class, mappedBy = "parent")
-    @JsonIgnore
-    private List<StorageElement> children;
+
 
     @ManyToMany(cascade = CascadeType.REMOVE)
     @JoinTable(
