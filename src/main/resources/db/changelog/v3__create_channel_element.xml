@@ -8,23 +8,6 @@
 
     <changeSet id="add_table_channel" author="karpovich">
 
-        <!--<createTable tableName="channel">-->
-            <!--<column name="id" type="bigint" autoIncrement="true">-->
-                <!--<constraints primaryKey="true" nullable="false" unique="true" />-->
-            <!--</column>-->
-            <!--<column name="name" type="varchar(128)"/>-->
-            <!--<column name="owner" type="bigint">-->
-                <!--&lt;!&ndash;<constraints foreignKeyName="fk_owner" referencedTableName="account"&ndash;&gt;-->
-                             <!--&lt;!&ndash;referencedColumnNames="id" nullable="true"/>&ndash;&gt;-->
-            <!--</column>-->
-        <!--</createTable>-->
-        <!--<addForeignKeyConstraint baseColumnNames="owner"-->
-                                 <!--baseTableName="channel"-->
-                                 <!--constraintName="fk_owner"-->
-                                 <!--onDelete="CASCADE"-->
-                                 <!--referencedColumnNames="id"-->
-                                 <!--referencedTableName="account"/>-->
-
         <createTable tableName="storage_parent">
             <column name="storage_id" type="bigint"/>
             <column name="parent_id" type="bigint"/>
@@ -68,4 +51,9 @@
                                  referencedColumnNames="id"
                                  referencedTableName="account"/>
     </changeSet>
+
+    <!--<changeSet id="add_table_account_file" author="karpovich">-->
+
+    <!--</changeSet>-->
+
 </databaseChangeLog>

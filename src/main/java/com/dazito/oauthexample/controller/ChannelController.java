@@ -2,7 +2,9 @@ package com.dazito.oauthexample.controller;
 
 import com.dazito.oauthexample.dao.ChannelRepository;
 import com.dazito.oauthexample.service.ChannelService;
+import com.dazito.oauthexample.service.dto.request.DirectoryDto;
 import com.dazito.oauthexample.service.dto.request.StorageAddToChannelDto;
+import com.dazito.oauthexample.service.dto.request.UpdateStorageOnChannel;
 import com.dazito.oauthexample.service.dto.request.UserAddToChannelDto;
 import com.dazito.oauthexample.service.dto.response.*;
 import com.dazito.oauthexample.utils.exception.AppException;
@@ -40,7 +42,7 @@ public class ChannelController {
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    @PostMapping("/add/storage")
+    @PostMapping("/add/file")
     public ResponseEntity<GeneralResponseDto<StorageAddedToChannelDto>> addStorageElement(@RequestBody StorageAddToChannelDto storageAddToChannelDto) throws AppException {
         StorageAddedToChannelDto response = channelService.addStorageToChannel(storageAddToChannelDto);
         return ResponseEntity.ok(new GeneralResponseDto<>(null, response));
@@ -54,13 +56,12 @@ public class ChannelController {
 
     @GetMapping("/storage/access/{idChannel:.+}")
     public ResponseEntity<GeneralResponseDto<List<Long>>> getAllStorageElements(@PathVariable Long idChannel) throws AppException {
-        List<Long> allStorageElements = channelService.getAllStorageElements(idChannel);
+        List<Long> allStorageElements = channelService.getAllStorageElementsChannel(idChannel);
         return ResponseEntity.ok(new GeneralResponseDto<>(null, allStorageElements));
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @DeleteMapping("/{idChannel}/{idStorage}")
-    public ResponseEntity<GeneralResponseDto<DeletedStorageDto>> deleteUser(@PathVariable Long idChannel, @PathVariable Long idStorage) throws AppException {
+    public ResponseEntity<GeneralResponseDto<DeletedStorageDto>> deleteStorageFromChannel(@PathVariable Long idChannel, @PathVariable Long idStorage) throws AppException {
         DeletedStorageDto deletedStorageDto = channelService.deleteStorageFromChannel(idChannel, idStorage);
         return ResponseEntity.ok(new GeneralResponseDto<>(null, deletedStorageDto));
     }

@@ -7,7 +7,9 @@ import com.dazito.oauthexample.model.type.ResponseCode;
 import com.dazito.oauthexample.model.type.SomeType;
 import com.dazito.oauthexample.model.type.UserRole;
 import com.dazito.oauthexample.service.*;
+import com.dazito.oauthexample.service.dto.request.DirectoryDto;
 import com.dazito.oauthexample.service.dto.request.StorageAddToChannelDto;
+import com.dazito.oauthexample.service.dto.request.UpdateStorageOnChannel;
 import com.dazito.oauthexample.service.dto.request.UserAddToChannelDto;
 import com.dazito.oauthexample.service.dto.response.*;
 import com.dazito.oauthexample.utils.exception.AppException;
@@ -58,6 +60,7 @@ public class ChannelServiceImpl implements ChannelService {
         channel.setListOwners(listAccount);
         ArrayList<StorageElement> listFiles = new ArrayList<>();
         channel.setParents(listFiles);
+        channel.setOrganization(currentUser.getOrganization());
 
         channelRepository.saveAndFlush(channel);
 
@@ -123,12 +126,13 @@ public class ChannelServiceImpl implements ChannelService {
 
     @Override
     @Transactional
-    public List<Long> getAllStorageElements(Long idChannel) throws AppException {
+    public List<Long> getAllStorageElementsChannel(Long idChannel) throws AppException {
         AccountEntity currentUser = userService.getCurrentUser();
         Channel foundChannel = findById(idChannel);
 
-        boolean isHaveAccess = changeRightsCheck(currentUser, foundChannel);
-        if (!isHaveAccess) throw new AppException("You do not have access to this channel",ResponseCode.DO_NOT_HAVE_ACCESS);
+        boolean isHaveAccess = checkRightsCheck(currentUser, foundChannel);
+        if (!isHaveAccess)
+            throw new AppException("You do not have access to this channel", ResponseCode.DO_NOT_HAVE_ACCESS);
 
         List<StorageElement> storageElementList = foundChannel.getChildren();
         List<Long> storageElementListIds = new ArrayList<>();
@@ -145,8 +149,9 @@ public class ChannelServiceImpl implements ChannelService {
         AccountEntity currentUser = userService.getCurrentUser();
         Channel foundChannel = findById(idChannel);
 
-        boolean isHaveAccess = changeRightsCheck(currentUser, foundChannel);
-        if (!isHaveAccess) throw new AppException("You do not have access to this channel",ResponseCode.DO_NOT_HAVE_ACCESS);
+        boolean isHaveAccess = checkRightsCheck(currentUser, foundChannel);
+        if (!isHaveAccess)
+            throw new AppException("You do not have access to this channel", ResponseCode.DO_NOT_HAVE_ACCESS);
 
         FileEntity foundFile = fileService.findById(id);
         AccountEntity ownerFile = foundFile.getOwner();
@@ -163,8 +168,12 @@ public class ChannelServiceImpl implements ChannelService {
                 filePath = Paths.get(root.toString(), uuid);
                 break;
         }
-        checkStorageOnChannel(foundChannel, foundFile);
-        if (!Files.exists(filePath)) throw new AppException("The path does not exist or has an error.", ResponseCode.PATH_NOT_EXIST);
+        boolean onChannel = checkStorageOnChannel(foundChannel, foundFile);
+        if (!onChannel)
+            throw new AppException("Storage element is not exist on channel.", ResponseCode.NO_SUCH_ELEMENT);
+
+        if (!Files.exists(filePath))
+            throw new AppException("The path does not exist or has an error.", ResponseCode.PATH_NOT_EXIST);
 
         ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(filePath));
         return resource;
@@ -174,61 +183,152 @@ public class ChannelServiceImpl implements ChannelService {
     @Transactional
     public DeletedStorageDto deleteStorageFromChannel(Long idChannel, Long idStorage) throws AppException {
         AccountEntity currentUser = userService.getCurrentUser();
-        userService.adminRightsCheck(currentUser);
 
         StorageElement foundStorageElement = storageService.findById(idStorage);
+        Long idStorageElement = foundStorageElement.getId();
         String organizationNameFoundStorage = foundStorageElement.getOrganization().getOrganizationName();
         userService.isMatchesOrganization(organizationNameFoundStorage, currentUser);
 
         Channel foundChannel = findById(idChannel);
-        checkStorageOnChannel(foundChannel, foundStorageElement);
+        boolean onChannel = checkStorageOnChannel(foundChannel, foundStorageElement);
+        if (!onChannel)
+            throw new AppException("Storage element is not exist on channel.", ResponseCode.NO_SUCH_ELEMENT);
 
-        List<StorageElement> storageChildrenFirstLvl = foundChannel.getChildren();
-        String foundStorageElementName = null;
-        SomeType typeFoundStorage = foundStorageElement.getType();
-
-        switch (typeFoundStorage) {
-            case DIRECTORY:
-                break;
-            case FILE:
-                foundStorageElementName = foundStorageElement.getName();
-                storageChildrenFirstLvl.remove(foundStorageElement);
-                channelRepository.saveAndFlush(foundChannel);
+        if (foundStorageElement.getType() == SomeType.FILE) {
+            List<StorageElement> parents = foundStorageElement.getParents();
+            for (StorageElement element : parents) {
+                StorageElementWithChildren castElement = (StorageElementWithChildren) element;
+                List<StorageElement> children = castElement.getChildren();
+                children.remove(foundStorageElement);
+            }
+            channelRepository.saveAndFlush(foundChannel);
+            return responseStorageDeleteFromChannel(idStorageElement);
         }
+        StorageElement foundDirectory = storageService.findById(idStorageElement);
+        storageRepository.delete(foundDirectory);
+        return responseStorageDeleteFromChannel(idStorageElement);
+    }
 
+    private DeletedStorageDto responseStorageDeleteFromChannel(Long idStorageElement) {
         DeletedStorageDto deletedStorageDto = new DeletedStorageDto();
-        deletedStorageDto.setIdDeletedStorage(idStorage);
-        deletedStorageDto.setNameDeletedStorage(foundStorageElementName);
+        deletedStorageDto.setIdDeletedStorage(idStorageElement);
         return deletedStorageDto;
     }
 
+    @Override
+    @Transactional
+    public DirectoryCreatedDto createDirectory(DirectoryDto directoryDto) throws AppException {
+        AccountEntity currentUser = userService.getCurrentUser();
+        Long newParentId = directoryDto.getNewParentId();
+        StorageElement foundParent = findById(newParentId);
+        String organizationNameFoundStorage = foundParent.getOrganization().getOrganizationName();
+        userService.isMatchesOrganization(organizationNameFoundStorage, currentUser);
 
+        //TO ADD CHECK RIGHT
 
+        Directory directory = new Directory();
+        directory.setName(directoryDto.getNewName());
+        directory.setOrganization(currentUser.getOrganization());
+        directory.setOwner(currentUser);
+        directory.setOwner(currentUser);
 
+        Channel channelByStorage = findChannelByStorage(foundParent);
 
+        StorageElementWithChildren castFoundParent = (StorageElementWithChildren) foundParent;
+
+        List<StorageElement> children = castFoundParent.getChildren();
+        if (children == null) children = new ArrayList<>();
+        children.add(directory);
+
+        channelRepository.saveAndFlush(channelByStorage);
+
+        DirectoryCreatedDto directoryCreatedDto = new DirectoryCreatedDto();
+        directoryCreatedDto.setName(directoryDto.getNewName());
+        directoryCreatedDto.setParentId(foundParent.getId());
+        return directoryCreatedDto;
+    }
+
+    private Channel findChannelByStorage(StorageElement foundStorage) throws AppException {
+        SomeType type = foundStorage.getType();
+        switch (type) {
+            case CONTENT:
+                throw new AppException("The type cannot be a Content.", ResponseCode.TYPE_MISMATCH);
+            case FILE:
+                throw new AppException("The type cannot be a File.", ResponseCode.TYPE_MISMATCH);
+            case CHANNEL:
+                return (Channel) foundStorage;
+            case DIRECTORY:
+                return recursForFindChannelParent(foundStorage);
+        }
+        throw new AppException("Channel is not found.", ResponseCode.NO_SUCH_ELEMENT);
+    }
+
+    private Channel recursForFindChannelParent(StorageElement foundStorage) throws AppException {
+        List<StorageElement> parents = foundStorage.getParents();
+        for (StorageElement element : parents) {
+            SomeType type = element.getType();
+            if (type == SomeType.CHANNEL) return (Channel) element;
+            if (type == SomeType.FILE) continue;
+            recursForFindChannelParent(element);
+        }
+        return null;
+    }
+
+    @Override
+    @Transactional
+    public DirectoryCreatedDto updateStorage(UpdateStorageOnChannel updateStorageOnChannel) throws AppException {
+        Long idChannel = updateStorageOnChannel.getIdChannel();
+        Long idEditStorage = updateStorageOnChannel.getIdEditStorage();
+        Long idNewParent = updateStorageOnChannel.getIdNewParent();
+        Long idCurrentParent = updateStorageOnChannel.getIdCurrentParent();
+        if (idCurrentParent == null) idCurrentParent = idChannel;
+
+        AccountEntity currentUser = userService.getCurrentUser();
+        Channel foundChannel = findById(idChannel);
+        checkRightsCheck(currentUser, foundChannel);
+        StorageElement foundStorage = storageService.findById(idEditStorage);
+        checkStorageOnChannel(foundChannel, foundStorage);
+
+        StorageElementWithChildren currentParent = findById(idCurrentParent);
+        StorageElementWithChildren newParent = (StorageElementWithChildren) storageService.findById(idNewParent);
+        List<StorageElement> childrenCurrentParent = currentParent.getChildren();
+        childrenCurrentParent.remove(foundStorage);
+        List<StorageElement> childrenNewParent = newParent.getChildren();
+        childrenNewParent.add(foundStorage);
+
+        channelRepository.saveAndFlush(foundChannel);
+
+        DirectoryCreatedDto directoryCreatedDto = new DirectoryCreatedDto();
+        directoryCreatedDto.setName(foundStorage.getName());
+        directoryCreatedDto.setParentId(idNewParent);
+        return directoryCreatedDto;
+    }
 
     private boolean checkStorageOnChannel(Channel foundChannel, StorageElement foundFile) throws AppException {
         List<StorageElement> parents = foundFile.getParents();
         for (StorageElement element : parents) {
             if (element.getType() == SomeType.CHANNEL && element.getId() == foundChannel.getId()) return true;
-            if (recursForFindChannelParent(foundChannel, element)) return true;
+            if (recursForFindChannelParent(element, foundChannel)) return true;
         }
-        throw new AppException("The channel does not have this file.", ResponseCode.NO_FILE_ON_CHANNEL);
+        if (parents.isEmpty()) {
+            if (foundFile.getType() == SomeType.CHANNEL && foundFile.getId() == foundChannel.getId()) return true;
+        }
+        return false;
     }
 
-    private boolean recursForFindChannelParent(Channel foundChannel, StorageElement transferElement) throws AppException {
+    private boolean recursForFindChannelParent(StorageElement transferElement, Channel foundChannel) throws AppException {
         List<StorageElement> parents = transferElement.getParents();
         for (StorageElement element : parents) {
-            if (element.getType() == SomeType.CHANNEL && element.getId() == foundChannel.getId()){
+            if (element.getType() == SomeType.CHANNEL && element.getId() == foundChannel.getId()) {
                 return true;
             } else {
-                recursForFindChannelParent(foundChannel, element);
+                recursForFindChannelParent(element, foundChannel);
             }
         }
         return false;
     }
 
-    private boolean changeRightsCheck(AccountEntity currentUser, Channel foundChannel) throws AppException {
+    private boolean checkRightsCheck(AccountEntity currentUser, Channel foundChannel) throws AppException {
         UserRole role = currentUser.getRole();
         switch (role) {
             case USER:
@@ -244,12 +344,14 @@ public class ChannelServiceImpl implements ChannelService {
                 utilService.isMatchesOrganization(organizationNameCurrentUser, organizationNameOwnerChannel);
                 return true;
         }
-    return true;
+        return true;
     }
 
     public Channel findById(Long id) throws AppException {
         Optional<Channel> foundOptional = channelRepository.findById(id);
-        if (!foundOptional.isPresent()) throw new AppException("No objects were found by your request.", ResponseCode.NO_SUCH_ELEMENT);
+        if (!foundOptional.isPresent())
+            throw new AppException("No objects were found by your request.", ResponseCode.NO_SUCH_ELEMENT);
         return foundOptional.get();
     }
+
 }

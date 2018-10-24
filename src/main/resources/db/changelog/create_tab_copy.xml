@@ -68,8 +68,6 @@
                                  referencedColumnNames="id"
                                  referencedTableName="organization"/>
 
-
-
         <createTable tableName="clientdetails">
             <column name="appId" type="VARCHAR(255)">
                 <constraints primaryKey="true"/>
