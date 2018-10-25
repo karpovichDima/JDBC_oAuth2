@@ -17,7 +17,7 @@ public class StorageElementWithChildren extends StorageElement {
 //    private List<StorageElement> children;
 
     @JsonIgnore
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany
     @JoinTable(
             name="parent_storage_id",
             joinColumns=@JoinColumn(name="parent_id", referencedColumnName="id"),

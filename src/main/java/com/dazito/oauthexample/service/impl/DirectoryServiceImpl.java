@@ -42,7 +42,7 @@ public class DirectoryServiceImpl implements DirectoryService {
         AccountEntity currentUser = userServices.getCurrentUser();
         String name = directoryDto.getNewName();
         Long parent_id = directoryDto.getNewParentId();
-        String organizationName = currentUser.getOrganization().getOrganizationName();
+        Organization organization = currentUser.getOrganization();
         UserRole role = currentUser.getRole();
         StorageElement foundParentElement;
 
@@ -51,7 +51,7 @@ public class DirectoryServiceImpl implements DirectoryService {
         directory.setSize(0L);
         directory.setOrganization(currentUser.getOrganization());
         if (parent_id == 0) {
-            foundParentElement = contentService.findContentForAdmin(organizationName);
+            foundParentElement = contentService.findContentForAdmin(organization);
         } else {
             foundParentElement = storageService.findById(parent_id);
             SomeType type = foundParentElement.getType();

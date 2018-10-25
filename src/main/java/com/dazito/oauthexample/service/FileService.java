@@ -33,7 +33,7 @@ public interface FileService{
      * @param organization this is the organization by which we will search for the storage element
      * @return StorageElement is found object
      */
-    StorageElement findContentDependingOnTheParent(Long parentId, Organization organization);
+    StorageElement findContentDependingOnTheParent(Long parentId, Organization organization) throws AppException;
 
     /**
      * generate uuid and convert to string
@@ -54,7 +54,7 @@ public interface FileService{
      * @param uuid is uuid of the file we downloaded
      * @return Path is a path to the file
      */
-    Path setFilePathDependingOnTheUserRole(AccountEntity currentUser, String uuid);
+    Path setFilePathDependingOnTheUserRole(AccountEntity currentUser, String uuid) throws AppException;
 
     /**
      * File search by id

@@ -79,5 +79,11 @@ public class ChannelController {
         return ResponseEntity.ok(new GeneralResponseDto<>(null, directoryCreatedDto));
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @DeleteMapping("/{idChannel}")
+    public ResponseEntity<GeneralResponseDto<DeletedStorageDto>> deleteStorageFromChannel(@PathVariable Long idChannel) throws AppException {
+        DeletedStorageDto deletedStorageDto = channelService.deleteChannel(idChannel);
+        return ResponseEntity.ok(new GeneralResponseDto<>(null, deletedStorageDto));
+    }
 
 }

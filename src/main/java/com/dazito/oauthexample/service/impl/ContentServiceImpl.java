@@ -6,6 +6,7 @@ import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.model.Content;
 import com.dazito.oauthexample.model.Organization;
 import com.dazito.oauthexample.model.StorageElement;
+import com.dazito.oauthexample.model.type.SomeType;
 import com.dazito.oauthexample.model.type.UserRole;
 import com.dazito.oauthexample.service.*;
 import com.dazito.oauthexample.service.dto.request.ContentUpdateDto;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.File;
+import java.lang.reflect.Array;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +69,10 @@ public class ContentServiceImpl implements ContentService {
                 break;
         }
 //        content.setParent(null);
+        List<AccountEntity> owners = new ArrayList<>();
+        owners.add(newUser);
+        content.setListOwners(owners);
+
         content.setSize(0L);
         content.setOwner(newUser);
         content.setOrganization(organization);
@@ -123,17 +129,38 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public Content findContentForAdmin(String organizationName) {
-        Optional<Content> foundOptional = contentRepository.findContentByOwnerIsNullAndOrganization(organizationName);
+    public Content findContentForAdmin(Organization organization) {
+        Optional<Content> foundOptional = contentRepository.findContentByOwnerIsNullAndOrganization(organization);
         return foundOptional.orElse(null);
     }
 
     @Override
     public void delete(List<StorageElement> children) {
-        if(children.size() == 0) return;
+        if (children.size() == 0) return;
         List<StorageElement> listChildToDelete = new ArrayList<>();
         listChildToDelete.addAll(children);
         directoryService.deleteChildFiles(listChildToDelete, children);
         storageRepository.delete(listChildToDelete);
+    }
+
+    public Content findContentByUser(AccountEntity user) throws AppException {
+        StorageElement foundContent = contentRepository.findByTypeAndOwner(SomeType.CONTENT, user);
+        if (foundContent == null) return null;
+        return (Content) foundContent;
+    }
+
+    @Override
+    public void saveContent(Content newContent) throws AppException {
+//        AccountEntity owner = newContent.getOwner();
+//        Content foundContent = findContentByUser(owner.getId());
+        storageRepository.saveAndFlush(newContent);
+//        if (foundContent == null) {
+//            UserRole role = owner.getRole();
+//            if (role == UserRole.ADMIN) {
+//                String organizationName = owner.getOrganization().getOrganizationName();
+//                Content contentForAdmin = findContentForAdmin(organizationName);
+//                if (contentForAdmin != null){
+//                    throw new AppException("The administrators of this company already have content", ResponseCode.ALREADY_EXIST);
+//                } else {
     }
 }

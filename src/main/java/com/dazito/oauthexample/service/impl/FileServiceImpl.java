@@ -56,7 +56,7 @@ public class FileServiceImpl implements FileService {
         AccountEntity currentUser = userServices.getCurrentUser();
         Organization organization = currentUser.getOrganization();
         UserRole role = currentUser.getRole();
-        String rootReference = currentUser.getContent().getRoot();
+        String rootReference = contentService.findContentByUser(currentUser).getRoot();
         Path rootPath;
 
         rootPath = this.root;
@@ -85,6 +85,7 @@ public class FileServiceImpl implements FileService {
         fileEntity.setOrganization(currentUser.getOrganization());
 
         StorageElement foundContent = findContentDependingOnTheParent(parentId, organization);
+        if (foundContent == null) foundContent = contentService.createContent(currentUser);
 
         List<StorageElement> parents = new ArrayList<>();
         parents.add(foundContent);
@@ -131,7 +132,7 @@ public class FileServiceImpl implements FileService {
         utilService.isMatchesOrganization(organizationNameCurrentUser,organizationNameFound);
 
         UserRole role = currentUser.getRole();
-        String rootReference = currentUser.getContent().getRoot();
+        String rootReference = contentService.findContentByUser(currentUser).getRoot();
         Path rootPath;
         rootPath = this.root;
         if (role == UserRole.USER) rootPath = Paths.get(rootReference);
@@ -211,7 +212,7 @@ public class FileServiceImpl implements FileService {
 
         Path rootContent;
         if (role.equals(UserRole.USER)) {
-            rootContent = Paths.get(currentUser.getContent().getRoot());
+            rootContent = Paths.get(contentService.findContentByUser(currentUser).getRoot());
         } else {
             rootContent = root;
         }
@@ -227,14 +228,15 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public StorageElement findContentDependingOnTheParent(Long parentId, Organization organization) {
+    public StorageElement findContentDependingOnTheParent(Long parentId, Organization organization) throws AppException {
         StorageElement foundParent;
         if (parentId != 0) {
             foundParent = storageRepository.findById(parentId).get();
             return  foundParent;
         } else {
             AccountEntity currentUser = userServices.getCurrentUser();
-            foundParent = currentUser.getContent();
+            foundParent = contentService.findContentByUser(currentUser);
+            if (foundParent == null) foundParent = contentService.findContentForAdmin(organization);
             return foundParent;
         }
     }
@@ -261,11 +263,11 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public Path setFilePathDependingOnTheUserRole(AccountEntity currentUser, String uuid) {
+    public Path setFilePathDependingOnTheUserRole(AccountEntity currentUser, String uuid) throws AppException {
         UserRole role = currentUser.getRole();
         Path filePath;
         if (role.equals(UserRole.USER)) {
-            filePath = Paths.get(currentUser.getContent().getRoot(), uuid);
+            filePath = Paths.get(contentService.findContentByUser(currentUser).getRoot(), uuid);
         } else {
             filePath = Paths.get(root.toString(), uuid);
         }
@@ -296,5 +298,6 @@ public class FileServiceImpl implements FileService {
         if (!checkOnNull) return null;
         return fileOptional.get();
     }
+
 
 }

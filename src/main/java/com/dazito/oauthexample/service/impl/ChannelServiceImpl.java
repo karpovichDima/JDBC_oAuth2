@@ -40,6 +40,8 @@ public class ChannelServiceImpl implements ChannelService {
     @Autowired
     ChannelRepository channelRepository;
     @Autowired
+    ContentService contentService;
+    @Autowired
     StorageService storageService;
     @Autowired
     UtilService utilService;
@@ -162,7 +164,7 @@ public class ChannelServiceImpl implements ChannelService {
 
         switch (roleOwnerFile) {
             case USER:
-                filePath = Paths.get(ownerFile.getContent().getRoot(), uuid);
+                filePath = Paths.get(contentService.findContentByUser(ownerFile).getRoot(), uuid);
                 break;
             case ADMIN:
                 filePath = Paths.get(root.toString(), uuid);
@@ -206,7 +208,7 @@ public class ChannelServiceImpl implements ChannelService {
         }
         List<StorageElement> listToDelete = new ArrayList<>();
 
-        resursForCreateListToDelete(listToDelete, foundChannel, foundStorageElement);
+        recursionForCreateListToDelete(listToDelete, foundChannel, foundStorageElement);
         deleteStorageFromParents(listToDelete, foundChannel);
         removeTopmostItem(foundStorageElement);
 
@@ -244,6 +246,20 @@ public class ChannelServiceImpl implements ChannelService {
     }
 
     @Override
+    public DeletedStorageDto deleteChannel(Long idChannel) throws AppException {
+        AccountEntity currentUser = userService.getCurrentUser();
+        Channel channel = (Channel)findById(idChannel);
+        String name = channel.getName();
+        String organizationNameChannel = channel.getOrganization().getOrganizationName();
+        userService.isMatchesOrganization(organizationNameChannel, currentUser);
+        channelRepository.delete(idChannel);
+
+        DeletedStorageDto deletedStorageDto = new DeletedStorageDto();
+        deletedStorageDto.setNameDeletedStorage(name);
+        return deletedStorageDto;
+    }
+
+    @Override
     @Transactional
     public DirectoryCreatedDto createDirectory(DirectoryDto directoryDto) throws AppException {
         AccountEntity currentUser = userService.getCurrentUser();
@@ -258,7 +274,8 @@ public class ChannelServiceImpl implements ChannelService {
         directory.setName(directoryDto.getNewName());
         directory.setOrganization(currentUser.getOrganization());
         directory.setOwner(currentUser);
-        directory.setOwner(currentUser);
+
+        storageRepository.saveAndFlush(directory);
 
         Channel channelByStorage = findChannelByStorage(foundParent);
 
@@ -268,6 +285,7 @@ public class ChannelServiceImpl implements ChannelService {
         if (children == null) children = new ArrayList<>();
         children.add(directory);
 
+        ((StorageElementWithChildren) foundParent).setChildren(children);
         channelRepository.saveAndFlush(channelByStorage);
 
         DirectoryCreatedDto directoryCreatedDto = new DirectoryCreatedDto();
@@ -304,7 +322,7 @@ public class ChannelServiceImpl implements ChannelService {
         }
     }
 
-    private void resursForCreateListToDelete(List<StorageElement> listToDelete, StorageElement foundChannel, StorageElement foundStorageElement) {
+    private void recursionForCreateListToDelete(List<StorageElement> listToDelete, StorageElement foundChannel, StorageElement foundStorageElement) {
         List<StorageElement> children = null;
         if (foundStorageElement instanceof StorageElementWithChildren) {
             StorageElementWithChildren castStorage = (StorageElementWithChildren)foundStorageElement;
@@ -312,12 +330,11 @@ public class ChannelServiceImpl implements ChannelService {
             if (children.isEmpty()) return;
         }
         for (StorageElement child : children) {
-            // узнать является ли child частью заданного канала и если да, то добавить в listToDelete, если нет, return
             boolean partChannel = isPartChannel(child, foundChannel);
             if (partChannel) {
                 listToDelete.add(child);
                 if (child instanceof StorageElementWithChildren) {
-                    resursForCreateListToDelete(listToDelete, foundChannel, child);
+                    recursionForCreateListToDelete(listToDelete, foundChannel, child);
                 }
             }
         }

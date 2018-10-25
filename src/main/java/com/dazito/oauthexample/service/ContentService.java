@@ -2,6 +2,7 @@ package com.dazito.oauthexample.service;
 
 import com.dazito.oauthexample.model.AccountEntity;
 import com.dazito.oauthexample.model.Content;
+import com.dazito.oauthexample.model.Organization;
 import com.dazito.oauthexample.model.StorageElement;
 import com.dazito.oauthexample.service.dto.request.ContentUpdateDto;
 import com.dazito.oauthexample.service.dto.response.ContentUpdatedDto;
@@ -54,14 +55,18 @@ public interface ContentService {
 
     /**
      * search for content that belongs to all administrators
-     * @param organizationName is organizationName by which we will to find content
+     * @param organization is organizationName by which we will to find content
      * @return Content is root point object
      */
-    Content findContentForAdmin(String organizationName);
+    Content findContentForAdmin(Organization organization);
 
     /**
      * remove all children from content
      * @param children this is a list of children content
      */
     void delete(List<StorageElement> children);
+
+    Content findContentByUser(AccountEntity user) throws AppException;
+
+    void saveContent(Content newContent) throws AppException;
 }

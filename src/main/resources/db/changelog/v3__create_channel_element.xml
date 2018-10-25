@@ -19,16 +19,14 @@
         <addForeignKeyConstraint baseColumnNames="storage_id"
                                  baseTableName="parent_storage_id"
                                  constraintName="fk_storage_element"
-                                 onDelete="CASCADE"
-                                 onUpdate="CASCADE"
+                                 onDelete="SET NULL"
                                  referencedColumnNames="id"
                                  referencedTableName="storage_element"/>
 
         <addForeignKeyConstraint baseColumnNames="parent_id"
                                  baseTableName="parent_storage_id"
                                  constraintName="fk_storage_parent"
-                                 onDelete="CASCADE"
-                                 onUpdate="CASCADE"
+                                 onDelete="SET NULL"
                                  referencedColumnNames="id"
                                  referencedTableName="storage_element"/>
 
@@ -44,16 +42,14 @@
         <addForeignKeyConstraint baseColumnNames="storage_id"
                                  baseTableName="channel_account"
                                  constraintName="fk_storage_account"
-                                 onDelete="CASCADE"
-                                 onUpdate="CASCADE"
+                                 onDelete="SET NULL"
                                  referencedColumnNames="id"
                                  referencedTableName="storage_element"/>
 
         <addForeignKeyConstraint baseColumnNames="user_id"
                                  baseTableName="channel_account"
                                  constraintName="fk_account_channel"
-                                 onDelete="CASCADE"
-                                 onUpdate="CASCADE"
+                                 onDelete="SET NULL"
                                  referencedColumnNames="id"
                                  referencedTableName="account"/>
     </changeSet>
@@ -71,16 +67,14 @@
         <addForeignKeyConstraint baseColumnNames="account_entity_id"
                                  baseTableName="account_files"
                                  constraintName="fk_files_account"
-                                 onDelete="CASCADE"
-                                 onUpdate="CASCADE"
+                                 onDelete="SET NULL"
                                  referencedColumnNames="id"
                                  referencedTableName="account"/>
 
         <addForeignKeyConstraint baseColumnNames="files_id"
                                  baseTableName="account_files"
                                  constraintName="fk_account_files"
-                                 onDelete="CASCADE"
-                                 onUpdate="CASCADE"
+                                 onDelete="SET NULL"
                                  referencedColumnNames="id"
                                  referencedTableName="storage_element"/>
     </changeSet>

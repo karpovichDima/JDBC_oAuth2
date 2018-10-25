@@ -7,10 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.security.Principal;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -19,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "account")
-public class AccountEntity{
+public class AccountEntity {
 
     @Id
     @GeneratedValue
@@ -36,7 +33,7 @@ public class AccountEntity{
     private UserRole role;
 
     @ManyToOne(targetEntity = Organization.class)
-    @JoinColumn(name="organization_id")
+    @JoinColumn(name = "organization_id")
     private Organization organization;
 
     private Boolean isActivated;
@@ -46,10 +43,6 @@ public class AccountEntity{
     @OneToMany
     private List<FileEntity> files;
 
-    @OneToOne(mappedBy="owner")
-//    @JoinColumn(name="content")
-    private Content content;
-
     @Column(name = "uuid", length = 128)
     private String uuid;
 
@@ -58,12 +51,12 @@ public class AccountEntity{
 
     @ManyToMany
     @JoinTable(
-            name="channel_account",
-            joinColumns=@JoinColumn(name="user_id", referencedColumnName="id"),
-            inverseJoinColumns=@JoinColumn(name="storage_id", referencedColumnName="id"))
+            name = "channel_account",
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "storage_id", referencedColumnName = "id"))
     private List<Channel> channelList;
 
-    AccountEntity(String username, String password){
+    AccountEntity(String username, String password) {
         this.username = username;
         this.password = password;
     }

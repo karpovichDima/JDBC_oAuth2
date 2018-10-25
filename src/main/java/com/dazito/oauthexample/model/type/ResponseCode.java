@@ -12,5 +12,6 @@ public enum ResponseCode {
     NO_SUCH_ELEMENT,
     DO_NOT_HAVE_ACCESS,
     NO_FILE_ON_CHANNEL,
-    CONTENT_NOT_EXIST
+    CONTENT_NOT_EXIST,
+    ALREADY_EXIST
 }

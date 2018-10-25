@@ -47,24 +47,21 @@
         <addForeignKeyConstraint baseColumnNames="organization_id"
                                  baseTableName="account"
                                  constraintName="fk_organization"
-                                 onDelete="CASCADE"
-                                 onUpdate="CASCADE"
+                                 onDelete="SET NULL"
                                  referencedColumnNames="id"
                                  referencedTableName="organization"/>
 
         <addForeignKeyConstraint baseColumnNames="user_id"
                                  baseTableName="storage_element"
                                  constraintName="fk_account_user_id"
-                                 onDelete="CASCADE"
-                                 onUpdate="CASCADE"
+                                 onDelete="SET NULL"
                                  referencedColumnNames="id"
                                  referencedTableName="account"/>
 
         <addForeignKeyConstraint baseColumnNames="organization_id"
                                  baseTableName="storage_element"
                                  constraintName="fk_organization_storage"
-                                 onDelete="CASCADE"
-                                 onUpdate="CASCADE"
+                                 onDelete="SET NULL"
                                  referencedColumnNames="id"
                                  referencedTableName="organization"/>
 

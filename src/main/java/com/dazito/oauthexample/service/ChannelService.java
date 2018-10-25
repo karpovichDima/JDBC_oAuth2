@@ -28,4 +28,6 @@ public interface ChannelService {
     DirectoryCreatedDto createDirectory(DirectoryDto directoryDto) throws AppException;
 
     DirectoryCreatedDto updateStorage(UpdateStorageOnChannel updateStorageOnChannel) throws AppException;
+
+    DeletedStorageDto deleteChannel(Long idChannel) throws AppException;
 }

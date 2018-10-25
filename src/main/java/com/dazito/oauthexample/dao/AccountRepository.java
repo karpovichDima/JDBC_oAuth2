@@ -17,19 +17,6 @@ public interface AccountRepository extends JpaRepository<AccountEntity, Long> {
 
     Optional<AccountEntity> findById(Long id);
     Optional<AccountEntity> findByUsername(String username);
-    Collection<AccountEntity> findByRole(String role);
     Optional<AccountEntity> findUserByEmail(String email);
     Optional<AccountEntity> findUserByUuid(String uuid);
-
-//    @Query("select a from AccountEntity a left join a.channelList c where c.a")
-
-
-
-    // никогда не удалять это запрос
-    Optional<AccountEntity> findOneByRoleAndContentIsNotNull(UserRole role);
-
-    Long countAccountEntitiesByRoleAndContentIsNotNullAndOrganization_OrganizationName(UserRole role,
-                                                                                         String organizationName);
-
-
 }

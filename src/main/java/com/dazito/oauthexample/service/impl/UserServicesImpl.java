@@ -118,7 +118,7 @@ public class UserServicesImpl implements UserService {
             String encodedPassword = getCurrentUser().getPassword();
             isMatchesPassword(password, encodedPassword);
 
-            List<StorageElement> children = currentUser.getContent().getChildren();
+            List<StorageElement> children = contentService.findContentByUser(currentUser).getChildren();
             AccountEntity account = findUserByEmail(email);
             accountRepository.delete(account);
             if (account.getRole().equals(UserRole.USER)) contentService.delete(children);
@@ -130,7 +130,7 @@ public class UserServicesImpl implements UserService {
 
         UserRole role = foundedUser.getRole();
         if (role == UserRole.USER) {
-            List<StorageElement> children = foundedUser.getContent().getChildren();
+            List<StorageElement> children = contentService.findContentByUser(currentUser).getChildren();
             accountRepository.delete(foundedUser);
             contentService.delete(children);
         } else {
@@ -167,7 +167,6 @@ public class UserServicesImpl implements UserService {
         if (getCountStorageWithOwnerNullAndNotNullOrganization() < 1 || role.equals(UserRole.USER)) {
             rootContent = contentService.createContent(newUser);
         }
-        newUser.setContent(rootContent);
         String uuid = UUID.randomUUID() + "";
         Date date = new Date();
         LocalDateTime utc = LocalDateTime.from(date.toInstant().atZone(ZoneId.of("UTC"))).plusDays(1);
@@ -175,6 +174,7 @@ public class UserServicesImpl implements UserService {
         newUser.setUuid(uuid);
         newUser.setTokenEndDate(timestamp);
         accountRepository.saveAndFlush(newUser);
+        contentService.saveContent(rootContent);
         mailService.emailPreparation(newUser);
         return responsePersonalDataDto(newUser);
     }
@@ -356,5 +356,6 @@ public class UserServicesImpl implements UserService {
     public Long getCountStorageWithOwnerNullAndNotNullOrganization() {
         return storageRepository.countStorageElementByOwnerIsNullAndOrganizationIsNotNull();
     }
+
 
 }
