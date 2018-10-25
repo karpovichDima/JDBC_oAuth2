@@ -42,14 +42,14 @@ public abstract class StorageElement implements Serializable{
     @JsonIgnore
     private Organization organization;
 
-    @ManyToMany(cascade = CascadeType.REMOVE)
+    @ManyToMany(cascade = CascadeType.DETACH)
     @JoinTable(
-            name="storage_parent",
+            name="parent_storage_id",
             joinColumns=@JoinColumn(name="storage_id", referencedColumnName="id"),
             inverseJoinColumns=@JoinColumn(name="parent_id", referencedColumnName="id"))
     private List<StorageElement> parents;
 
-    @ManyToMany(cascade = CascadeType.REMOVE)
+    @ManyToMany
     @JoinTable(
             name="channel_account",
             joinColumns=@JoinColumn(name="storage_id", referencedColumnName="id"),

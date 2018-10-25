@@ -8,13 +8,16 @@
 
     <changeSet id="add_table_channel" author="karpovich">
 
-        <createTable tableName="storage_parent">
+        <createTable tableName="parent_storage_id">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" unique="true"/>
+            </column>
             <column name="storage_id" type="bigint"/>
             <column name="parent_id" type="bigint"/>
         </createTable>
 
         <addForeignKeyConstraint baseColumnNames="storage_id"
-                                 baseTableName="storage_parent"
+                                 baseTableName="parent_storage_id"
                                  constraintName="fk_storage_element"
                                  onDelete="CASCADE"
                                  onUpdate="CASCADE"
@@ -22,7 +25,7 @@
                                  referencedTableName="storage_element"/>
 
         <addForeignKeyConstraint baseColumnNames="parent_id"
-                                 baseTableName="storage_parent"
+                                 baseTableName="parent_storage_id"
                                  constraintName="fk_storage_parent"
                                  onDelete="CASCADE"
                                  onUpdate="CASCADE"
@@ -31,6 +34,9 @@
 
 
         <createTable tableName="channel_account">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" unique="true"/>
+            </column>
             <column name="storage_id" type="bigint"/>
             <column name="user_id" type="bigint"/>
         </createTable>
@@ -52,8 +58,31 @@
                                  referencedTableName="account"/>
     </changeSet>
 
-    <!--<changeSet id="add_table_account_file" author="karpovich">-->
 
-    <!--</changeSet>-->
+    <changeSet id="add_table_account_files" author="karpovich">
+        <createTable tableName="account_files">
+            <column name="id" type="bigint" autoIncrement="true">
+            <constraints primaryKey="true" nullable="false" unique="true"/>
+        </column>
+            <column name="account_entity_id" type="bigint"/>
+            <column name="files_id" type="bigint"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="account_entity_id"
+                                 baseTableName="account_files"
+                                 constraintName="fk_files_account"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="account"/>
+
+        <addForeignKeyConstraint baseColumnNames="files_id"
+                                 baseTableName="account_files"
+                                 constraintName="fk_account_files"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="storage_element"/>
+    </changeSet>
 
 </databaseChangeLog>

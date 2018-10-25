@@ -46,7 +46,7 @@ public class AccountEntity{
     @OneToMany
     private List<FileEntity> files;
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy="owner")
+    @OneToOne(mappedBy="owner")
 //    @JoinColumn(name="content")
     private Content content;
 
@@ -56,7 +56,7 @@ public class AccountEntity{
     @Column(name = "token_end_date", length = 128)
     private Timestamp tokenEndDate;
 
-    @ManyToMany(cascade = CascadeType.PERSIST)
+    @ManyToMany
     @JoinTable(
             name="channel_account",
             joinColumns=@JoinColumn(name="user_id", referencedColumnName="id"),

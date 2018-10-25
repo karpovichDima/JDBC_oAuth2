@@ -185,7 +185,6 @@ public class ChannelServiceImpl implements ChannelService {
         AccountEntity currentUser = userService.getCurrentUser();
 
         StorageElement foundStorageElement = storageService.findById(idStorage);
-        Long idStorageElement = foundStorageElement.getId();
         String organizationNameFoundStorage = foundStorageElement.getOrganization().getOrganizationName();
         userService.isMatchesOrganization(organizationNameFoundStorage, currentUser);
 
@@ -194,19 +193,79 @@ public class ChannelServiceImpl implements ChannelService {
         if (!onChannel)
             throw new AppException("Storage element is not exist on channel.", ResponseCode.NO_SUCH_ELEMENT);
 
-        if (foundStorageElement.getType() == SomeType.FILE) {
+        if(!(foundStorageElement instanceof StorageElementWithChildren)){
             List<StorageElement> parents = foundStorageElement.getParents();
-            for (StorageElement element : parents) {
-                StorageElementWithChildren castElement = (StorageElementWithChildren) element;
-                List<StorageElement> children = castElement.getChildren();
+            for (StorageElement parent : parents) {
+                boolean isPartChannel = checkStorageOnChannel(foundChannel, parent);
+                if (!isPartChannel) continue;
+                StorageElementWithChildren castedParent = (StorageElementWithChildren) parent;
+                List<StorageElement> children = castedParent.getChildren();
                 children.remove(foundStorageElement);
+                channelRepository.saveAndFlush(foundChannel);
             }
-            channelRepository.saveAndFlush(foundChannel);
-            return responseStorageDeleteFromChannel(idStorageElement);
+            DeletedStorageDto deletedStorageDto = new DeletedStorageDto();
+            deletedStorageDto.setNameDeletedStorage("Deleted");
+            return deletedStorageDto;
         }
-        StorageElement foundDirectory = storageService.findById(idStorageElement);
-        storageRepository.delete(foundDirectory);
-        return responseStorageDeleteFromChannel(idStorageElement);
+        List<StorageElement> listToDelete = new ArrayList<>();
+
+        // формируем список ддля прохода
+        resursForCreateListToDelete(listToDelete, foundChannel, foundStorageElement);
+
+        deleteStorageFromParents(listToDelete, foundChannel);
+
+        DeletedStorageDto deletedStorageDto = new DeletedStorageDto();
+        deletedStorageDto.setNameDeletedStorage("Deleted");
+        return deletedStorageDto;
+    }
+
+    private void deleteStorageFromParents(List<StorageElement> listToDelete, Channel foundChannel) {
+        for (StorageElement element : listToDelete) {
+            List<StorageElement> parents = element.getParents();
+            raiseEachParent(parents, element, foundChannel);
+        }
+    }
+
+    private void raiseEachParent(List<StorageElement> parents, StorageElement foundStorageElement, Channel foundChannel) {
+        for (StorageElement parent : parents) {
+            // если объект ведет к Channel, который мы указали, тогда выполняем код дальше(он удаляется)
+            // иначе пропускаем итерацию
+            boolean partChannel = isPartChannel(parent, foundChannel);
+            if (!partChannel) continue;
+            StorageElementWithChildren castParent = (StorageElementWithChildren) parent;
+            List<StorageElement> children = castParent.getChildren();
+            children.remove(foundStorageElement);
+        }
+    }
+
+    private void resursForCreateListToDelete(List<StorageElement> listToDelete, StorageElement foundChannel, StorageElement foundStorageElement) {
+        List<StorageElement> children = null;
+        if (foundStorageElement instanceof StorageElementWithChildren) {
+            StorageElementWithChildren castStorage = (StorageElementWithChildren)foundStorageElement;
+            children = castStorage.getChildren();
+            if (children.isEmpty()) return;
+        }
+        for (StorageElement child : children) {
+            // узнать является ли child частью заданного канала и если да, то добавить в listToDelete, если нет, return
+            boolean partChannel = isPartChannel(child, foundChannel);
+            if (partChannel) {
+                listToDelete.add(child);
+                if (child instanceof StorageElementWithChildren) {
+                    resursForCreateListToDelete(listToDelete, foundChannel, child);
+                }
+            }
+        }
+    }
+
+    private boolean isPartChannel(StorageElement child, StorageElement foundChannel) {
+        List<StorageElement> parents = child.getParents();
+        for (StorageElement parent : parents) {
+            if (parent.getId().equals(foundChannel.getId())){
+                return true;
+            }
+            if (parent.getType() == SomeType.DIRECTORY) return isPartChannel(parent, foundChannel);
+        }
+        return false;
     }
 
     private DeletedStorageDto responseStorageDeleteFromChannel(Long idStorageElement) {

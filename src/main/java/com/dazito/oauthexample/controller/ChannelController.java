@@ -60,10 +60,23 @@ public class ChannelController {
         return ResponseEntity.ok(new GeneralResponseDto<>(null, allStorageElements));
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @DeleteMapping("/{idChannel}/{idStorage}")
     public ResponseEntity<GeneralResponseDto<DeletedStorageDto>> deleteStorageFromChannel(@PathVariable Long idChannel, @PathVariable Long idStorage) throws AppException {
         DeletedStorageDto deletedStorageDto = channelService.deleteStorageFromChannel(idChannel, idStorage);
         return ResponseEntity.ok(new GeneralResponseDto<>(null, deletedStorageDto));
+    }
+
+    @PostMapping("/create/directory")
+    public ResponseEntity<GeneralResponseDto<DirectoryCreatedDto>> createDirectory(@RequestBody DirectoryDto directoryDto) throws AppException {
+        DirectoryCreatedDto directoryDtoResp = channelService.createDirectory(directoryDto);
+        return ResponseEntity.ok(new GeneralResponseDto<>(null, directoryDtoResp));
+    }
+
+    @PostMapping("/update/storage")
+    public ResponseEntity<GeneralResponseDto<DirectoryCreatedDto>> updateStorage(@RequestBody UpdateStorageOnChannel updateStorageOnChannel) throws AppException {
+        DirectoryCreatedDto directoryCreatedDto = channelService.updateStorage(updateStorageOnChannel);
+        return ResponseEntity.ok(new GeneralResponseDto<>(null, directoryCreatedDto));
     }
 
 
