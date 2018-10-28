@@ -16,4 +16,5 @@ public class FileUploadedDto implements Serializable {
     private String referenceToDownloadFile;
     private String name;
     private Long size;
+    private Long fileId;
 }

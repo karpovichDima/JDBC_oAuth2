@@ -57,6 +57,7 @@ public class ChannelServiceImpl implements ChannelService {
         AccountEntity currentUser = userService.getCurrentUser();
         userService.adminRightsCheck(currentUser);
         Channel channel = new Channel();
+        channel.setName(name);
         channel.setOwner(currentUser);
         ArrayList<AccountEntity> listAccount = new ArrayList<>();
         channel.setListOwners(listAccount);
@@ -68,6 +69,9 @@ public class ChannelServiceImpl implements ChannelService {
 
         ChannelCreatedDto channelCreatedDto = new ChannelCreatedDto();
         channelCreatedDto.setChannelName(name);
+
+        Channel foundChannel = channelRepository.findByName(name);
+        channelCreatedDto.setId(foundChannel.getId());
         return channelCreatedDto;
     }
 
@@ -291,6 +295,10 @@ public class ChannelServiceImpl implements ChannelService {
         DirectoryCreatedDto directoryCreatedDto = new DirectoryCreatedDto();
         directoryCreatedDto.setName(directoryDto.getNewName());
         directoryCreatedDto.setParentId(foundParent.getId());
+
+        StorageElement foundDir = storageRepository.findByName(directoryDto.getNewName()).get();
+        Long id = foundDir.getId();
+        directoryCreatedDto.setId(id);
         return directoryCreatedDto;
     }
 

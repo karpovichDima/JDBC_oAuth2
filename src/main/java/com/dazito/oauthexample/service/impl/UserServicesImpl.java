@@ -94,7 +94,7 @@ public class UserServicesImpl implements UserService {
             currentUser.setEmail(newEmail);
             currentUser.setUsername(newName);
             accountRepository.saveAndFlush(currentUser);
-            return responsePersonalDataDto(currentUser);
+            return responsePersonalDataDto(currentUser, null);
         }
         adminRightsCheck(currentUser);
         AccountEntity foundedAccount = findByIdAccountRepo(id);
@@ -104,7 +104,7 @@ public class UserServicesImpl implements UserService {
         foundedAccount.setEmail(newEmail);
         foundedAccount.setUsername(newName);
         accountRepository.saveAndFlush(foundedAccount);
-        return responsePersonalDataDto(foundedAccount);
+        return responsePersonalDataDto(foundedAccount, null);
     }
 
     @Transactional
@@ -130,7 +130,7 @@ public class UserServicesImpl implements UserService {
 
         UserRole role = foundedUser.getRole();
         if (role == UserRole.USER) {
-            List<StorageElement> children = contentService.findContentByUser(currentUser).getChildren();
+            List<StorageElement> children = contentService.findContentByUser(foundedUser).getChildren();
             accountRepository.delete(foundedUser);
             contentService.delete(children);
         } else {
@@ -176,7 +176,7 @@ public class UserServicesImpl implements UserService {
         accountRepository.saveAndFlush(newUser);
         contentService.saveContent(rootContent);
         mailService.emailPreparation(newUser);
-        return responsePersonalDataDto(newUser);
+        return responsePersonalDataDto(newUser, rootContent);
     }
 
     @Override
@@ -320,10 +320,12 @@ public class UserServicesImpl implements UserService {
     }
 
     @Override
-    public EditedEmailNameDto responsePersonalDataDto(AccountEntity accountEntity) {
+    public EditedEmailNameDto responsePersonalDataDto(AccountEntity accountEntity, Content rootContent) {
         EditedEmailNameDto editedEmailNameDto = new EditedEmailNameDto();
         editedEmailNameDto.setUsername(accountEntity.getUsername());
         editedEmailNameDto.setEmail(accountEntity.getEmail());
+        editedEmailNameDto.setUuid(accountEntity.getUuid());
+        editedEmailNameDto.setContentId(rootContent.getId());
         return editedEmailNameDto;
     }
 

@@ -58,9 +58,7 @@ public class FileServiceImpl implements FileService {
         UserRole role = currentUser.getRole();
         String rootReference = contentService.findContentByUser(currentUser).getRoot();
         Path rootPath;
-
         rootPath = this.root;
-
         StorageElement parent = storageRepository.findById(parentId).get();
 
         if (!parent.getOwner().getId().equals(currentUser.getId())) {
@@ -258,6 +256,12 @@ public class FileServiceImpl implements FileService {
         fileUploadedDto.setName(name + "." + extension);
         fileUploadedDto.setSize(size);
         fileUploadedDto.setReferenceToDownloadFile(downloadPath + uuid);
+
+        Optional<FileEntity> foundFile = fileRepository.findByUuid(uuid);
+        FileEntity file = foundFile.get();
+        Long fileId = file.getId();
+
+        fileUploadedDto.setFileId(fileId);
 
         return fileUploadedDto;
     }

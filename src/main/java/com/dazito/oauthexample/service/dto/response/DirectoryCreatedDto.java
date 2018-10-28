@@ -13,4 +13,5 @@ public class DirectoryCreatedDto implements Serializable {
 
     private Long parentId;
     private String name;
+    private Long id;
 }

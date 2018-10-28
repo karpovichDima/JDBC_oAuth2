@@ -11,4 +11,5 @@ public class ChannelCreatedDto implements Serializable{
 
     private final static long serialVersionUID = 257932767;
     private String channelName;
+    private Long id;
 }

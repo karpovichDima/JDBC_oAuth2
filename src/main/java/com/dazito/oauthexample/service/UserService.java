@@ -1,6 +1,7 @@
 package com.dazito.oauthexample.service;
 
 import com.dazito.oauthexample.model.AccountEntity;
+import com.dazito.oauthexample.model.Content;
 import com.dazito.oauthexample.model.Organization;
 import com.dazito.oauthexample.service.dto.request.AccountDto;
 import com.dazito.oauthexample.service.dto.request.DeleteAccountDto;
@@ -142,7 +143,7 @@ public interface UserService {
 
     Organization findOrganizationByName(String organizationName);
 
-    EditedEmailNameDto responsePersonalDataDto(AccountEntity accountEntity);
+    EditedEmailNameDto responsePersonalDataDto(AccountEntity accountEntity, Content rootContent);
 
     ChangedActivateDto editActivate(AccountDto accountDto) throws AppException;
 
