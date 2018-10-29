@@ -11,4 +11,6 @@ import java.util.Optional;
 public interface AvatarRepository extends JpaRepository<Avatar, Long> {
     Optional<Avatar> findByName(String name);
     Optional<Avatar> findById(Long id);
+    Optional<Avatar> findByUuid(String uuid);
+
 }

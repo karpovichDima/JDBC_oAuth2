@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AvatarServiceImpl implements AvatarService {
@@ -155,9 +156,7 @@ public class AvatarServiceImpl implements AvatarService {
                 break;
         }
         Long idCurrent = currentUser.getId();
-        StorageElement fileEntityFromDB = fileService.findByUUID(uuid);
-        AccountEntity fileOwner = fileEntityFromDB.getOwner();
-        Long ownerId = fileOwner.getId();
+        Long ownerId = foundStorage.getOwner().getId();
         if (!utilService.matchesOwner(idCurrent, ownerId)) {
             userService.adminRightsCheck(currentUser);
         }
