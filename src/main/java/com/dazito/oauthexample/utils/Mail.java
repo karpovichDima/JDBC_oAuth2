@@ -1,4 +1,4 @@
-package com.dazito.oauthexample.model;
+package com.dazito.oauthexample.utils;
 
 import lombok.Getter;
 import lombok.Setter;

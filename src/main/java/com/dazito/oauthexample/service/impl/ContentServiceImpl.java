@@ -62,6 +62,10 @@ public class ContentServiceImpl implements ContentService {
                 content.setName("Content " + newUser.getEmail());
                 utilService.createSinglePath(root + File.separator + nameNewFolder);
                 content.setRoot(root + File.separator + nameNewFolder);
+                List<AccountEntity> owners = new ArrayList<>();
+                content.setListOwners(owners);
+                owners.add(newUser);
+                content.setOwner(newUser);
                 break;
             case ADMIN:
                 content.setName("CONTENT_" + organization.getOrganizationName());
@@ -69,12 +73,6 @@ public class ContentServiceImpl implements ContentService {
                 break;
         }
 //        content.setParent(null);
-        List<AccountEntity> owners = new ArrayList<>();
-        owners.add(newUser);
-        content.setListOwners(owners);
-
-        content.setSize(0L);
-        content.setOwner(newUser);
         content.setOrganization(organization);
 
         return content;

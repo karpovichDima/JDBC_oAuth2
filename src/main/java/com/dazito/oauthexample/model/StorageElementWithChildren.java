@@ -10,11 +10,7 @@ import java.util.List;
 @Getter
 @Setter
 @MappedSuperclass
-public class StorageElementWithChildren extends StorageElement {
-
-//    @OneToMany(targetEntity = StorageElement.class, mappedBy = "parent")
-//    @JsonIgnore
-//    private List<StorageElement> children;
+public abstract class StorageElementWithChildren extends StorageElement {
 
     @JsonIgnore
     @ManyToMany

@@ -1,8 +1,7 @@
 package com.dazito.oauthexample.service;
 
 import com.dazito.oauthexample.model.AccountEntity;
-import com.dazito.oauthexample.model.Mail;
-import com.dazito.oauthexample.service.dto.request.SetPasswordDto;
+import com.dazito.oauthexample.utils.Mail;
 
 import javax.xml.bind.ValidationException;
 

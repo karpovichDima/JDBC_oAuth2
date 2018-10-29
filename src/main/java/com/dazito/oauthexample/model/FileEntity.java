@@ -10,11 +10,5 @@ import java.util.UUID;
 @Getter
 @Setter
 @DiscriminatorValue("FILE")
-public class FileEntity extends StorageElement {
-
-    @Column(unique = true)
-    private String uuid;
-
-    @Column
-    private String extension;
+public class FileEntity extends FileElement {
 }

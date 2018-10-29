@@ -41,6 +41,8 @@ public class FileServiceImpl implements FileService {
     @Autowired
     private StorageRepository storageRepository;
     @Autowired
+    private StorageService storageService;
+    @Autowired
     private FileRepository fileRepository;
     @Autowired
     private UtilService utilService;
@@ -59,7 +61,7 @@ public class FileServiceImpl implements FileService {
         String rootReference = contentService.findContentByUser(currentUser).getRoot();
         Path rootPath;
         rootPath = this.root;
-        StorageElement parent = storageRepository.findById(parentId).get();
+        StorageElement parent = storageService.findById(parentId);
 
         if (!parent.getOwner().getId().equals(currentUser.getId())) {
             throw new AppException("You are trying to upload a file where you do not have access.", ResponseCode.DO_NOT_HAVE_ACCESS);
@@ -96,7 +98,6 @@ public class FileServiceImpl implements FileService {
     // download file by uuid and response
     @Override
     public org.springframework.core.io.Resource download(String uuid) throws IOException, AppException {
-
         AccountEntity currentUser = userServices.getCurrentUser();
         Long idCurrent = currentUser.getId();
 

@@ -54,7 +54,7 @@
             <column name="client_secret" value="$2a$04$ypxka9nxoZxvPXlvQtXVNO72T.RQNCXHuh5Whji3E1Gm1u2t1Rg7W"/>
             <column name="scope" value="write"/>
             <column name="authorized_grant_types" value="authorization_code,password,refresh_token,implicit"/>
-            <column name="access_token_validity" value="900"/>
+            <column name="access_token_validity" value="9000000"/>
             <column name="additional_information" value="{}"/>
         </insert>
 
@@ -63,7 +63,7 @@
             <column name="client_secret" value="$2a$04$ypxka9nxoZxvPXlvQtXVNO72T.RQNCXHuh5Whji3E1Gm1u2t1Rg7W"/>
             <column name="scope" value="write"/>
             <column name="authorized_grant_types" value="authorization_code,password,refresh_token,implicit"/>
-            <column name="access_token_validity" value="900"/>
+            <column name="access_token_validity" value="9000000"/>
             <column name="additional_information" value="{}"/>
         </insert>
 
