@@ -1,13 +1,16 @@
 package com.dazito.oauthexample.controller;
 
 import com.dazito.oauthexample.service.StorageService;
+import com.dazito.oauthexample.service.dto.request.StorageAddToSomeStructureDto;
 import com.dazito.oauthexample.service.dto.request.StorageUpdateDto;
 import com.dazito.oauthexample.service.dto.response.GeneralResponseDto;
+import com.dazito.oauthexample.service.dto.response.StorageAddedToSomeStructureDto;
 import com.dazito.oauthexample.service.dto.response.StorageDto;
 import com.dazito.oauthexample.service.dto.response.StorageUpdatedDto;
 import com.dazito.oauthexample.utils.exception.AppException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;

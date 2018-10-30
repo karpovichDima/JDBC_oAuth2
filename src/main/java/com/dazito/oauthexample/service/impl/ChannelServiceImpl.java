@@ -8,7 +8,7 @@ import com.dazito.oauthexample.model.type.SomeType;
 import com.dazito.oauthexample.model.type.UserRole;
 import com.dazito.oauthexample.service.*;
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
-import com.dazito.oauthexample.service.dto.request.StorageAddToChannelDto;
+import com.dazito.oauthexample.service.dto.request.StorageAddToSomeStructureDto;
 import com.dazito.oauthexample.service.dto.request.UpdateStorageOnChannel;
 import com.dazito.oauthexample.service.dto.request.UserAddToChannelDto;
 import com.dazito.oauthexample.service.dto.response.*;
@@ -53,30 +53,6 @@ public class ChannelServiceImpl implements ChannelService {
 
     @Override
     @Transactional
-    public ChannelCreatedDto createChannel(String name) throws AppException {
-        AccountEntity currentUser = userService.getCurrentUser();
-        userService.adminRightsCheck(currentUser);
-        Channel channel = new Channel();
-        channel.setName(name);
-        channel.setOwner(currentUser);
-        ArrayList<AccountEntity> listAccount = new ArrayList<>();
-        channel.setListOwners(listAccount);
-        ArrayList<StorageElement> listFiles = new ArrayList<>();
-        channel.setParents(listFiles);
-        channel.setOrganization(currentUser.getOrganization());
-
-        channelRepository.saveAndFlush(channel);
-
-        ChannelCreatedDto channelCreatedDto = new ChannelCreatedDto();
-        channelCreatedDto.setChannelName(name);
-
-        Channel foundChannel = channelRepository.findByName(name);
-        channelCreatedDto.setId(foundChannel.getId());
-        return channelCreatedDto;
-    }
-
-    @Override
-    @Transactional
     public UserAddedToChannelDto addUserToChannel(UserAddToChannelDto userAddToChannelDto) throws AppException {
         AccountEntity currentUser = userService.getCurrentUser();
         userService.adminRightsCheck(currentUser);
@@ -97,37 +73,6 @@ public class ChannelServiceImpl implements ChannelService {
         userAddedToChannelDto.setIdChannel(idChannel);
         userAddedToChannelDto.setIdUser(idUser);
         return userAddedToChannelDto;
-    }
-
-    @Override
-    @Transactional
-    public StorageAddedToChannelDto addStorageToChannel(StorageAddToChannelDto storageAddToChannelDto) throws AppException {
-        AccountEntity currentUser = userService.getCurrentUser();
-        userService.adminRightsCheck(currentUser);
-        Long idStorage = storageAddToChannelDto.getIdStorage();
-        StorageElement foundStorageElement = storageService.findById(idStorage);
-        String organizationNameFoundStorage = foundStorageElement.getOrganization().getOrganizationName();
-        userService.isMatchesOrganization(organizationNameFoundStorage, currentUser);
-
-        Long idChannel = storageAddToChannelDto.getIdChannel();
-        Channel foundChannel = (Channel)findById(idChannel);
-
-        List<StorageElement> parentsStorageElement = foundStorageElement.getParents();
-        parentsStorageElement.add(foundChannel);
-        foundStorageElement.setParents(parentsStorageElement);
-
-//        List<StorageElement> children = foundChannel.getChildren();
-//        if (children == null) children = new ArrayList<>();
-//        children.add(foundStorageElement);
-//        foundChannel.setChildren(children);
-
-        storageRepository.saveAndFlush(foundStorageElement);
-//        channelRepository.saveAndFlush(foundChannel);
-
-        StorageAddedToChannelDto storageAddedToChannelDto = new StorageAddedToChannelDto();
-        storageAddedToChannelDto.setIdChannel(idChannel);
-        storageAddedToChannelDto.setIdStorage(idStorage);
-        return storageAddedToChannelDto;
     }
 
     @Override

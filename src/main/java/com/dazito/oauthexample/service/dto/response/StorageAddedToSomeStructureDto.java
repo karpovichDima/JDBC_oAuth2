@@ -7,10 +7,10 @@ import java.io.Serializable;
 
 @Getter
 @Setter
-public class StorageAddedToChannelDto implements Serializable {
+public class StorageAddedToSomeStructureDto implements Serializable {
 
     private final static long serialVersionUID = 72535899;
 
     private Long idStorage;
-    private Long idChannel;
+    private Long idStructure;
 }

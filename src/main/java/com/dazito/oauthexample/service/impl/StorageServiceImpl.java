@@ -2,23 +2,23 @@ package com.dazito.oauthexample.service.impl;
 
 import com.dazito.oauthexample.dao.StorageRepository;
 import com.dazito.oauthexample.model.AccountEntity;
+import com.dazito.oauthexample.model.Channel;
 import com.dazito.oauthexample.model.StorageElement;
 import com.dazito.oauthexample.model.type.ResponseCode;
 import com.dazito.oauthexample.model.type.SomeType;
 import com.dazito.oauthexample.service.StorageService;
 import com.dazito.oauthexample.service.UserService;
 import com.dazito.oauthexample.service.UtilService;
+import com.dazito.oauthexample.service.dto.request.StorageAddToSomeStructureDto;
 import com.dazito.oauthexample.service.dto.request.StorageUpdateDto;
-import com.dazito.oauthexample.service.dto.response.DirectoryStorageDto;
-import com.dazito.oauthexample.service.dto.response.FileStorageDto;
-import com.dazito.oauthexample.service.dto.response.StorageDto;
-import com.dazito.oauthexample.service.dto.response.StorageUpdatedDto;
+import com.dazito.oauthexample.service.dto.response.*;
 import com.dazito.oauthexample.utils.exception.AppException;
 import lombok.NonNull;
 import org.omg.CORBA.portable.ApplicationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.security.auth.login.AppConfigurationEntry;
@@ -39,6 +39,8 @@ public class StorageServiceImpl implements StorageService {
     private StorageRepository storageRepository;
     @Autowired
     private UtilService utilService;
+    @Autowired
+    private StorageService storageService;
 
     @Override
     public StorageUpdatedDto editData(StorageUpdateDto storageUpdateDto) throws AppException {

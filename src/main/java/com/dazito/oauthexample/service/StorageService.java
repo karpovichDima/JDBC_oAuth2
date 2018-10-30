@@ -1,7 +1,9 @@
 package com.dazito.oauthexample.service;
 
 import com.dazito.oauthexample.model.StorageElement;
+import com.dazito.oauthexample.service.dto.request.StorageAddToSomeStructureDto;
 import com.dazito.oauthexample.service.dto.request.StorageUpdateDto;
+import com.dazito.oauthexample.service.dto.response.StorageAddedToSomeStructureDto;
 import com.dazito.oauthexample.service.dto.response.StorageDto;
 import com.dazito.oauthexample.service.dto.response.StorageUpdatedDto;
 import com.dazito.oauthexample.utils.exception.AppException;

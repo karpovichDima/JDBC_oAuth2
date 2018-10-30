@@ -1,7 +1,7 @@
 package com.dazito.oauthexample.service;
 
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
-import com.dazito.oauthexample.service.dto.request.StorageAddToChannelDto;
+import com.dazito.oauthexample.service.dto.request.StorageAddToSomeStructureDto;
 import com.dazito.oauthexample.service.dto.request.UpdateStorageOnChannel;
 import com.dazito.oauthexample.service.dto.request.UserAddToChannelDto;
 import com.dazito.oauthexample.service.dto.response.*;
@@ -13,11 +13,7 @@ import java.util.List;
 
 public interface ChannelService {
 
-    ChannelCreatedDto createChannel(String id) throws AppException;
-
     UserAddedToChannelDto addUserToChannel(UserAddToChannelDto userAddToChannelDto) throws AppException;
-
-    StorageAddedToChannelDto addStorageToChannel(StorageAddToChannelDto storageAddToChannelDto) throws AppException;
 
     List<Long> getAllStorageElementsChannel(Long idChannel) throws AppException;
 

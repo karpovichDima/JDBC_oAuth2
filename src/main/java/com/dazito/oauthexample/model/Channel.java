@@ -12,7 +12,7 @@ import java.util.List;
 @Getter
 @Entity
 @DiscriminatorValue("CHANNEL")
-public class Channel extends StorageElementWithChildren{
+public class Channel extends Structure{
     @OneToOne
     private Avatar avatar;
 }
