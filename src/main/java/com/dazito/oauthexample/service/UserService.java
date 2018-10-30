@@ -147,4 +147,5 @@ public interface UserService {
 
     ChangedActivateDto editActivate(AccountDto accountDto) throws AppException;
 
+    void userRightsCheck(AccountEntity currentUser) throws AppException;
 }

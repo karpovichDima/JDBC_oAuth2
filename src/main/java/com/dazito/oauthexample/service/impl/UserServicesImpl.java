@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -348,6 +349,12 @@ public class UserServicesImpl implements UserService {
         changedActivateDto.setId(id);
         changedActivateDto.setIsActivated(isActivated);
         return changedActivateDto;
+    }
+
+    @Override
+    public void userRightsCheck(AccountEntity currentUser) throws AppException {
+        UserRole role = currentUser.getRole();
+        if (role != UserRole.USER) throw new AppException("Current user is not user", ResponseCode.CURRENT_USER_IS_NOT_USER);
     }
 
     @Override

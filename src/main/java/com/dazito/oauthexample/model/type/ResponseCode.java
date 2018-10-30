@@ -2,6 +2,7 @@ package com.dazito.oauthexample.model.type;
 
 public enum ResponseCode {
     CURRENT_USER_IS_NOT_ADMIN,
+    CURRENT_USER_IS_NOT_USER,
     EMAIL_NOT_MATCH,
     EMPTY_FIELD,
     ORGANIZATIONS_NOT_MUCH,

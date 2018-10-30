@@ -41,9 +41,17 @@ public class StructureServiceImpl implements StructureService {
     @Transactional
     public StorageAddedToSomeStructureDto addStorageToSomeStructure(StorageAddToSomeStructureDto storageAddToSomeStructureDto) throws AppException {
         AccountEntity currentUser = userService.getCurrentUser();
-        userService.adminRightsCheck(currentUser);
         Long idStorage = storageAddToSomeStructureDto.getIdStorage();
         StorageElement foundStorageElement = storageService.findById(idStorage);
+        SomeType typeFoundStorage = foundStorageElement.getType();
+        switch (typeFoundStorage) {
+            case COLLECTION:
+                userService.userRightsCheck(currentUser);
+                break;
+            case CHANNEL:
+                userService.adminRightsCheck(currentUser);
+                break;
+        }
         String organizationNameFoundStorage = foundStorageElement.getOrganization().getOrganizationName();
         userService.isMatchesOrganization(organizationNameFoundStorage, currentUser);
 
@@ -66,14 +74,15 @@ public class StructureServiceImpl implements StructureService {
     @Transactional
     public SomeStructureCreatedDto createSomeStructure(CreateSomeStructureDto dto) throws AppException {
         AccountEntity currentUser = userService.getCurrentUser();
-        userService.adminRightsCheck(currentUser);
         SomeType typeCreateStructure = dto.getTypeCreatedStructure();
         StorageElementWithChildren structure = null;
         switch (typeCreateStructure) {
             case CHANNEL:
+                userService.adminRightsCheck(currentUser);
                 structure = new Channel();
                 break;
             case COLLECTION:
+                userService.userRightsCheck(currentUser);
                 structure = new Collection();
                 break;
         }
