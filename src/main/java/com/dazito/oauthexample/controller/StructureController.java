@@ -3,6 +3,7 @@ package com.dazito.oauthexample.controller;
 import com.dazito.oauthexample.service.StructureService;
 import com.dazito.oauthexample.service.dto.request.CreateSomeStructureDto;
 import com.dazito.oauthexample.service.dto.request.StorageAddToSomeStructureDto;
+import com.dazito.oauthexample.service.dto.response.DeletedStorageDto;
 import com.dazito.oauthexample.service.dto.response.SomeStructureCreatedDto;
 import com.dazito.oauthexample.service.dto.response.GeneralResponseDto;
 import com.dazito.oauthexample.service.dto.response.StorageAddedToSomeStructureDto;
@@ -29,4 +30,14 @@ public class StructureController {
         SomeStructureCreatedDto structure = structureService.createSomeStructure(createSomeStructure);
         return ResponseEntity.ok(new GeneralResponseDto<>(null, structure));
     }
+
+    @DeleteMapping("/{idStructure}/{idStorage}")
+    public ResponseEntity<GeneralResponseDto<DeletedStorageDto>> deleteStorageFromStructure(@PathVariable Long idStructure, @PathVariable Long idStorage) throws AppException {
+        DeletedStorageDto deletedStorageDto = structureService.deleteStorageFromStructure(idStructure, idStorage);
+        return ResponseEntity.ok(new GeneralResponseDto<>(null, deletedStorageDto));
+    }
+
+
+
+
 }

@@ -1,5 +1,7 @@
 package com.dazito.oauthexample.service;
 
+import com.dazito.oauthexample.model.Channel;
+import com.dazito.oauthexample.model.StorageElement;
 import com.dazito.oauthexample.service.dto.request.DirectoryDto;
 import com.dazito.oauthexample.service.dto.request.StorageAddToSomeStructureDto;
 import com.dazito.oauthexample.service.dto.request.UpdateStorageOnChannel;
@@ -19,11 +21,13 @@ public interface ChannelService {
 
     Resource download(Long idChannel, Long id) throws AppException, IOException;
 
-    DeletedStorageDto deleteStorageFromChannel(Long idChannel, Long idStorage) throws AppException;
-
     DirectoryCreatedDto createDirectory(DirectoryDto directoryDto) throws AppException;
 
     DirectoryCreatedDto updateStorage(UpdateStorageOnChannel updateStorageOnChannel) throws AppException;
 
     DeletedStorageDto deleteChannel(Long idChannel) throws AppException;
+
+    boolean isPartChannel(StorageElement child, StorageElement foundChannel);
+
+    boolean checkStorageOnChannel(Channel foundChannel, StorageElement foundFile) throws AppException;
 }
