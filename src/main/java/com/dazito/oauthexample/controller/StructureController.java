@@ -31,13 +31,4 @@ public class StructureController {
         return ResponseEntity.ok(new GeneralResponseDto<>(null, structure));
     }
 
-    @DeleteMapping("/{idStructure}/{idStorage}")
-    public ResponseEntity<GeneralResponseDto<DeletedStorageDto>> deleteStorageFromStructure(@PathVariable Long idStructure, @PathVariable Long idStorage) throws AppException {
-        DeletedStorageDto deletedStorageDto = structureService.deleteStorageFromStructure(idStructure, idStorage);
-        return ResponseEntity.ok(new GeneralResponseDto<>(null, deletedStorageDto));
-    }
-
-
-
-
 }

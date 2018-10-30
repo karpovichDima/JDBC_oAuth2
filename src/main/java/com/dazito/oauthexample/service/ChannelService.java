@@ -9,6 +9,7 @@ import com.dazito.oauthexample.service.dto.request.UserAddToChannelDto;
 import com.dazito.oauthexample.service.dto.response.*;
 import com.dazito.oauthexample.utils.exception.AppException;
 import org.springframework.core.io.Resource;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.List;
@@ -30,4 +31,7 @@ public interface ChannelService {
     boolean isPartChannel(StorageElement child, StorageElement foundChannel);
 
     boolean checkStorageOnChannel(Channel foundChannel, StorageElement foundFile) throws AppException;
+
+    @Transactional
+    DeletedStorageDto deleteStorageFromChannel(Long idChannel, Long idStorage) throws AppException;
 }

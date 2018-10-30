@@ -33,8 +33,6 @@ public class ChannelController extends StructureController{
         return ResponseEntity.ok(new GeneralResponseDto<>(null, response));
     }
 
-    // StorageController -> addStorageToSomeStructure
-
     @GetMapping("/{idChannel:.+}/{id:.+}")
     public ResponseEntity<Resource> download(@PathVariable Long idChannel, @PathVariable Long id) throws IOException, AppException {
         Resource download = channelService.download(idChannel, id);
@@ -66,4 +64,10 @@ public class ChannelController extends StructureController{
         return ResponseEntity.ok(new GeneralResponseDto<>(null, deletedStorageDto));
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @DeleteMapping("/{idChannel}/{idStorage}")
+    public ResponseEntity<GeneralResponseDto<DeletedStorageDto>> deleteStorageFromChannel(@PathVariable Long idChannel, @PathVariable Long idStorage) throws AppException {
+        DeletedStorageDto deletedStorageDto = channelService.deleteStorageFromChannel(idChannel, idStorage);
+        return ResponseEntity.ok(new GeneralResponseDto<>(null, deletedStorageDto));
+    }
 }

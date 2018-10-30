@@ -12,7 +12,4 @@ public interface StructureService {
     StorageAddedToSomeStructureDto addStorageToSomeStructure(StorageAddToSomeStructureDto storageAddToSomeStructureDto) throws AppException;
 
     SomeStructureCreatedDto createSomeStructure(CreateSomeStructureDto dto) throws AppException;
-
-    DeletedStorageDto deleteStorageFromStructure(Long idChannel, Long idStorage) throws AppException;
-
 }
