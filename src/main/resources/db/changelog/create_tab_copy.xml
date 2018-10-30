@@ -42,6 +42,7 @@
             <column name="size" type="bigint(20)"/>
             <column name="root" type="varchar(128)"/>
             <column name="organization_id" type="bigint"/>
+            <column name="avatar_id" type="bigint"/>
         </createTable>
 
         <addForeignKeyConstraint baseColumnNames="organization_id"

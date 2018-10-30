@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="add_table_account_collections" author="karpovich">
+
+        <createTable tableName="account_collections">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" unique="true"/>
+            </column>
+            <column name="account_entity_id" type="bigint"/>
+            <column name="collections_id" type="bigint"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="account_entity_id"
+                                 baseTableName="account_collections"
+                                 constraintName="fk_account_collectionsId"
+                                 onDelete="SET NULL"
+                                 referencedColumnNames="id"
+                                 referencedTableName="account"/>
+
+        <addForeignKeyConstraint baseColumnNames="collections_id"
+                                 baseTableName="account_collections"
+                                 constraintName="fk_accountId_collections"
+                                 onDelete="SET NULL"
+                                 referencedColumnNames="id"
+                                 referencedTableName="storage_element"/>
+
+        <addForeignKeyConstraint baseColumnNames="avatar_id"
+                                 baseTableName="storage_element"
+                                 constraintName="fk_avatar_id"
+                                 onDelete="SET NULL"
+                                 referencedColumnNames="id"
+                                 referencedTableName="storage_element"/>
+    </changeSet>
+
+
+
+
+</databaseChangeLog>
