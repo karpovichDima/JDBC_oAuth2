@@ -66,7 +66,7 @@ public class AvatarServiceImpl implements AvatarService {
         String originalFilename = file.getOriginalFilename();
         AccountEntity currentUser = userService.getCurrentUser();
         Content findContent = null;
-        Content foundContent = checkAccessFindContent(currentUser, findContent);
+        checkAccess(currentUser, findContent);
         Path rootPath = this.root;
 
         StorageElement foundStorage = storageService.findById(ownerId);
@@ -88,10 +88,6 @@ public class AvatarServiceImpl implements AvatarService {
         avatar.setOrganization(currentUser.getOrganization());
         avatar.setUuid(uuidString);
 
-        List<StorageElement> parents = new ArrayList<>();
-        parents.add(foundContent);
-        avatar.setParents(parents);
-
         avatarRepository.saveAndFlush(avatar);
 
         if (foundStorage == null) throw new AppException("Found storage equal null", ResponseCode.NO_SUCH_ELEMENT);
@@ -102,7 +98,7 @@ public class AvatarServiceImpl implements AvatarService {
         storageRepository.saveAndFlush(channel);
     }
 
-    private Content checkAccessFindContent(AccountEntity currentUser, Content foundContent) throws AppException {
+    private Content checkAccess(AccountEntity currentUser, Content foundContent) throws AppException {
         Organization organizationCurrentUser = currentUser.getOrganization();
         UserRole role = currentUser.getRole();
         String rootReference = null;
@@ -141,7 +137,7 @@ public class AvatarServiceImpl implements AvatarService {
     public Resource getAvatar(Long idAvatarOwner) throws AppException, IOException {
         AccountEntity currentUser = userService.getCurrentUser();
         Content findContent = null;
-        checkAccessFindContent(currentUser, findContent);
+        checkAccess(currentUser, findContent);
 
         StorageElement foundStorage = storageService.findById(idAvatarOwner);
         SomeType type = foundStorage.getType();
@@ -172,7 +168,7 @@ public class AvatarServiceImpl implements AvatarService {
     public AvatarDeletedDto deleteAvatar(Long idAvatarOwner) throws AppException {
         AccountEntity currentUser = userService.getCurrentUser();
         Content findContent = null;
-        checkAccessFindContent(currentUser, findContent);
+        checkAccess(currentUser, findContent);
 
         StorageElement foundAvatarOwner = storageService.findById(idAvatarOwner);
         SomeType type = foundAvatarOwner.getType();

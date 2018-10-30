@@ -14,6 +14,4 @@ import javax.persistence.OneToOne;
 @DiscriminatorValue("CONTENT")
 public class Content extends StorageElementWithChildren {
     private String root;
-//    @OneToOne
-//    private AccountEntity contentOwner;
 }

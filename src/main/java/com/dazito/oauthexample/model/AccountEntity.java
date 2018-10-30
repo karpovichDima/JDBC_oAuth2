@@ -57,6 +57,9 @@ public class AccountEntity implements Serializable {
             inverseJoinColumns = @JoinColumn(name = "storage_id", referencedColumnName = "id"))
     private List<Channel> channelList;
 
+    @OneToMany
+    private List<Collection> collections;
+
     AccountEntity(String username, String password) {
         this.username = username;
         this.password = password;

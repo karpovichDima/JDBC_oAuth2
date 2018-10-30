@@ -5,5 +5,6 @@ public enum SomeType {
     DIRECTORY,
     FILE,
     CHANNEL,
-    AVATAR
+    AVATAR,
+    COLLECTION
 }

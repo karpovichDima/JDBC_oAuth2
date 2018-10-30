@@ -1,9 +1,9 @@
 package com.dazito.oauthexample.service.impl;
 
 import com.dazito.oauthexample.model.AccountEntity;
-import com.dazito.oauthexample.utils.Mail;
 import com.dazito.oauthexample.service.MailService;
 import com.dazito.oauthexample.service.UserService;
+import com.dazito.oauthexample.utils.Mail;
 import org.apache.velocity.app.VelocityEngine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

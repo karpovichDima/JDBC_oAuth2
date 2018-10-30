@@ -5,11 +5,10 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Getter
 @Setter
-@DiscriminatorValue("FILE")
-public class FileEntity extends FileElement {
+@DiscriminatorValue("COLLECTION")
+public class Collection extends StorageElementWithChildren {
 }
